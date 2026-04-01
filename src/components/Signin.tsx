@@ -20,14 +20,23 @@ export const Signin = () => {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
+    setError("");
     try {
       const result = await signInUser(email, password);
 
       if (result.success) {
         navigate("/dashboard");
+      } else {
+        if (result.error?.toLowerCase().includes("invalid login credentials")) {
+          setError("Invalid email or password. Please try again.");
+        } else if (result.error?.toLowerCase().includes("email not confirmed")) {
+          setError("Please confirm your email before signing in.");
+        } else {
+          setError(result.error || "An error occurred.");
+        }
       }
     } catch (error) {
-      setError("An error occured.");
+      setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }

@@ -7,14 +7,14 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const userName = location.state?.userName || session?.user?.email?.split("@")[0] || "Guest";
+  const userName = session?.user?.user_metadata?.display_name || session?.user?.email?.split("@")[0] || "Guest";
 
   return (
     <div className="bg-cream min-h-screen w-full flex font-quicksand">
       <Sidebar />
       <main className="flex-1 p-6">
         <div className="mb-6">
-          <h1 className="text-4xl font-bold text-dark-brown">Good morning, {userName}</h1>
+          <h1 className="text-4xl font-extrabold font-fredoka text-dark-brown">Hello, {userName}!</h1>
           <p className="text-sm text-gray-500">Get ready to take orders!</p>
         </div>
 

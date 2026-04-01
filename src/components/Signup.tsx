@@ -22,14 +22,17 @@ export const Signup = () => {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
+    setError("");
     try {
-      const result = await signUpNewUser(email, password);
+      const result = await signUpNewUser(email, password, name);
 
       if (result.success) {
-        navigate("/dashboard", { state: { userName: name } });
+        navigate("/dashboard");
+      } else {
+        setError(result.error || "An error occurred.");
       }
     } catch (error) {
-      setError("An error occured.");
+      setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }

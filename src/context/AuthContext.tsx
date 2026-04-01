@@ -4,7 +4,7 @@ import { Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
     session: Session | null;
-    signUpNewUser: (email: string, password: string) => Promise<{ success: boolean; data?: any; error?: any }>;
+    signUpNewUser: (email: string, password: string, displayName?: string) => Promise<{ success: boolean; data?: any; error?: any }>;
     signOut: () => Promise<void>;
     signInUser: (
     email: string,
@@ -23,10 +23,15 @@ export const AuthContextProvider = ({children}: AuthProviderProps) => {
     const [ session, setSession ] = useState<Session | null>(null);
 
     // Sign up
-    const signUpNewUser = async (email: string, password: string) => {
+    const signUpNewUser = async (email: string, password: string, displayName?: string) => {
         const { data, error } = await supabase.auth.signUp({
             email: email,
             password: password,
+            options: {
+                data: {
+                    display_name: displayName || "",
+                }
+            }
         });
 
         if (error) {

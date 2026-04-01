@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Store, List, BarChart2, Settings, LogOut } from "lucide-react";
 import { UserAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import Logo from '/src/assets/QueueTea.png'
+
 
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
@@ -42,11 +44,16 @@ export const Sidebar = () => {
       style={{ width: isOpen ? "16rem" : "5rem" }}
     >
       <div>
-        <div className="flex gap-x-3 items-center mb-10">
+        <div className="flex">
+        <img src={Logo} className="w-10 h-10"></img>
+        <div className="flex flex-col gap-x-3 items-center mb-10">
+          
           
           <h1 className={`pl-3 text-dark-brown font-bold font-quicksand text-2xl transition-all ${!isOpen && "scale-0"}`}>
             QueueTea
           </h1>
+          <p className={`text-brown font-regular font-quicksand text-sm transition-all ${!isOpen && "scale-0"}`}>© 2026 QueueTea</p>
+        </div>
         </div>
 
         <ul className="space-y-2">
