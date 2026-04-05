@@ -1,4 +1,4 @@
-import Pearl from '/src/assets/Pearl.png';
+import Pearl from '/src/assets/pearl.png';
 
 export const BobaFooter = () => {
   return (
