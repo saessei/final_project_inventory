@@ -10,6 +10,7 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ success: boolean; data?: any; error?: string }>;
+  refreshSession: () => Promise<void>;
 }
 
 
@@ -21,6 +22,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthContextProvider = ({children}: AuthProviderProps) => {
     const [ session, setSession ] = useState<Session | null>(null);
+
+    const refreshSession = async () => {
+        const { data: { session: updatedSession }, error } = await supabase.auth.getSession();
+        if (!error && updatedSession) {
+            setSession(updatedSession);
+        }
+    };
 
     // Sign up
     const signUpNewUser = async (email: string, password: string, displayName?: string) => {
@@ -81,7 +89,7 @@ export const AuthContextProvider = ({children}: AuthProviderProps) => {
     }
 
     return (
-        <AuthContext.Provider value={{ session, signUpNewUser, signInUser, signOut }}>
+        <AuthContext.Provider value={{ session, signUpNewUser, signInUser, signOut, refreshSession }}>
             {children}
         </AuthContext.Provider>
     );

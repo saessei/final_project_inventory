@@ -1,17 +1,17 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Store, List, BarChart2, Settings, LogOut } from "lucide-react";
 import { UserAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Logo from '/src/assets/QueueTea.png'
 
 
 export const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
-  const [activeItem, setActiveItem] = useState("Kiosk Mode");
   const sidebarRef = useRef<HTMLDivElement>(null);
 
   const { session, signOut } = UserAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
@@ -30,6 +30,8 @@ export const Sidebar = () => {
     { name: "Reports", icon: <BarChart2 size={20} />, path: "/dashboard" },
     { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
   ];
+
+  const activeItem = sidebarItems.find(item => item.path === location.pathname)?.name || "Kiosk Mode";
 
   const handleSignOut = async () => {
     await signOut();
@@ -63,7 +65,6 @@ export const Sidebar = () => {
               <li
                 key={item.name}
                 onClick={() => {
-                  setActiveItem(item.name);
                   if (item.path) navigate(item.path);
                 }}
                 className={`flex items-center gap-x-4 rounded-2xl px-3 py-2 cursor-pointer transition-all ${

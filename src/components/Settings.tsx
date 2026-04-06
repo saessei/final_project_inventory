@@ -2,6 +2,7 @@ import { FormEvent, useState, useEffect } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { profileService } from "../services/profileService";
 import { Sidebar } from "./common/Sidebar";
+import supabase from "../config/supabaseClient";
 
 export const Settings = () => {
   const [name, setName] = useState("");
@@ -12,14 +13,18 @@ export const Settings = () => {
   const [savingPassword, setSavingPassword] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const { session } = UserAuth();
+  const { session, refreshSession } = UserAuth();
 
   useEffect(() => {
     if (session?.user?.id) {
       profileService
         .getProfile(session.user.id)
         .then((data) => {
-          setName(data.full_name || "");
+          if (data) {
+            setName(data.full_name || "");
+          } else {
+            setName(""); //default if no profile exists
+          }
           setLoading(false);
         })
         .catch((err) => {
@@ -30,26 +35,27 @@ export const Settings = () => {
   }, [session]);
 
   const handleUpdateName = async () => {
-    if (!session?.user?.id) {
-      console.error("No user found!");
-      return;
-    }
+  if (!session?.user?.id) return;
 
-    setFormError(null);
-    setStatusMessage(null);
-    setSavingName(true);
+  setSavingName(true);
+  try {
+    await profileService.updateName(session.user.id, name);
 
-    try {
-      await profileService.updateName(session.user.id, name);
-      console.log("Name updated successfully!");
-      setStatusMessage("Name updated successfully.");
-    } catch (err) {
-      console.error("Update failed:", err);
-      setFormError("Failed to update name. Please try again.");
-    } finally {
-      setSavingName(false);
-    }
-  };
+    const { error: authError } = await supabase.auth.updateUser({
+      data: { display_name: name } 
+    });
+
+    if (authError) throw authError;
+
+    await refreshSession();
+
+    setStatusMessage("Name updated successfully.");
+  } catch (err) {
+    setFormError("Failed to update name.");
+  } finally {
+    setSavingName(false);
+  }
+};
 
   const handleUpdatePassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -97,8 +103,12 @@ export const Settings = () => {
       <main className="ml-0 lg:ml-64 h-screen overflow-y-auto p-4 lg:p-6 pt-8 lg:pt-10">
         <div className="max-w-5xl mx-auto">
           <div className="mb-6">
-            <h1 className="text-4xl font-black font-fredoka">Account Settings</h1>
-            <p className="text-gray-500 mt-2">Edit your display name or choose a new account password.</p>
+            <h1 className="text-4xl font-black font-fredoka">
+              Account Settings
+            </h1>
+            <p className="text-gray-500 mt-2">
+              Edit your display name or choose a new account password.
+            </p>
           </div>
 
           {(statusMessage || formError) && (
@@ -115,12 +125,25 @@ export const Settings = () => {
             </div>
           )}
 
+          {/* Name modal */}
           <div className="grid gap-6 lg:grid-cols-2">
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-dark-brown">Display Name</h2>
-              <p className="text-sm text-gray-500 mt-2">This name appears across your dashboard experience.</p>
-              <form onSubmit={(event) => { event.preventDefault(); handleUpdateName(); }} className="mt-6 space-y-4">
-                <label className="text-xs uppercase ml-2 font-semibold text-brown-two">Full Name</label>
+              <h2 className="text-xl font-semibold text-dark-brown">
+                Display Name
+              </h2>
+              <p className="text-sm text-gray-500 mt-2">
+                This name appears across your dashboard experience.
+              </p>
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  handleUpdateName();
+                }}
+                className="mt-6 space-y-4"
+              >
+                <label className="text-xs uppercase ml-2 font-semibold text-brown-two">
+                  Full Name
+                </label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -138,12 +161,20 @@ export const Settings = () => {
               </form>
             </section>
 
+            {/* Password modal */}
+
             <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-dark-brown">Change Password</h2>
-              <p className="text-sm text-gray-500 mt-2">Choose a new password to keep your account secure.</p>
+              <h2 className="text-xl font-semibold text-dark-brown">
+                Change Password
+              </h2>
+              <p className="text-sm text-gray-500 mt-2">
+                Choose a new password to keep your account secure.
+              </p>
               <form onSubmit={handleUpdatePassword} className="mt-6 space-y-4">
                 <div>
-                  <label className="text-xs uppercase ml-2 font-semibold text-brown-two">New Password</label>
+                  <label className="text-xs uppercase ml-2 font-semibold text-brown-two">
+                    New Password
+                  </label>
                   <input
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -153,7 +184,9 @@ export const Settings = () => {
                   />
                 </div>
                 <div>
-                  <label className="text-xs uppercase ml-2 font-semibold text-brown-two">Confirm Password</label>
+                  <label className="text-xs uppercase ml-2 font-semibold text-brown-two">
+                    Confirm Password
+                  </label>
                   <input
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
