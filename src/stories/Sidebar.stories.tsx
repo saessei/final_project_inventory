@@ -51,12 +51,6 @@ export const Collapsed: Story = {
       }}>
         <div className="flex h-screen bg-cream">
           <Story />
-          <main className="flex-1 p-8">
-            <div className="bg-white rounded-lg p-6 shadow">
-              <h2 className="text-2xl font-bold text-dark-brown mb-4">Main Content Area</h2>
-              <p className="text-gray-600">Click on the sidebar to expand</p>
-            </div>
-          </main>
         </div>
       </AuthContext.Provider>
     ),
