@@ -2,60 +2,7 @@ import { useMemo, useState } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
-
-// Factory Method
-export type DrinkType = "BrownSugar" | "Matcha" | "Taro";
-
-interface Drink {
-  id: DrinkType;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-}
-
-class MilkTea implements Drink {
-  id: DrinkType;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-
-  constructor(id: DrinkType, name: string, description: string, price: number, image: string) {
-    this.id = id;
-    this.name = name;
-    this.description = description;
-    this.price = price;
-    this.image = image;
-  }
-}
-
-class DrinkFactory {
-  static createDrink(type: DrinkType): Drink {
-    const placeholder = placeholderImg;
-    const common: Record<DrinkType, { name: string; description: string; image: string }> = {
-      BrownSugar: {
-        name: "Brown Sugar Boba",
-        description: "Classic favorite with caramelized sugar and pearls.",
-        image: placeholder,
-      },
-      Matcha: {
-        name: "Matcha Milk Tea",
-        description: "Creamy matcha with a mild bitterness.",
-        image: placeholder,
-      },
-      Taro: {
-        name: "Taro Milk Tea",
-        description: "Sweet taro flavor with purple swirl.",
-        image: placeholder,
-      },
-    };
-
-    const basePrice = 100;
-    const d = common[type];
-    return new MilkTea(type, d.name, d.description, basePrice, d.image);
-  }
-}
+import { DrinkFactory, type DrinkType, type Drink } from "../patterns/DrinkFactory";
 
 // Strategy pattern
 interface CustomizationStrategy {
