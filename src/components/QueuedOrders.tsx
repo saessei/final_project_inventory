@@ -3,10 +3,22 @@ import { Sidebar } from "./common/Sidebar";
 import { useOrders } from "../hooks/useOrders";
 import { updateOrderStatus } from "../utils/orders";
 import { OrderStatusButton } from "./common/OrderStatusButton";
+import { UserAuth } from "../context/AuthContext";
+
 
 export const QueuedOrders = () => {
   const { orders, fetchOrders } = useOrders();
   const [viewMode, setViewMode] = useState<"active" | "completed">("active");
+
+  // for barista name
+  const { session } = UserAuth();
+
+  const userName =
+    session?.user?.user_metadata?.display_name ||
+    session?.user?.email?.split("@")[0] ||
+    "Guest";
+    
+  const baristaName = userName;
 
   const incomingOrders = orders.filter((order) => order.status === "pending");
   const preparingOrders = orders.filter((order) => order.status === "preparing");
@@ -97,7 +109,7 @@ export const QueuedOrders = () => {
 
                 <div className="mt-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                   <div className="text-sm text-gray-600">
-                    Barista: Unassigned
+                    Barista: {userName}
                   </div>
                   <OrderStatusButton
                     status={order.status as "pending" | "preparing" | "completed"}

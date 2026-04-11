@@ -46,6 +46,9 @@ export const Kiosk = () => {
     session?.user?.email?.split("@")[0] ||
     "Guest";
 
+  const baristaName = userName;
+  const [customerName, setCustomerName] = useState("");
+
   const products = useMemo(
     () => ["BrownSugar", "Matcha", "Taro"].map((id) => DrinkFactory.createDrink(id as DrinkType)),
     [],
@@ -163,7 +166,7 @@ export const Kiosk = () => {
 
     try {
       await createOrder({
-        customer_name: userName,
+        customer_name: customerName.trim() || "Guest",
         order_details: orderDetails,
         status: "pending",
       });
@@ -227,16 +230,32 @@ export const Kiosk = () => {
         </div>
 
         <div className="mt-6 border-t pt-4">
-          <p className="text-sm text-gray-500">Subtotal</p>
-          <p className="text-3xl font-bold">₱{cartTotal.toFixed(2)}</p>
-          <button
-            type="button"
-            onClick={handleCheckout}
-            className="mt-4 w-full rounded-xl bg-dark-brown px-4 py-2 text-white disabled:opacity-50 cursor-pointer"
-            disabled={cart.length === 0}
-          >
-            Check Out
-          </button>
+          <label htmlFor="customerName" className="block text-sm font-semibold text-slate-700">
+            Customer name
+          </label>
+          <input
+            id="customerName"
+            type="text"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
+            placeholder="Enter customer name"
+            className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20"
+          />
+          <p className="mt-3 text-xs text-gray-500">
+            Barista: {baristaName}
+          </p>
+          <div className="mt-4">
+            <p className="text-sm text-gray-500">Subtotal</p>
+            <p className="text-3xl font-bold">₱{cartTotal.toFixed(2)}</p>
+            <button
+              type="button"
+              onClick={handleCheckout}
+              className="mt-4 w-full rounded-xl bg-dark-brown px-4 py-2 text-white disabled:opacity-50 cursor-pointer"
+              disabled={cart.length === 0 || customerName.trim() === ""}
+            >
+              Check Out
+            </button>
+          </div>
         </div>
       </aside>
 

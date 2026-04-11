@@ -9,8 +9,8 @@ interface OrderButtonProps {
 export const OrderStatusButton = ({ status, onClick }: OrderButtonProps) => {
   const config = {
     pending: { label: "Start Preparing", color: "bg-brown/20", text: "text-dark-brown" },
-    preparing: { label: "Mark as Complete", color: "bg-orange/20", text: "text-brown-two" },
-    completed: { label: "Archive Order", color: "bg-green/20", text:"text-green-500" },
+    preparing: { label: "Mark as Complete", color: "bg-orange-100", text: "text-brown-two" },
+    completed: { label: "Archive Order", color: "bg-green-100", text:"text-green-500" },
   };
 
   const { label, color, text} = config[status];
@@ -18,7 +18,7 @@ export const OrderStatusButton = ({ status, onClick }: OrderButtonProps) => {
   return (
     <div>
       <button
-        className={`${color} ${text} font-quicksand px-4 py-2 rounded`}
+        className={`${color} ${text} cursor-pointer rounded-2xl font-quicksand px-4 py-2`}
         onClick={onClick}
       >
         {label}
