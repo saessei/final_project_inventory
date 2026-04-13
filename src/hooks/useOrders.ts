@@ -12,10 +12,10 @@ interface Order {
 export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     const { data } = await supabase.from('orders').select('*').order('created_at');
     if (data) setOrders(data);
-  };
+  }, []);
 
   useEffect(() => {
     fetchOrders();

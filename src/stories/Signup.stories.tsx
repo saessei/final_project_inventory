@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react-vite";
 import { Signup } from "../components/Signup";
 import { AuthContext } from "../context/AuthContext";
 import { BrowserRouter } from "react-router-dom";

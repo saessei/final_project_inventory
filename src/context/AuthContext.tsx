@@ -4,12 +4,12 @@ import { Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
     session: Session | null;
-    signUpNewUser: (email: string, password: string, displayName?: string) => Promise<{ success: boolean; data?: any; error?: any }>;
+    signUpNewUser: (email: string, password: string, displayName?: string) => Promise<{ success: boolean; data?: unknown; error?: unknown }>;
     signOut: () => Promise<void>;
     signInUser: (
     email: string,
     password: string
-  ) => Promise<{ success: boolean; data?: any; error?: string }>;
+  ) => Promise<{ success: boolean; data?: unknown; error?: string }>;
   refreshSession: () => Promise<void>;
 }
 

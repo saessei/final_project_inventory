@@ -27,8 +27,8 @@ export const Settings = () => {
           }
           setLoading(false);
         })
-        .catch((err) => {
-          console.error(err);
+        .catch((_err) => {
+          console.error(_err);
           setLoading(false);
         });
     }
@@ -50,7 +50,7 @@ export const Settings = () => {
     await refreshSession();
 
     setStatusMessage("Name updated successfully.");
-  } catch (err) {
+  } catch (_err) {
     setFormError("Failed to update name.");
   } finally {
     setSavingName(false);
@@ -86,8 +86,8 @@ export const Settings = () => {
       setStatusMessage("Password updated successfully.");
       setPassword("");
       setConfirmPassword("");
-    } catch (err) {
-      console.error("Password update failed:", err);
+    } catch (_err) {
+      console.error("Password update failed:", _err);
       setFormError("Could not update password. Please try again.");
     } finally {
       setSavingPassword(false);

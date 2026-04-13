@@ -33,7 +33,7 @@ export const Signup = () => {
       } else {
         setError(result.error || "An error occurred.");
       }
-    } catch (error) {
+    } catch (_error) {
       setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
