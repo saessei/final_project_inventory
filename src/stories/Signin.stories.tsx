@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { BrowserRouter } from "react-router-dom";
 import { Signin } from "../components/Signin";
 import { AuthContext } from "../context/AuthContext";
-import { userEvent, within, expect, waitFor } from "@storybook/test";
+import { userEvent, within, expect, waitFor } from "storybook/test";
 
 const MockProviders = ({ children, authValue }: any) => (
   <BrowserRouter>
