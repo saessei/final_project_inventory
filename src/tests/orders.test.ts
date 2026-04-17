@@ -3,8 +3,7 @@ import { createOrder, updateOrderStatus } from '../services/orderService';
 import { supabaseTest, supabaseAdmin } from '../lib/supabaseTestClient';
 
 describe('Milk Tea Queueing System - Full Integration', () => {
-  const testSessionId = crypto.randomUUID().slice(0, 8);
-  const testCustomer = `Test-Customer-${testSessionId}`;
+  const testCustomer = "Robin";
   let sharedOrderId: string;
 
   // CLEANUP
