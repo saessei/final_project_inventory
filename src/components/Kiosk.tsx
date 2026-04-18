@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Trash, Plus } from "lucide-react";
 import { UserAuth } from "../context/AuthContext";
@@ -6,6 +6,7 @@ import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
 import { DrinkFactory, type DrinkType, type Drink } from "../patterns/DrinkFactory";
 import { createOrder } from "../services/orderService";
+import { useCart } from "../hooks/useCart";
 
 interface CustomizationStrategy {
   name: string;
@@ -30,15 +31,18 @@ class ToppingStrategy implements CustomizationStrategy {
   }
 }
 
-interface CartItem {
-  drink: Drink;
-  quantity: number;
-  sugar: string;
-  toppings: string[];
-}
-
 export const Kiosk = () => {
+  const navigate = useNavigate();
   const { session } = UserAuth();
+
+  const baristaUserId = session?.user?.id; // used as owner key for Option C cart
+  const {
+    cart,
+    upsertItem,
+    decrementItemAtIndex,
+    incrementItemAtIndex,
+    clearCart,
+  } = useCart(baristaUserId);
 
   const userName =
     session?.user?.user_metadata?.display_name ||
@@ -53,7 +57,6 @@ export const Kiosk = () => {
     [],
   );
 
-  const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
   const [showModal, setShowModal] = useState(false);
 
@@ -63,23 +66,6 @@ export const Kiosk = () => {
   const [sugarLevel, setSugarLevel] = useState(sugarStrategy.options[2]);
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
 
-  // Load cart from localStorage on mount
-  useEffect(() => {
-    const savedCart = localStorage.getItem('kioskCart');
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (error) {
-        console.error('Failed to load cart from localStorage:', error);
-      }
-    }
-  }, []);
-
-  // Save cart to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem('kioskCart', JSON.stringify(cart));
-  }, [cart]);
-
   const openCustomization = (drink: Drink) => {
     setSelectedDrink(drink);
     setSugarLevel(sugarStrategy.options[2]);
@@ -87,61 +73,24 @@ export const Kiosk = () => {
     setShowModal(true);
   };
 
-  const addToCart = () => {
+  const addToCart = async () => {
     if (!selectedDrink) return;
 
-    const sameIndex = cart.findIndex(
-      (item) =>
-        item.drink.id === selectedDrink.id &&
-        item.sugar === sugarLevel &&
-        JSON.stringify(item.toppings) === JSON.stringify(selectedToppings),
-    );
-
-    if (sameIndex > -1) {
-      const updated = [...cart];
-      updated[sameIndex].quantity += 1;
-      setCart(updated);
-    } else {
-      setCart((prev) => [
-        ...prev,
-        {
-          drink: selectedDrink,
-          quantity: 1,
-          sugar: sugarLevel,
-          toppings: [...selectedToppings],
-        },
-      ]);
-    }
+    await upsertItem({
+      drink_id: selectedDrink.id,
+      drink_name: selectedDrink.name,
+      drink_price:
+        selectedDrink.price +
+        selectedToppings.reduce((sum, t) => sum + toppingStrategy.priceAdjustment(t), 0),
+      sugar: sugarLevel,
+      toppings: [...selectedToppings],
+      quantity: 1,
+    });
 
     setShowModal(false);
   };
 
-  const removeItem = (index: number) => {
-    setCart((prev) => prev.map((item, i) => {
-      if (i === index) {
-        if (item.quantity > 1) {
-          return { ...item, quantity: item.quantity - 1 };
-        } else {
-          return null; // will be filtered out
-        }
-      }
-      return item;
-    }).filter(Boolean) as CartItem[]);
-  };
-
-  const increaseItem = (index: number) => {
-    setCart((prev) => prev.map((item, i) => {
-      if (i === index) {
-        return { ...item, quantity: item.quantity + 1 };
-      }
-      return item;
-    }));
-  };
-
-  const cartTotal = cart.reduce((sum, item) => {
-    const toppingCost = item.toppings.reduce((total, topping) => total + toppingStrategy.priceAdjustment(topping), 0);
-    return sum + (item.drink.price + toppingCost) * item.quantity;
-  }, 0);
+  const cartTotal = cart.reduce((sum, item) => sum + Number(item.drink_price) * item.quantity, 0);
 
   const toggleTopping = (topping: string) => {
     setSelectedToppings((prev) =>
@@ -149,18 +98,14 @@ export const Kiosk = () => {
     );
   };
 
-  const navigate = useNavigate();
-
   const handleCheckout = async () => {
     if (cart.length === 0) return;
 
     const orderDetails = cart
-      .map(
-        (item) =>
-          `${item.quantity}x ${item.drink.name} (${item.sugar}${
-            item.toppings.length > 0 ? `, ${item.toppings.join(", ")}` : ""
-          })`,
-      )
+      .map((item) => {
+        const toppings = item.toppings?.length ? `, ${item.toppings.join(", ")}` : "";
+        return `${item.quantity}x ${item.drink_name} (${item.sugar}${toppings})`;
+      })
       .join(" • ");
 
     try {
@@ -169,8 +114,8 @@ export const Kiosk = () => {
         order_details: orderDetails,
         status: "pending",
       });
-      setCart([]);
-      localStorage.removeItem('kioskCart');
+
+      await clearCart();
       navigate("/queued-orders");
     } catch (error) {
       console.error("Failed to send order to queue:", error instanceof Error ? error.message : error);
@@ -196,27 +141,31 @@ export const Kiosk = () => {
             <p className="text-sm text-gray-500">Cart is empty.</p>
           ) : (
             cart.map((item, idx) => {
-              const extraCost = item.toppings.reduce((a, t) => a + toppingStrategy.priceAdjustment(t), 0);
-              const total = (item.drink.price + extraCost) * item.quantity;
+              const total = Number(item.drink_price) * item.quantity;
               return (
-                <div key={`${item.drink.id}-${idx}`} className="border rounded-xl p-3 bg-[#fcfcfc]">
+                <div key={item.id} className="border rounded-xl p-3 bg-[#fcfcfc]">
                   <div className="flex justify-between text-sm font-semibold">
-                    <span>{item.drink.name} x{item.quantity}</span>
+                    <span>
+                      {item.drink_name} x{item.quantity}
+                    </span>
                     <span>₱{total.toFixed(2)}</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">Sugar: {item.sugar}</p>
-                  <p className="text-xs text-gray-500">Toppings: {item.toppings.length > 0 ? item.toppings.join(", ") : "None"}</p>
+                  <p className="text-xs text-gray-500">
+                    Toppings: {item.toppings?.length ? item.toppings.join(", ") : "None"}
+                  </p>
+
                   <div className="mt-2 flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => removeItem(idx)}
+                      onClick={() => decrementItemAtIndex(idx)}
                       className="flex items-center justify-center rounded-full p-2 bg-red-100 text-red-600 hover:bg-red-200 transition-colors cursor-pointer"
                     >
                       <Trash size={16} />
                     </button>
                     <button
                       type="button"
-                      onClick={() => increaseItem(idx)}
+                      onClick={() => incrementItemAtIndex(idx)}
                       className="flex items-center justify-center rounded-full p-2 bg-green-100 text-green-600 hover:bg-green-200 transition-colors cursor-pointer"
                     >
                       <Plus size={16} />
@@ -240,9 +189,9 @@ export const Kiosk = () => {
             placeholder="Enter customer name"
             className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20"
           />
-          <p className="mt-3 text-xs text-gray-500">
-            Barista: {baristaName}
-          </p>
+
+          <p className="mt-3 text-xs text-gray-500">Barista: {baristaName}</p>
+
           <div className="mt-4">
             <p className="text-sm text-gray-500">Subtotal</p>
             <p className="text-3xl font-bold">₱{cartTotal.toFixed(2)}</p>
@@ -259,21 +208,9 @@ export const Kiosk = () => {
       </aside>
 
       <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto p-4 lg:p-6 pt-28 lg:pt-6">
-        <div className="mb-6">
-          <h1 className="text-5xl font-black font-fredoka">Good morning, {userName}</h1>
-          <p className="text-lg text-gray-500">Get ready to take orders!</p>
-        </div>
-
-        <div className="mb-6 flex items-center gap-3">
-          <button type="button" className="rounded-full px-5 py-2 bg-dark-brown text-white cursor-pointer">Milktea</button>
-        </div>
-
         <section className="grid lg:grid-cols-2 xl:grid-cols-2 gap-5">
           {products.map((drink) => (
-            <article
-              key={drink.id}
-              className="border border-slate-200 rounded-3xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
-            >
+            <article key={drink.id} className="border border-slate-200 rounded-3xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
               <img
                 src={drink.image || placeholderImg}
                 alt={drink.name}
@@ -305,7 +242,9 @@ export const Kiosk = () => {
                 src={selectedDrink.image || placeholderImg}
                 alt={selectedDrink.name}
                 className="h-full w-full object-cover"
-                onError={(e) => ((e.target as HTMLImageElement).src = placeholderImg)}
+                onError={(e) =>
+                  ((e.target as HTMLImageElement).src = placeholderImg)
+                }
               />
               <button
                 type="button"
@@ -320,9 +259,13 @@ export const Kiosk = () => {
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="text-3xl font-bold">{selectedDrink.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{selectedDrink.description}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {selectedDrink.description}
+                  </p>
                 </div>
-                <span className="text-2xl font-black">₱{selectedDrink.price.toFixed(2)}</span>
+                <span className="text-2xl font-black">
+                  ₱{selectedDrink.price.toFixed(2)}
+                </span>
               </div>
 
               <div className="mb-4">
@@ -335,7 +278,11 @@ export const Kiosk = () => {
                         key={option}
                         type="button"
                         onClick={() => toggleTopping(option)}
-                        className={`rounded-xl px-3 py-2 text-sm border font-semibold ${selected ? "bg-dark-brown text-white border-dark-brown" : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"} cursor-pointer`}
+                        className={`rounded-xl px-3 py-2 text-sm border font-semibold ${
+                          selected
+                            ? "bg-dark-brown text-white border-dark-brown"
+                            : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"
+                        } cursor-pointer`}
                       >
                         {option} (+₱{toppingStrategy.priceAdjustment(option)})
                       </button>
@@ -354,7 +301,11 @@ export const Kiosk = () => {
                         key={option}
                         type="button"
                         onClick={() => setSugarLevel(option)}
-                        className={`text-xs rounded-full px-3 py-2 font-semibold border ${selected ? "bg-dark-brown text-white border-dark-brown" : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"} cursor-pointer`}
+                        className={`text-xs rounded-full px-3 py-2 font-semibold border ${
+                          selected
+                            ? "bg-dark-brown text-white border-dark-brown"
+                            : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"
+                        } cursor-pointer`}
                       >
                         {option}
                       </button>
@@ -383,6 +334,7 @@ export const Kiosk = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
