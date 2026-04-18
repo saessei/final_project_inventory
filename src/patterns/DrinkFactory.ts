@@ -1,7 +1,7 @@
 // src/factories/DrinkFactory.ts
 import placeholderImg from "../assets/Placeholder.jpg";
 
-export type DrinkType = "BrownSugar" | "Matcha" | "Taro" | "Shrek";
+export type DrinkType = "BrownSugar" | "Matcha" | "Taro" | "Shrek" | "PassionFruit";
 
 export interface Drink {
   id: DrinkType;
@@ -47,6 +47,12 @@ export class DrinkFactory {
         description: "Matcha latte",
         image: placeholderImg,
         price: 100000,
+      },
+      PassionFruit: {
+        name: "Passion Fruit Green Tea",
+        description: "A refreshing, tart, and sweet beverage combining brewed green tea with passion fruit puree or syrup.",
+        image: placeholderImg,
+        price: 90,
       }
     };
 

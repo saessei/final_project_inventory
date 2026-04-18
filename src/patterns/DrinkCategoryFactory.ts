@@ -1,6 +1,6 @@
 import { DrinkFactory, type DrinkType, type Drink } from "./DrinkFactory";
 
-export type DrinkCategoryId = "milktea" | "specials";
+export type DrinkCategoryId = "milktea" | "specials" | "fruit tea";
 
 export type DrinkCategory = {
   id: DrinkCategoryId;
@@ -19,6 +19,11 @@ const Categories: readonly DrinkCategory[] = [
     label: "Specials",
     drinkIds: ["Matcha", "Shrek"],
   },
+  {
+    id: "fruit tea",
+    label: "Fruit Tea",
+    drinkIds: ["PassionFruit"]
+  }
 ] as const;
 
 export function getCategoryFactories(): DrinkCategory[] {
