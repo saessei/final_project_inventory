@@ -4,7 +4,11 @@ import { Trash, Plus } from "lucide-react";
 import { UserAuth } from "../context/AuthContext";
 import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
-import { DrinkFactory, type DrinkType, type Drink } from "../patterns/DrinkFactory";
+import {
+  DrinkFactory,
+  type DrinkType,
+  type Drink,
+} from "../patterns/DrinkFactory";
 import { createOrder } from "../services/orderService";
 import { useCart } from "../hooks/useCart";
 
@@ -53,7 +57,10 @@ export const Kiosk = () => {
   const [customerName, setCustomerName] = useState("");
 
   const products = useMemo(
-    () => ["BrownSugar", "Matcha", "Taro", "Shrek"].map((id) => DrinkFactory.createDrink(id as DrinkType)),
+    () =>
+      ["BrownSugar", "Matcha", "Taro", "Shrek"].map((id) =>
+        DrinkFactory.createDrink(id as DrinkType),
+      ),
     [],
   );
 
@@ -81,7 +88,10 @@ export const Kiosk = () => {
       drink_name: selectedDrink.name,
       drink_price:
         selectedDrink.price +
-        selectedToppings.reduce((sum, t) => sum + toppingStrategy.priceAdjustment(t), 0),
+        selectedToppings.reduce(
+          (sum, t) => sum + toppingStrategy.priceAdjustment(t),
+          0,
+        ),
       sugar: sugarLevel,
       toppings: [...selectedToppings],
       quantity: 1,
@@ -90,11 +100,16 @@ export const Kiosk = () => {
     setShowModal(false);
   };
 
-  const cartTotal = cart.reduce((sum, item) => sum + Number(item.drink_price) * item.quantity, 0);
+  const cartTotal = cart.reduce(
+    (sum, item) => sum + Number(item.drink_price) * item.quantity,
+    0,
+  );
 
   const toggleTopping = (topping: string) => {
     setSelectedToppings((prev) =>
-      prev.includes(topping) ? prev.filter((t) => t !== topping) : [...prev, topping],
+      prev.includes(topping)
+        ? prev.filter((t) => t !== topping)
+        : [...prev, topping],
     );
   };
 
@@ -103,7 +118,9 @@ export const Kiosk = () => {
 
     const orderDetails = cart
       .map((item) => {
-        const toppings = item.toppings?.length ? `, ${item.toppings.join(", ")}` : "";
+        const toppings = item.toppings?.length
+          ? `, ${item.toppings.join(", ")}`
+          : "";
         return `${item.quantity}x ${item.drink_name} (${item.sugar}${toppings})`;
       })
       .join(" • ");
@@ -118,7 +135,10 @@ export const Kiosk = () => {
       await clearCart();
       navigate("/queued-orders");
     } catch (error) {
-      console.error("Failed to send order to queue:", error instanceof Error ? error.message : error);
+      console.error(
+        "Failed to send order to queue:",
+        error instanceof Error ? error.message : error,
+      );
     }
   };
 
@@ -143,16 +163,22 @@ export const Kiosk = () => {
             cart.map((item, idx) => {
               const total = Number(item.drink_price) * item.quantity;
               return (
-                <div key={item.id} className="border rounded-xl p-3 bg-[#fcfcfc]">
+                <div
+                  key={item.id}
+                  className="border rounded-xl p-3 bg-[#fcfcfc]"
+                >
                   <div className="flex justify-between text-sm font-semibold">
                     <span>
                       {item.drink_name} x{item.quantity}
                     </span>
                     <span>₱{total.toFixed(2)}</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Sugar: {item.sugar}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Sugar: {item.sugar}
+                  </p>
                   <p className="text-xs text-gray-500">
-                    Toppings: {item.toppings?.length ? item.toppings.join(", ") : "None"}
+                    Toppings:{" "}
+                    {item.toppings?.length ? item.toppings.join(", ") : "None"}
                   </p>
 
                   <div className="mt-2 flex items-center gap-2">
@@ -178,7 +204,10 @@ export const Kiosk = () => {
         </div>
 
         <div className="mt-6 border-t pt-4">
-          <label htmlFor="customerName" className="block text-sm font-semibold text-slate-700">
+          <label
+            htmlFor="customerName"
+            className="block text-sm font-semibold text-slate-700"
+          >
             Customer name
           </label>
           <input
@@ -208,27 +237,42 @@ export const Kiosk = () => {
       </aside>
 
       <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto p-4 lg:p-6 pt-28 lg:pt-6">
-        <section className="grid lg:grid-cols-2 xl:grid-cols-2 gap-5">
+        <section className="grid gap-5 lg:grid-cols-2 xl:grid-cols-2 auto-rows-fr">
           {products.map((drink) => (
-            <article key={drink.id} className="border border-slate-200 rounded-3xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
+            <article
+              key={drink.id}
+              className="flex h-full flex-col border border-slate-200 rounded-3xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+            >
               <img
                 src={drink.image || placeholderImg}
                 alt={drink.name}
-                className="h-44 w-full object-cover rounded-2xl"
-                onError={(e) => ((e.target as HTMLImageElement).src = placeholderImg)}
+                className="h-44 w-full shrink-0 object-cover rounded-2xl"
+                onError={(e) =>
+                  ((e.target as HTMLImageElement).src = placeholderImg)
+                }
               />
-              <div className="mt-4">
+
+              <div className="mt-4 flex flex-1 flex-col">
                 <h3 className="text-2xl font-bold">{drink.name}</h3>
-                <p className="text-sm text-gray-500 mt-1">{drink.description}</p>
-                <p className="mt-3 text-2xl font-extrabold">₱{drink.price.toFixed(2)}</p>
+
+                <p className="mt-1 text-sm text-gray-500 line-clamp-3 min-h-[3rem]">
+                  {drink.description}
+                </p>
+
+                <div className="mt-auto">
+                  <p className="mt-3 text-2xl font-extrabold">
+                    ₱{drink.price.toFixed(2)}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => openCustomization(drink)}
+                    className="mt-4 w-full rounded-xl bg-brown text-white py-3 font-semibold hover:bg-brown-dark transition-colors cursor-pointer"
+                  >
+                    + Add to Order
+                  </button>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => openCustomization(drink)}
-                className="mt-4 w-full rounded-xl bg-brown text-white py-3 font-semibold hover:bg-brown-dark transition-colors cursor-pointer"
-              >
-                + Add to Order
-              </button>
             </article>
           ))}
         </section>
@@ -334,7 +378,6 @@ export const Kiosk = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };
