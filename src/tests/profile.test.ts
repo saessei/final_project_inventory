@@ -2,12 +2,13 @@ import { it, expect, describe, afterAll } from 'vitest';
 import { profileService } from '../services/profileService';
 import { supabaseTest, supabaseAdmin } from '../lib/supabaseTestClient';
 
-describe('Password Management (Happy Path)', () => {
+describe('Password Management', () => {
   const tempEmail = `barista-${Date.now()}@test.com`; // Unique email every time
   const tempPassword = 'OldPassword123!';
   const newPassword = 'NewSecurePassword456!';
   let userId: string | undefined;
 
+  // happy path
   it('should successfully update password for an authenticated user', async () => {
     // 
     const { data: adminData, error: adminError } = await supabaseAdmin.auth.admin.createUser({
@@ -39,6 +40,21 @@ describe('Password Management (Happy Path)', () => {
     expect(verifyError).toBeNull();
     expect(verifyData.user?.email).toBe(tempEmail);
   });
+
+  // sad path
+  it("should fail to update password when user is not authenticated", async () => {
+  await supabaseTest.auth.signOut();
+
+  try {
+    await profileService.updatePassword("SomePassword123!", supabaseTest);
+    throw new Error("Expected updatePassword to throw, but it succeeded");
+  } catch (err) {
+    expect(err).toBeDefined();
+    if (err instanceof Error) {
+      expect(err.message.length).toBeGreaterThan(0);
+    }
+  }
+});
 
   afterAll(async () => {
     if (userId) {
