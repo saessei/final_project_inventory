@@ -4,11 +4,12 @@ import { Trash, Plus } from "lucide-react";
 import { UserAuth } from "../context/AuthContext";
 import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
+import { type Drink } from "../patterns/DrinkFactory";
 import {
-  DrinkFactory,
-  type DrinkType,
-  type Drink,
-} from "../patterns/DrinkFactory";
+  getCategoryFactories,
+  createDrinksForCategory,
+  type DrinkCategoryId,
+} from "../patterns/DrinkCategoryFactory";
 import { createOrder } from "../services/orderService";
 import { useCart } from "../hooks/useCart";
 
@@ -56,12 +57,14 @@ export const Kiosk = () => {
   const baristaName = userName;
   const [customerName, setCustomerName] = useState("");
 
+  const categories = useMemo(() => getCategoryFactories(), []);
+  const [categoryId, setCategoryId] = useState<DrinkCategoryId>(
+    categories[0].id,
+  );
+
   const products = useMemo(
-    () =>
-      ["BrownSugar", "Matcha", "Taro", "Shrek"].map((id) =>
-        DrinkFactory.createDrink(id as DrinkType),
-      ),
-    [],
+    () => createDrinksForCategory(categoryId),
+    [categoryId],
   );
 
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
@@ -242,8 +245,21 @@ export const Kiosk = () => {
           <p className="text-lg text-gray-500">Get ready to take orders!</p>
         </div>
 
-        <div className="mb-6 flex items-center gap-3">
-          <button type="button" className="rounded-full px-5 py-2 bg-dark-brown text-white cursor-pointer">Milktea</button>
+        <div className="mb-6 flex items-center gap-3 flex-wrap">
+          {categories.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setCategoryId(c.id)}
+              className={`rounded-full px-5 py-2 ${
+                categoryId === c.id
+                  ? "bg-dark-brown text-white"
+                  : "bg-white border border-slate-200 text-slate-700"
+              } cursor-pointer`}
+            >
+              {c.label}
+            </button>
+          ))}
         </div>
 
         <section className="grid gap-5 lg:grid-cols-2 xl:grid-cols-2 auto-rows-fr">
