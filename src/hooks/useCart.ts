@@ -177,6 +177,19 @@ export function useCart(baristaUserId?: string) {
     [cart],
   );
 
+    const removeItemAtIndex = useCallback(
+    async (index: number) => {
+      const item = cart[index];
+      if (!item) return;
+
+      const { error } = await supabase.from("cart_items").delete().eq("id", item.id);
+      if (error) throw error;
+
+      await refresh();
+    },
+    [cart, refresh],
+  );
+
   return {
     cart,
     cartId,
@@ -185,6 +198,7 @@ export function useCart(baristaUserId?: string) {
     upsertItem,
     decrementItemAtIndex,
     incrementItemAtIndex,
+    removeItemAtIndex,   
     clearCart,
     cartTotal,
   };

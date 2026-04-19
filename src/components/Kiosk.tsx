@@ -46,6 +46,7 @@ export const Kiosk = () => {
     upsertItem,
     decrementItemAtIndex,
     incrementItemAtIndex,
+    removeItemAtIndex,
     clearCart,
   } = useCart(baristaUserId);
 
@@ -171,9 +172,7 @@ export const Kiosk = () => {
                   className="border rounded-xl p-3 bg-[#fcfcfc]"
                 >
                   <div className="flex justify-between text-sm font-semibold">
-                    <span>
-                      {item.drink_name} x{item.quantity}
-                    </span>
+                    <span>{item.drink_name}</span>
                     <span>₱{total.toFixed(2)}</span>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
@@ -184,20 +183,46 @@ export const Kiosk = () => {
                     {item.toppings?.length ? item.toppings.join(", ") : "None"}
                   </p>
 
-                  <div className="mt-2 flex items-center gap-2">
+                  <div className="mt-3 flex items-center justify-between gap-3">
+                    {/* Quantity stepper */}
+                    <div className="inline-flex items-center rounded-full border border-slate-200 bg-white shadow-sm overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => decrementItemAtIndex(idx)}
+                        aria-label="Decrease quantity"
+                        className="h-9 w-10 grid place-items-center text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors disabled:opacity-50"
+                        disabled={item.quantity <= 1}
+                        title="Decrease"
+                      >
+                        −
+                      </button>
+
+                      <div
+                        className="h-9 min-w-10 px-3 grid place-items-center text-sm font-bold text-slate-800 tabular-nums select-none"
+                        aria-label="Quantity"
+                      >
+                        {item.quantity}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => incrementItemAtIndex(idx)}
+                        aria-label="Increase quantity"
+                        className="h-9 w-10 grid place-items-center text-slate-700 hover:bg-slate-50 active:bg-slate-100 transition-colors"
+                        title="Increase"
+                      >
+                        +
+                      </button>
+                    </div>
+
                     <button
                       type="button"
-                      onClick={() => decrementItemAtIndex(idx)}
-                      className="flex items-center justify-center rounded-full p-2 bg-red-100 text-red-600 hover:bg-red-200 transition-colors cursor-pointer"
+                      onClick={() => removeItemAtIndex(idx)}
+                      className="inline-flex items-center justify-center rounded-full p-2 bg-red-100 text-red-600 hover:bg-red-200 transition-colors cursor-pointer"
+                      aria-label="Remove item"
+                      title="Remove item"
                     >
                       <Trash size={16} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => incrementItemAtIndex(idx)}
-                      className="flex items-center justify-center rounded-full p-2 bg-green-100 text-green-600 hover:bg-green-200 transition-colors cursor-pointer"
-                    >
-                      <Plus size={16} />
                     </button>
                   </div>
                 </div>
