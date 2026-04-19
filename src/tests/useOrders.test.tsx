@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { describe, it, expect, afterAll } from "vitest";
 import { act } from "react-dom/test-utils";
 import { createRoot } from "react-dom/client";
