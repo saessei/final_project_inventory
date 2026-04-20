@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { Store, List, BarChart2, Settings, LogOut } from "lucide-react";
-import { UserAuth } from "../../context/AuthContext";
+import { UserAuth } from "../../auth/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "/src/assets/QueueTea.png";
 

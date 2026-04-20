@@ -3,7 +3,7 @@ import { Sidebar } from "./common/Sidebar";
 import { useOrders } from "../hooks/useOrders";
 import { updateOrderStatus } from "../services/orderService";
 import { OrderStatusButton } from "./common/OrderStatusButton";
-import { UserAuth } from "../context/AuthContext";
+import { UserAuth } from "../auth/AuthContext";
 
 export const QueuedOrders = () => {
   const { orders, fetchOrders } = useOrders();

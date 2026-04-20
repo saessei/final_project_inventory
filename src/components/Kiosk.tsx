@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Trash, Plus } from "lucide-react";
-import { UserAuth } from "../context/AuthContext";
+import { UserAuth } from "../auth/AuthContext";
 import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
 import { type Drink } from "../patterns/DrinkFactory";

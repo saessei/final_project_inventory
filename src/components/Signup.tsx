@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Header } from "./common/Header";
 import { BobaFooter } from "./common/BobaFooter";
 import { Link, useNavigate } from "react-router-dom";
-import { UserAuth } from "../context/AuthContext";
+import { UserAuth } from "../auth/AuthContext";
 import * as React from "react";
 import "../index.css";
 import { Eye, EyeOff, Store, Coffee } from "lucide-react";

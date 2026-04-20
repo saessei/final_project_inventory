@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Sidebar } from '../components//common/Sidebar';
-import { AuthContext } from '../context/AuthContext';
+import { AuthContext } from '../auth/AuthContext';
 import { BrowserRouter } from 'react-router-dom';
 import { userEvent } from 'storybook/test';
 

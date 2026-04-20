@@ -1,5 +1,5 @@
 import { FormEvent, useState, useEffect } from "react";
-import { UserAuth } from "../context/AuthContext";
+import { UserAuth } from "../auth/AuthContext";
 import { profileService } from "../services/profileService";
 import { Sidebar } from "./common/Sidebar";
 import supabase from "../lib/supabaseClient";
