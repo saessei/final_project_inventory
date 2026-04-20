@@ -37,6 +37,7 @@
       throw new Error("baristaUserId is required when claim=true");
     }
     patch.claimed_by = options.baristaUserId;
+    patch.claimed_by_name = options.baristaName;
     patch.claimed_at = new Date().toISOString();
   }
 
