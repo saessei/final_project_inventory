@@ -251,8 +251,6 @@ export const Kiosk = () => {
             className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20"
           />
 
-          <p className="mt-3 text-xs text-gray-500">Barista: {baristaName}</p>
-
           <div className="mt-4">
             <p className="text-sm text-gray-500">Subtotal</p>
             <p className="text-3xl font-bold">₱{cartTotal.toFixed(2)}</p>
