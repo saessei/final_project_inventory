@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trash, Plus } from "lucide-react";
+import { Trash } from "lucide-react";
 import { UserAuth } from "../auth/AuthContext";
 import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
