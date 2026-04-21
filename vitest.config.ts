@@ -5,9 +5,14 @@ import path from "path";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-  process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL;
-  process.env.VITE_SUPABASE_ANON_KEY = env.VITE_SUPABASE_ANON_KEY;
-  process.env.SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
+  const resolvedSupabaseUrl = env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const resolvedAnonKey = env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const resolvedServiceRoleKey =
+    env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (resolvedSupabaseUrl) process.env.VITE_SUPABASE_URL = resolvedSupabaseUrl;
+  if (resolvedAnonKey) process.env.VITE_SUPABASE_ANON_KEY = resolvedAnonKey;
+  if (resolvedServiceRoleKey) process.env.SUPABASE_SERVICE_ROLE_KEY = resolvedServiceRoleKey;
   
   return {
     test: {
@@ -22,9 +27,9 @@ export default defineConfig(({ mode }) => {
       setupFiles: [path.resolve(__dirname, "./src/tests/setup.ts")],
       env: {
         ...env,
-        VITE_SUPABASE_URL: env.VITE_SUPABASE_URL,
-        VITE_SUPABASE_ANON_KEY: env.VITE_SUPABASE_ANON_KEY,
-        SUPABASE_SERVICE_ROLE_KEY: env.SUPABASE_SERVICE_ROLE_KEY,
+        VITE_SUPABASE_URL: resolvedSupabaseUrl,
+        VITE_SUPABASE_ANON_KEY: resolvedAnonKey,
+        SUPABASE_SERVICE_ROLE_KEY: resolvedServiceRoleKey,
       },
     },
   };
