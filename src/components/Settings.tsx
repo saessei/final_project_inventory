@@ -100,7 +100,7 @@ export const Settings = () => {
         <Sidebar />
       </div>
 
-      <main className="ml-0 lg:ml-64 h-screen overflow-y-auto p-4 lg:p-6 pt-8 lg:pt-10">
+      <main className="ml-0 lg:ml-64 h-screen overflow-y-auto p-4 lg:p-6 pt-16 lg:pt-10">
         <div className="max-w-5xl mx-auto">
           <div className="mb-6">
             <h1 className="text-4xl font-black font-fredoka">
