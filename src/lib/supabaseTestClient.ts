@@ -5,8 +5,15 @@ const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY
 // 1. Get the Service Role Key
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY 
 
-if (!supabaseKey || !serviceRoleKey) {
-  throw new Error("Missing API Keys in supabaseTestClient!");
+const missing: string[] = [];
+if (!supabaseUrl) missing.push("VITE_SUPABASE_URL");
+if (!supabaseKey) missing.push("VITE_SUPABASE_ANON_KEY");
+if (!serviceRoleKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
+
+if (missing.length > 0) {
+  throw new Error(
+    `Missing required Supabase test environment variables: ${missing.join(", ")}`,
+  );
 }
 
 // Client for simulating a NORMAL user (Barista)

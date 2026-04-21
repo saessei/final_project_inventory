@@ -1,28 +1,43 @@
-import { useRef } from "react";
-import { Store, List, BarChart2, Settings, LogOut } from "lucide-react";
-import { UserAuth } from "../../context/AuthContext";
+import { useRef, useState } from "react";
+import { Store, List, BarChart2, Settings, LogOut, Menu, X } from "lucide-react";
+import { UserAuth } from "../../auth/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "/src/assets/QueueTea.png";
 
+type Role = "cashier" | "barista";
+
 export const Sidebar = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const { session, signOut } = UserAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-
+  const role = session?.user?.user_metadata?.role as Role | undefined;
 
   const sidebarItems = [
-    { name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" },
-    { name: "Queued Orders", icon: <List size={20} />, path: "/queued-orders" },
+    ...(role === "cashier"
+      ? [{ name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" }]
+      : []),
+
+    ...(role === "barista"
+      ? [
+          {
+            name: "Queued Orders",
+            icon: <List size={20} />,
+            path: "/queued-orders",
+          },
+        ]
+      : []),
     { name: "Reports", icon: <BarChart2 size={20} />, path: "/dashboard" },
     { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
   ];
 
   const activeItem =
     sidebarItems.find((item) => item.path === location.pathname)?.name ||
-    "Kiosk Mode";
+    sidebarItems[0]?.name ||
+    "";
 
   const handleSignOut = async () => {
     await signOut();
@@ -30,10 +45,30 @@ export const Sidebar = () => {
   };
 
   return (
-    <div
-      ref={sidebarRef}
-      className="bg-bg-lightgray fixed top-0 left-0 h-screen min-h-screen p-5 pt-8 flex flex-col justify-between shadow-lg font-quicksand z-50"
-    >
+    <>
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md"
+        aria-label="Toggle menu"
+      >
+        {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* Mobile overlay */}
+      {isMobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      <div
+        ref={sidebarRef}
+        className={`bg-bg-lightgray fixed top-0 left-0 h-screen min-h-screen p-5 pt-8 flex flex-col justify-between shadow-lg font-quicksand z-50 transition-transform duration-300 ease-in-out ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        } w-64`}
+      >
       <div>
         <div className="flex">
           <img src={Logo} className="w-10 h-10"></img>
@@ -67,11 +102,7 @@ export const Sidebar = () => {
                 }`}
               >
                 {item.icon}
-                <span
-                  className={`font-medium text-sm`}
-                >
-                  {item.name}
-                </span>
+                <span className={`font-medium text-sm`}>{item.name}</span>
               </li>
             );
           })}
@@ -103,5 +134,6 @@ export const Sidebar = () => {
         </button>
       </div>
     </div>
+    </>
   );
 };

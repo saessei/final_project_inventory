@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Trash, Plus } from "lucide-react";
-import { UserAuth } from "../context/AuthContext";
+import { Trash, CheckCircle2 } from "lucide-react";
+import { UserAuth } from "../auth/AuthContext";
 import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
 import { type Drink } from "../patterns/DrinkFactory";
@@ -37,7 +36,6 @@ class ToppingStrategy implements CustomizationStrategy {
 }
 
 export const Kiosk = () => {
-  const navigate = useNavigate();
   const { session } = UserAuth();
 
   const baristaUserId = session?.user?.id;
@@ -50,12 +48,11 @@ export const Kiosk = () => {
     clearCart,
   } = useCart(baristaUserId);
 
-  const userName =
-    session?.user?.user_metadata?.display_name ||
-    session?.user?.email?.split("@")[0] ||
-    "Guest";
+  // const userName =
+  //   session?.user?.user_metadata?.display_name ||
+  //   session?.user?.email?.split("@")[0] ||
+  //   "Guest";
 
-  const baristaName = userName;
   const [customerName, setCustomerName] = useState("");
 
   const categories = useMemo(() => getCategoryFactories(), []);
@@ -76,6 +73,9 @@ export const Kiosk = () => {
 
   const [sugarLevel, setSugarLevel] = useState(sugarStrategy.options[2]);
   const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
+
+  const [checkoutSuccessOpen, setCheckoutSuccessOpen] = useState(false);
+  const [lastOrderSummary, setLastOrderSummary] = useState<string>("");
 
   const openCustomization = (drink: Drink) => {
     setSelectedDrink(drink);
@@ -137,7 +137,10 @@ export const Kiosk = () => {
       });
 
       await clearCart();
-      navigate("/queued-orders");
+
+      setLastOrderSummary(orderDetails);
+      setCustomerName("");
+      setCheckoutSuccessOpen(true);
     } catch (error) {
       console.error(
         "Failed to send order to queue:",
@@ -246,8 +249,6 @@ export const Kiosk = () => {
             placeholder="Enter customer name"
             className="mt-2 w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20"
           />
-
-          <p className="mt-3 text-xs text-gray-500">Barista: {baristaName}</p>
 
           <div className="mt-4">
             <p className="text-sm text-gray-500">Subtotal</p>
@@ -422,6 +423,52 @@ export const Kiosk = () => {
                   className="px-5 py-2 rounded-xl bg-dark-brown text-white text-sm font-semibold hover:bg-brown-dark cursor-pointer"
                 >
                   Add to Cart
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {checkoutSuccessOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+            <div className="p-6">
+              <div className="flex items-start gap-3">
+                <div className="text-emerald-600">
+                  <CheckCircle2 size={28} />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black font-fredoka text-dark-brown">
+                    Order successful
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Your order has been sent to the queue.
+                  </p>
+                </div>
+              </div>
+
+              {lastOrderSummary && (
+                <div className="mt-4 rounded-2xl bg-[#f8f7f1] p-4">
+                  <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
+                    Order details
+                  </p>
+                  <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap">
+                    {lastOrderSummary}
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-5 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCheckoutSuccessOpen(false);
+                    setLastOrderSummary("");
+                  }}
+                  className="px-5 py-2 rounded-xl bg-dark-brown text-white text-sm font-semibold hover:bg-brown-dark cursor-pointer"
+                >
+                  New order
                 </button>
               </div>
             </div>

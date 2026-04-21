@@ -77,7 +77,7 @@ describe("Cart API (integration, real Supabase DB)", () => {
 
   // happy path
 
-  it("creates (or finds) an active cart for a barista user", async () => {
+  it("creates an active cart for a barista user", async () => {
     const cartId = await ensureActiveCart();
 
     const { data, error } = await supabaseTest

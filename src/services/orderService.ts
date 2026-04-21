@@ -6,6 +6,7 @@
       order_details: string;
       status: string;
       user_id?: string;
+      baristaName?: string;
     },
     supabase = supabaseDefault 
   ) => {
@@ -23,20 +24,36 @@
   };
 
   export const updateOrderStatus = async (
-    orderId: string, 
-    newStatus: string,
-    supabase = supabaseDefault 
-  ) => {
-    const { data, error } = await supabase
-      .from('orders')
-      .update({ status: newStatus })
-      .eq('id', orderId)
-      .select();
+  orderId: string,
+  newStatus: "pending" | "preparing" | "completed" ,
+  options?: { claim?: boolean; baristaUserId?: string, baristaName?:string },
+  supabase = supabaseDefault,
+) => {
+  const patch: Record<string, unknown> = { status: newStatus };
 
-    if (error) {
-      console.error('Update failed:', error.message);
-      return null;
+  // If claiming, write claimed_by/claimed_at
+  if (options?.claim) {
+    if (!options.baristaUserId) {
+      throw new Error("baristaUserId is required when claim=true");
     }
-    
-    return data;
-  };
+    patch.claimed_by = options.baristaUserId;
+    patch.claimed_by_name = options.baristaName;
+    patch.claimed_at = new Date().toISOString();
+  }
+
+  let query = supabase.from("orders").update(patch).eq("id", orderId);
+
+  // prevent two baristas claiming the same order
+  if (options?.claim) {
+    query = query.is("claimed_by", null);
+  }
+
+  const { data, error } = await query.select();
+
+  if (error) {
+    console.error("Update failed:", error.message);
+    return null;
+  }
+
+  return data;
+};

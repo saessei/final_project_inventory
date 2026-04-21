@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite";
 import { Signup } from "../components/Signup";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "../auth/AuthContext";
 import { BrowserRouter } from "react-router-dom";
 import { userEvent, within, expect, waitFor } from "storybook/test";
 interface MockProps {

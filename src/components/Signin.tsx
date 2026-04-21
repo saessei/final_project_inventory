@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserAuth } from "../context/AuthContext";
+import { UserAuth } from "../auth/AuthContext";
 import { Header } from "./common/Header";
 import { BobaFooter } from "./common/BobaFooter";
 import * as React from "react";

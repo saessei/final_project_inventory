@@ -1,4 +1,3 @@
-
 type OrderStatus = "pending" | "preparing" | "completed";
 
 interface OrderButtonProps {
@@ -6,14 +5,33 @@ interface OrderButtonProps {
   onClick: () => void;
 }
 
-export const OrderStatusButton = ({ status, onClick }: OrderButtonProps) => {
-  const config = {
-    pending: { label: "Start Preparing", color: "bg-brown/20", text: "text-dark-brown" },
-    preparing: { label: "Mark as Complete", color: "bg-orange-100", text: "text-brown-two" },
-    completed: { label: "Archive Order", color: "bg-green-100", text:"text-green-500" },
-  };
+const config: Record<
+  OrderStatus,
+  { label: string; color: string; text: string }
+> = {
+  pending: {
+    label: "Start Preparing",
+    color: "bg-brown/20",
+    text: "text-dark-brown",
+  },
+  preparing: {
+    label: "Mark as Complete",
+    color: "bg-orange-100",
+    text: "text-brown-two",
+  },
+  completed: {
+    label: "Archive Order",
+    color: "bg-green-100",
+    text: "text-green-500",
+  },
+};
 
-  const { label, color, text} = config[status];
+export const OrderStatusButton = ({ status, onClick }: OrderButtonProps) => {
+  const cfg = config[status];
+
+  if (!cfg) return null;
+
+  const { label, color, text } = cfg;
 
   return (
     <div>

@@ -6,8 +6,11 @@ export interface Order {
   id: string;
   customer_name: string;
   order_details: string;
-  status: "pending" | "preparing" | "completed" | "cancelled";
+  status: "pending" | "preparing" | "completed";
   created_at: string;
+  claimed_by: string | null;
+  claimed_by_name: string | null;
+  claimed_at: string | null;
 }
 
 export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
