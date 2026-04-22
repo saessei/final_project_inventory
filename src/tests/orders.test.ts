@@ -4,7 +4,23 @@ import { supabaseTest, supabaseAdmin } from "../lib/supabaseTestClient";
 
 describe("Milk Tea Queueing System - Full Integration", () => {
   const testCustomer = "Robin";
-  let sharedOrderId: string;
+
+  async function createPendingOrder() {
+    const created = await createOrder(
+      {
+        customer_name: testCustomer,
+        order_details: "Classic Milk Tea, 75% Sugar, Pearls",
+        status: "pending",
+      },
+      supabaseTest,
+    );
+
+    if (!created || created.length === 0) {
+      throw new Error("Failed to create a pending order for test setup");
+    }
+
+    return created[0].id;
+  }
 
   // CLEANUP
   afterAll(async () => {
@@ -30,16 +46,15 @@ describe("Milk Tea Queueing System - Full Integration", () => {
       expect(data).not.toBeNull();
       expect(data![0].customer_name).toBe(testCustomer);
       expect(data![0].status).toBe("pending");
-
-      sharedOrderId = data![0].id;
     });
 
     it('should update order to "preparing" when the barista starts (claim)', async () => {
+      const orderId = await createPendingOrder();
       const baristaUserId = crypto.randomUUID();
       const baristaName = "Test Barista";
 
       const data = await updateOrderStatus(
-        sharedOrderId,
+        orderId,
         "preparing",
         {
           claim: true,
@@ -58,8 +73,9 @@ describe("Milk Tea Queueing System - Full Integration", () => {
     });
 
     it('should update order to "completed" when ready for pickup', async () => {
+      const orderId = await createPendingOrder();
       const data = await updateOrderStatus(
-        sharedOrderId,
+        orderId,
         "completed",
         undefined,
         supabaseTest,
@@ -121,9 +137,10 @@ describe("Milk Tea Queueing System - Full Integration", () => {
     });
 
     it('should throw when claim=true but baristaUserId is missing', async () => {
+      const orderId = await createPendingOrder();
       await expect(
         updateOrderStatus(
-          sharedOrderId,
+          orderId,
           "preparing",
           { claim: true, baristaName: "Test Barista" },
           supabaseTest,

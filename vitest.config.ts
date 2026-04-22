@@ -16,6 +16,9 @@ export default defineConfig(({ mode }) => {
   
   return {
     test: {
+      globalSetup: [path.resolve(__dirname, "./tests/globalSetup.ts")],
+      fileParallelism: false,
+      include: ["src/tests/**/*.test.ts", "src/tests/**/*.test.tsx"],
       exclude: [
         "**/node_modules/**",
         "**/dist/**",
