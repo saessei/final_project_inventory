@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { UserAuth } from "./AuthContext";
 
-export function RequireRole({
+export function RequireAuth({
   children,
 }: {
   children: ReactNode;
@@ -10,7 +10,7 @@ export function RequireRole({
   const { session, loading } = UserAuth();
   const location = useLocation();
 
-  if (loading) return null; 
+  if (loading) return null;
 
   if (!session) {
     return (

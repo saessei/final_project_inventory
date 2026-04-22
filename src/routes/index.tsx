@@ -5,7 +5,7 @@ import { Signin } from "../components/Signin";
 import { Kiosk } from "../components/Kiosk";
 import { QueuedOrders } from "../components/QueuedOrders";
 import { Settings } from "../components/Settings";
-import { RequireRole } from "../auth/RequireRole";
+import { RequireAuth } from "../auth/RequireAuth";
 
 
 export const router = createBrowserRouter([
@@ -16,26 +16,26 @@ export const router = createBrowserRouter([
   {
     path: "/kiosk",
     element: (
-      <RequireRole>
+      <RequireAuth>
         <Kiosk />
-      </RequireRole>
+      </RequireAuth>
     ),
   },
   {
     path: "/queued-orders",
     element: (
-      <RequireRole>
+      <RequireAuth>
         <QueuedOrders />
-      </RequireRole>
+      </RequireAuth>
     ),
   },
 
   {
     path: "/settings",
     element: (
-      <RequireRole>
+      <RequireAuth>
         <Settings />
-      </RequireRole>
+      </RequireAuth>
     ),
   },
 ]);
