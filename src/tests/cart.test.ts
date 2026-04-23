@@ -1,5 +1,6 @@
-import { describe, it, expect, afterAll } from "vitest";
-import { supabaseTest, supabaseAdmin } from "../lib/supabaseTestClient";
+import { describe, it, expect, beforeEach } from "vitest";
+import supabase from "../lib/supabaseClient"; 
+import { clearDatabase } from "../utils/db";
 
 type CartRow = {
   id: string;
@@ -19,197 +20,134 @@ type CartItemRow = {
   created_at?: string;
 };
 
-describe("Cart API (integration, real Supabase DB)", () => {
-  const testRunId = `vitest-cart-api-${Date.now()}`;
+describe("Cart API Integration", () => {
   const baristaUserId = crypto.randomUUID();
 
-  const createdCartIds: string[] = [];
-  const createdCartItemIds: string[] = [];
+  // 1. CLEAN SLATE: Use your new utility before every test
+  beforeEach(async () => {
+    await clearDatabase();
+  });
 
+  // Helper to keep tests DRY
   async function ensureActiveCart(): Promise<string> {
-    const { data: existing, error: existingErr } = await supabaseTest
-      .from("carts")
-      .select("id, barista_user_id, status")
-      .eq("barista_user_id", baristaUserId)
-      .eq("status", "active")
-      .maybeSingle<CartRow>();
-
-    if (existingErr) throw existingErr;
-    if (existing?.id) return existing.id;
-
-    const { data: created, error: createErr } = await supabaseTest
+    const { data: created, error } = await supabase
       .from("carts")
       .insert([{ barista_user_id: baristaUserId, status: "active" }])
       .select("id")
       .single();
 
-    if (createErr) throw createErr;
-
-    const id = created.id as string;
-    createdCartIds.push(id);
-    return id;
+    if (error) throw error;
+    return created.id;
   }
-
-  afterAll(async () => {
-    if (createdCartItemIds.length) {
-      await supabaseAdmin
-        .from("cart_items")
-        .delete()
-        .in("id", createdCartItemIds);
-    } else {
-      if (createdCartIds.length) {
-        await supabaseAdmin
-          .from("cart_items")
-          .delete()
-          .in("cart_id", createdCartIds);
-      }
-    }
-
-    if (createdCartIds.length) {
-      await supabaseAdmin.from("carts").delete().in("id", createdCartIds);
-    } else {
-      await supabaseAdmin
-        .from("carts")
-        .delete()
-        .eq("barista_user_id", baristaUserId);
-    }
-  });
-
-  // happy path
 
   it("creates an active cart for a barista user", async () => {
     const cartId = await ensureActiveCart();
 
-    const { data, error } = await supabaseTest
+    const { data, error } = await supabase
       .from("carts")
-      .select("id, barista_user_id, status")
+      .select("*")
       .eq("id", cartId)
       .single<CartRow>();
 
     expect(error).toBeNull();
-    expect(data).toBeTruthy();
-    expect(data!.barista_user_id).toBe(baristaUserId);
-    expect(data!.status).toBe("active");
+    expect(data?.barista_user_id).toBe(baristaUserId);
+    expect(data?.status).toBe("active");
   });
 
   it("inserts cart items and reads them back ordered by created_at", async () => {
     const cartId = await ensureActiveCart();
 
-    const itemA = {
-      cart_id: cartId,
-      drink_id: `drink-a-${testRunId}`,
-      drink_name: `Classic Milk Tea (${testRunId})`,
-      drink_price: 5.5,
-      sugar: "75%",
-      toppings: ["pearls"],
-      quantity: 1,
-    };
+    const items = [
+      {
+        cart_id: cartId,
+        drink_id: "drink-a",
+        drink_name: "Classic Milk Tea",
+        drink_price: 5.5,
+        sugar: "75%",
+        toppings: ["pearls"],
+        quantity: 1,
+      },
+      {
+        cart_id: cartId,
+        drink_id: "drink-b",
+        drink_name: "Taro Milk Tea",
+        drink_price: 6.25,
+        sugar: "50%",
+        toppings: ["pudding"],
+        quantity: 2,
+      }
+    ];
 
-    const itemB = {
-      cart_id: cartId,
-      drink_id: `drink-b-${testRunId}`,
-      drink_name: `Taro Milk Tea (${testRunId})`,
-      drink_price: 6.25,
-      sugar: "50%",
-      toppings: ["pudding"],
-      quantity: 2,
-    };
-
-    const { data: inserted, error: insertErr } = await supabaseTest
-      .from("cart_items")
-      .insert([itemA, itemB])
-      .select(
-        "id, cart_id, drink_id, drink_name, drink_price, sugar, toppings, quantity, created_at",
-      );
-
+    const { error: insertErr } = await supabase.from("cart_items").insert(items);
     expect(insertErr).toBeNull();
-    expect(inserted).toBeTruthy();
-    expect(inserted!.length).toBeGreaterThanOrEqual(2);
 
-    for (const row of inserted as CartItemRow[])
-      createdCartItemIds.push(row.id);
-
-    const { data: readBack, error: readErr } = await supabaseTest
+    const { data: readBack, error: readErr } = await supabase
       .from("cart_items")
-      .select(
-        "id, cart_id, drink_id, drink_name, drink_price, sugar, toppings, quantity, created_at",
-      )
+      .select("*")
       .eq("cart_id", cartId)
       .order("created_at", { ascending: true });
 
     expect(readErr).toBeNull();
-    expect(Array.isArray(readBack)).toBe(true);
-
-    const mine = (readBack as CartItemRow[]).filter((r) =>
-      r.drink_id.includes(testRunId),
-    );
-    expect(mine.length).toBeGreaterThanOrEqual(2);
-
-    const times = mine
-      .map((r) => (r.created_at ? new Date(r.created_at).getTime() : 0))
-      .filter((t) => t > 0);
-
-    if (times.length >= 2) {
-      expect(times).toEqual([...times].sort((a, b) => a - b));
-    }
+    expect(readBack).toHaveLength(2);
+    expect(readBack![0].drink_name).toBe("Classic Milk Tea");
   });
 
   it("updates quantity and then deletes an item", async () => {
     const cartId = await ensureActiveCart();
 
-    const { data: inserted, error: insertErr } = await supabaseTest
+    // Insert
+    const { data: item } = await supabase
       .from("cart_items")
-      .insert([
-        {
-          cart_id: cartId,
-          drink_id: `drink-inc-${testRunId}`,
-          drink_name: `Increment Test (${testRunId})`,
-          drink_price: 4.0,
-          sugar: "100%",
-          toppings: [],
-          quantity: 1,
-        },
-      ])
-      .select("id, quantity")
+      .insert([{
+        cart_id: cartId,
+        drink_id: "drink-update",
+        drink_name: "Update Test",
+        drink_price: 4.0,
+        sugar: "100%",
+        toppings: [],
+        quantity: 1,
+      }])
+      .select()
       .single<CartItemRow>();
 
-    expect(insertErr).toBeNull();
-    expect(inserted).toBeTruthy();
-    createdCartItemIds.push(inserted!.id);
-
-    const { data: updated, error: updateErr } = await supabaseTest
+    // Update
+    const { data: updated } = await supabase
       .from("cart_items")
-      .update({ quantity: 2 })
-      .eq("id", inserted!.id)
-      .select("id, quantity")
+      .update({ quantity: 5 })
+      .eq("id", item!.id)
+      .select()
       .single<CartItemRow>();
 
-    expect(updateErr).toBeNull();
-    expect(updated!.quantity).toBe(2);
+    expect(updated?.quantity).toBe(5);
 
-    const { error: delErr } = await supabaseTest
+    // Delete
+    const { error: delErr } = await supabase
       .from("cart_items")
       .delete()
-      .eq("id", inserted!.id);
+      .eq("id", item!.id);
+
     expect(delErr).toBeNull();
+    
+    // Verify deletion
+    const { data: verify } = await supabase.from("cart_items").select().eq("id", item!.id);
+    expect(verify).toHaveLength(0);
   });
 
-  // sad path
   it("fails to insert cart_item when cart_id does not exist (FK constraint)", async () => {
     const fakeCartId = crypto.randomUUID();
 
-    const { error } = await supabaseTest.from("cart_items").insert([
-      {
-        cart_id: fakeCartId,
-        drink_id: `drink-fk-${testRunId}`,
-        drink_name: `FK Fail (${testRunId})`,
-        drink_price: 1.0,
-        sugar: "0%",
-        toppings: [],
-        quantity: 1,
-      },
-    ]);
+    const { error } = await supabase.from("cart_items").insert([{
+      cart_id: fakeCartId,
+      drink_id: "fail-test",
+      drink_name: "I should fail",
+      drink_price: 1.0,
+      sugar: "0%",
+      toppings: [],
+      quantity: 1,
+    }]);
 
+    // This proves your "frfr" database constraints are working!
     expect(error).toBeTruthy();
+    expect(error?.code).toBe("23503"); // Postgres FK violation code
   });
 });

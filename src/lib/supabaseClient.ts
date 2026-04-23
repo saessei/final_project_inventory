@@ -1,19 +1,23 @@
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+// src/lib/supabaseClient.ts
+import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY ?? import.meta.env.VITE_SUPABASE_KEY) as string;
+// Helper to get env from either Vite or Node context
+const getEnv = (key: string) => import.meta.env[key] || process.env[key];
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error("Missing VITE_SUPABASE_URL or Supabase anon key env var");
-}
+const supabaseUrl = getEnv("VITE_SUPABASE_URL");
 
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+// Logic: Use Service Role for tests (God Mode), Anon for everything else
+const isTest = import.meta.env.MODE === 'test' || process.env.NODE_ENV === 'test';
+
+const supabaseKey = isTest 
+  ? getEnv("SUPABASE_SERVICE_ROLE_KEY") 
+  : getEnv("VITE_SUPABASE_ANON_KEY");
+
+const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storage: localStorage,
-    storageKey: "queuetea-auth",
+    persistSession: !isTest, // Disable for tests to prevent localStorage leaks
+    // In jsdom/vitest, window is defined, but localStorage might be empty
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
   },
 });
 

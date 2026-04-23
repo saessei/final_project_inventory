@@ -5,17 +5,22 @@ import path from "path";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
 
-  const resolvedSupabaseUrl = env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-  const resolvedAnonKey = env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const resolvedSupabaseUrl =
+    env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const resolvedAnonKey =
+    env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
   const resolvedServiceRoleKey =
     env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (resolvedSupabaseUrl) process.env.VITE_SUPABASE_URL = resolvedSupabaseUrl;
   if (resolvedAnonKey) process.env.VITE_SUPABASE_ANON_KEY = resolvedAnonKey;
-  if (resolvedServiceRoleKey) process.env.SUPABASE_SERVICE_ROLE_KEY = resolvedServiceRoleKey;
-  
+  if (resolvedServiceRoleKey)
+    process.env.SUPABASE_SERVICE_ROLE_KEY = resolvedServiceRoleKey;
+
   return {
     test: {
+      fileParallelism: false,
+      threads: false,
       exclude: [
         "**/node_modules/**",
         "**/dist/**",

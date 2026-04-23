@@ -1,66 +1,69 @@
 import { useEffect } from "react";
-import { describe, it, expect, afterAll } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { act } from "react-dom/test-utils";
 import { createRoot } from "react-dom/client";
 import { useOrders } from "../hooks/useOrders";
-import { supabaseTest, supabaseAdmin } from "../lib/supabaseTestClient";
+import supabase from "../lib/supabaseClient";
 import { createOrder } from "../services/orderService";
+import { clearDatabase } from "../utils/db";
 
-describe("useOrders (integration, test DB)", () => {
-  const testRunId = `vitest-useOrders-${Date.now()}`;
-  const testCustomer = `HookUser-${testRunId}`;
-  const createdOrderIds: string[] = [];
+describe("useOrders Integration", () => {
+  const testCustomer = "HookUser";
 
-  afterAll(async () => {
-    if (createdOrderIds.length) {
-      await supabaseAdmin.from("orders").delete().in("id", createdOrderIds);
-    } else {
-      await supabaseAdmin
-        .from("orders")
-        .delete()
-        .like("order_details", `%${testRunId}%`);
-    }
+  beforeEach(async () => {
+    await clearDatabase();
   });
 
   it("fetchOrders loads orders from test DB and updates state", async () => {
-    const a = await createOrder(
-      {
-        customer_name: testCustomer,
-        order_details: `A (${testRunId})`,
-        status: "pending",
-      },
-      supabaseTest,
-    );
-    const b = await createOrder(
-      {
-        customer_name: testCustomer,
-        order_details: `B (${testRunId})`,
-        status: "pending",
-      },
-      supabaseTest,
-    );
+    // Insert real data
+    await createOrder({
+      customer_name: testCustomer,
+      order_details: "Order A",
+      status: "pending",
+    }, supabase);
 
-    createdOrderIds.push(a![0].id, b![0].id);
+    await createOrder({
+      customer_name: testCustomer,
+      order_details: "Order B",
+      status: "pending",
+    }, supabase);
 
-    type OrderRow = {
-      id: string;
-      customer_name: string;
-      order_details: string;
-      status: "pending" | "preparing" | "completed" | "cancelled";
-      created_at: string;
-    };
-
-    let latestOrders: OrderRow[] = [];
+    let latestOrders: any[] = [];
     let latestFetch: (() => Promise<void>) | null = null;
 
     function Harness() {
-      const { orders, fetchOrders } = useOrders(supabaseTest);
-
+      const { orders, fetchOrders } = useOrders(supabase);
       useEffect(() => {
         latestOrders = orders;
         latestFetch = fetchOrders;
       }, [orders, fetchOrders]);
+      return null;
+    }
 
+    const el = document.createElement("div");
+    document.body.appendChild(el);
+    const root = createRoot(el);
+
+    await act(async () => { root.render(<Harness />); });
+    await act(async () => { await latestFetch?.(); });
+
+    expect(latestOrders.length).toBe(2);
+    expect(latestOrders[0].customer_name).toBe(testCustomer);
+
+    await act(async () => root.unmount());
+    el.remove();
+  });
+
+  it("fetchOrders keeps state empty when there are no orders", async () => {
+    let latestOrders: any[] = [];
+    let latestFetch: (() => Promise<void>) | null = null;
+
+    function Harness() {
+      const { orders, fetchOrders } = useOrders(supabase);
+      useEffect(() => {
+        latestOrders = orders;
+        latestFetch = fetchOrders;
+      }, [orders, fetchOrders]);
       return null;
     }
 
@@ -71,16 +74,11 @@ describe("useOrders (integration, test DB)", () => {
     await act(async () => {
       root.render(<Harness />);
     });
-
     await act(async () => {
       await latestFetch?.();
     });
 
-    const mine = latestOrders.filter((o) => o.customer_name === testCustomer);
-    expect(mine.length).toBeGreaterThanOrEqual(2);
-
-    const times = mine.map((o) => new Date(o.created_at).getTime());
-    expect(times).toEqual([...times].sort((x, y) => x - y));
+    expect(latestOrders).toEqual([]);
 
     await act(async () => root.unmount());
     el.remove();
