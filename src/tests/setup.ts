@@ -1,5 +1,4 @@
-import { beforeAll, beforeEach } from "vitest";
-import { clearTestDatabase } from "./dbCleaner";
+import { beforeAll } from 'vitest';
 
 // Use process.env because Vitest injects the loaded envs there
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -15,8 +14,4 @@ beforeAll(() => {
       `Missing required test environment variables: ${missing.join(", ")}. Configure them in CI secrets or a local .env.test file.`,
     );
   }
-});
-
-beforeEach(async () => {
-  await clearTestDatabase();
 });
