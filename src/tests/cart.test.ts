@@ -19,7 +19,7 @@ type CartItemRow = {
   created_at?: string;
 };
 
-describe("Cart API (integration, real Supabase DB)", () => {
+describe("Cart Integration Test", () => {
   const testRunId = `vitest-cart-api-${Date.now()}`;
   const baristaUserId = crypto.randomUUID();
 
