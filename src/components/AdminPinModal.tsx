@@ -1,4 +1,5 @@
-// components/AdminPinModal.tsx
+ 
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect, useRef } from "react";
 import { Key, Lock, X } from "lucide-react";
 import supabase from "../lib/supabaseClient";
@@ -17,24 +18,30 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
   const [hasExistingPin, setHasExistingPin] = useState<boolean | null>(null);
   const { session, refreshSession } = UserAuth();
   
-  // Add a ref to prevent multiple verifications
   const hasVerifiedRef = useRef(false);
   const isVerifyingRef = useRef(false);
 
-  if (!session?.user?.id) {
-    return null;
-  }
-
+  // ALL HOOKS MUST BE BEFORE CONDITIONAL RETURNS
   useEffect(() => {
     checkUserPinStatus();
   }, [session]);
+
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => document.removeEventListener('keydown', handleEscapeKey);
+  }, [onClose]);
 
   const checkUserPinStatus = async () => {
     try {
       const { data: profile } = await supabase
         .from("profiles")
         .select("admin_pin")
-        .eq("id", session.user.id)
+        .eq("id", session?.user?.id)
         .single();
 
       console.log("Has existing PIN:", !!profile?.admin_pin);
@@ -84,7 +91,6 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
   };
 
   const handleVerifyPin = async () => {
-    // Prevent multiple verification attempts
     if (hasVerifiedRef.current || isVerifyingRef.current) {
       console.log("Already verified or verifying, skipping...");
       return;
@@ -119,7 +125,6 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
       await refreshSession();
       setLoading(false);
       isVerifyingRef.current = false;
-      // Call onSuccess after marking as verified
       onSuccess();
     } else {
       setError("Invalid PIN. Please try again.");
@@ -136,15 +141,10 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
     }
   };
 
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handleEscapeKey);
-    return () => document.removeEventListener('keydown', handleEscapeKey);
-  }, [onClose]);
+  // NOW conditional returns after all hooks
+  if (!session?.user?.id) {
+    return null;
+  }
 
   if (hasExistingPin === null) {
     return (

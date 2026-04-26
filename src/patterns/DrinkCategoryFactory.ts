@@ -25,6 +25,7 @@ export async function createDrinksForCategory(id: DrinkCategoryId): Promise<Drin
   // Convert dynamic drinks to the Drink interface using the factory
   return dynamicDrinks.map(dynamicDrink => {
     // Map the dynamic drink to use DrinkFactory
-    return DrinkFactory.createDrink(dynamicDrink.type as any);
+    const validType = dynamicDrink.type as "BrownSugar" | "Matcha" | "Taro" | "PassionFruit";
+    return DrinkFactory.createDrink(validType);
   });
 }

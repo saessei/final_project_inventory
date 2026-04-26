@@ -37,7 +37,8 @@ const toppingStrategy = new ToppingStrategy();
 
 // Helper to convert dynamic drink to Drink interface
 const convertToDrink = (dynamicDrink: DynamicDrink): Drink => {
-  return DrinkFactory.createDrink(dynamicDrink.type as any);
+  const validType = dynamicDrink.type as "BrownSugar" | "Matcha" | "Taro" | "PassionFruit";
+  return DrinkFactory.createDrink(validType);
 };
 
 export const Kiosk = () => {

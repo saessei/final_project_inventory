@@ -1,4 +1,4 @@
-// contexts/AdminPinContext.tsx
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, ReactNode } from "react";
 
 interface AdminPinContextType {

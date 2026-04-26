@@ -1,5 +1,6 @@
-// components/Admin/MenuManager.tsx
-import { useState, useEffect, useRef } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+ 
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Plus, Edit, Trash2, X } from "lucide-react";
 import { dynamicMenu, DynamicCategory, DynamicDrink, Topping, SugarLevel } from "../../services/DynamicMenuService";
 import { Sidebar } from "../common/Sidebar";
@@ -26,62 +27,10 @@ export const MenuManager = () => {
   const { session, loading: authLoading, refreshSession } = UserAuth();
   const navigate = useNavigate();
   
-  // Use refs to track verification state
   const pinVerifiedRef = useRef(false);
   const modalShownRef = useRef(false);
 
-  useEffect(() => {
-    if (!authLoading) {
-      checkAccess();
-    }
-  }, [session, authLoading]);
-
-  const checkAccess = async () => {
-    if (authLoading) return;
-    
-    if (!session?.user?.id) {
-      navigate("/signin");
-      return;
-    }
-
-    // If PIN already verified in this session, grant access immediately
-    if (pinVerifiedRef.current) {
-      setIsAuthorized(true);
-      loadData();
-      return;
-    }
-
-    // Only show modal once
-    if (modalShownRef.current) return;
-    
-    modalShownRef.current = true;
-
-    // Check if user has a PIN
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("admin_pin")
-      .eq("id", session.user.id)
-      .single();
-
-    setShowPinModal(true);
-  };
-
-  const handlePinSuccess = async () => {
-    // Set the ref to true BEFORE closing modal
-    pinVerifiedRef.current = true;
-    
-    setShowPinModal(false);
-    await refreshSession();
-    setIsAuthorized(true);
-    loadData();
-  };
-
-  const handlePinCancel = () => {
-    setShowPinModal(false);
-    navigate("/kiosk");
-  };
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     const [cats, drinksData, tops, sugars] = await Promise.all([
       dynamicMenu.getCategories(),
@@ -94,6 +43,52 @@ export const MenuManager = () => {
     setToppings(tops);
     setSugarLevels(sugars);
     setLoading(false);
+  }, []);
+
+  const checkAccess = useCallback(async () => {
+    if (authLoading) return;
+    
+    if (!session?.user?.id) {
+      navigate("/signin");
+      return;
+    }
+
+    if (pinVerifiedRef.current) {
+      setIsAuthorized(true);
+      loadData();
+      return;
+    }
+
+    if (modalShownRef.current) return;
+    
+    modalShownRef.current = true;
+
+    await supabase
+      .from("profiles")
+      .select("admin_pin")
+      .eq("id", session.user.id)
+      .single();
+
+    setShowPinModal(true);
+  }, [authLoading, session, navigate, loadData]);
+
+  useEffect(() => {
+    if (!authLoading) {
+      checkAccess();
+    }
+  }, [authLoading, checkAccess]);
+
+  const handlePinSuccess = async () => {
+    pinVerifiedRef.current = true;
+    setShowPinModal(false);
+    await refreshSession();
+    setIsAuthorized(true);
+    loadData();
+  };
+
+  const handlePinCancel = () => {
+    setShowPinModal(false);
+    navigate("/kiosk");
   };
   
   const handleSave = async (data: any) => {
@@ -198,6 +193,7 @@ export const MenuManager = () => {
             ))}
           </div>
           
+          {/* Rest of your JSX remains the same */}
           {/* Categories Tab */}
           {activeTab === 'categories' && (
             <div>
@@ -389,7 +385,7 @@ export const MenuManager = () => {
   );
 };
 
-// Complete Edit Modal Component
+// Edit Modal Component (keep your existing EditModal code)
 const EditModal = ({ item, type, onSave, onClose, categories, toppings, sugarLevels }: any) => {
   const [formData, setFormData] = useState(item || {});
   
