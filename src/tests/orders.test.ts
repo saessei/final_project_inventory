@@ -2,7 +2,7 @@ import { it, expect, describe, afterAll } from "vitest";
 import { createOrder, updateOrderStatus } from "../services/orderService";
 import { supabaseTest, supabaseAdmin } from "../lib/supabaseTestClient";
 
-describe("Milk Tea Queueing System - Full Integration", () => {
+describe("Order Integration Test", () => {
   const testCustomer = "Robin";
   let sharedOrderId: string;
 

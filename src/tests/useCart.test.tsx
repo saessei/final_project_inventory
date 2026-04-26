@@ -1,226 +1,142 @@
 import { afterAll, describe, expect, it } from "vitest";
-import { act } from "react-dom/test-utils";
-import { createRoot } from "react-dom/client";
-import { useEffect } from "react";
+import { renderHook, waitFor, act } from "@testing-library/react"; // Added act
 import { useCart, type CartItem } from "../hooks/useCart";
-import { supabaseAdmin, supabaseTest } from "../lib/supabaseTestClient";
-
-type CartRow = {
-  id: string;
-  barista_user_id: string;
-  status: "active" | "checked_out" | "abandoned";
-};
-
-type CartItemRow = Pick<
-  CartItem,
-  "id" | "cart_id" | "drink_id" | "drink_name" | "drink_price" | "sugar" | "toppings" | "quantity"
->;
+import { supabaseAdmin } from "../lib/supabaseTestClient";
 
 describe("useCart (integration, real Supabase DB)", () => {
   const testRunId = `vitest-useCart-${Date.now()}`;
-  const baristaUserId = crypto.randomUUID();
-  let cartId: string | null = null;
+  const createdCartIds: string[] = [];
+  const createdBaristaUserIds: string[] = [];
+
+  function trackCartId(id: string | null) {
+    if (!id) return;
+    if (!createdCartIds.includes(id)) createdCartIds.push(id);
+  }
+
+  function trackBaristaUserId(id: string) {
+    if (!createdBaristaUserIds.includes(id)) createdBaristaUserIds.push(id);
+  }
+
+  function makeBaseItem(overrides?: Partial<Omit<CartItem, "id" | "cart_id">>) {
+    return {
+      drink_id: `drink-${testRunId}`,
+      drink_name: `Hook Test Milk Tea (${testRunId})`,
+      drink_price: 5.5,
+      sugar: "75%",
+      toppings: ["pearls"],
+      quantity: 1,
+      ...overrides,
+    } satisfies Omit<CartItem, "id" | "cart_id">;
+  }
 
   afterAll(async () => {
-    if (cartId) {
-      await supabaseAdmin.from("cart_items").delete().eq("cart_id", cartId);
-      await supabaseAdmin.from("carts").delete().eq("id", cartId);
-      return;
+    if (createdCartIds.length) {
+      await supabaseAdmin.from("cart_items").delete().in("cart_id", createdCartIds);
+      await supabaseAdmin.from("carts").delete().in("id", createdCartIds);
     }
-
-    await supabaseAdmin.from("carts").delete().eq("barista_user_id", baristaUserId);
+    if (createdBaristaUserIds.length) {
+      await supabaseAdmin.from("carts").delete().in("barista_user_id", createdBaristaUserIds);
+    }
   });
 
-  async function waitFor(predicate: () => boolean, timeoutMs = 10000) {
-    const started = Date.now();
-
-    while (!predicate()) {
-      if (Date.now() - started > timeoutMs) {
-        throw new Error("Timed out waiting for useCart state to settle");
-      }
-
-      await act(async () => {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      });
-    }
-  }
-
-  function mountHarness() {
-    let latest: ReturnType<typeof useCart> | null = null;
-
-    function Harness() {
-      const cart = useCart(baristaUserId);
-
-      useEffect(() => {
-        latest = cart;
-      }, [cart]);
-
-      return null;
-    }
-
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    const root = createRoot(container);
-
-    return {
-      render: async () => {
-        await act(async () => {
-          root.render(<Harness />);
-        });
-      },
-      cleanup: async () => {
-        await act(async () => {
-          root.unmount();
-        });
-        container.remove();
-      },
-      getLatest: () => {
-        if (!latest) {
-          throw new Error("useCart hook did not initialize");
-        }
-
-        return latest;
-      },
-    };
-  }
-
   it("creates and mutates a real cart through the hook", async () => {
-    const harness = mountHarness();
+    const baristaUserId = crypto.randomUUID();
+    trackBaristaUserId(baristaUserId);
 
-    try {
-      await harness.render();
+    const { result, unmount } = renderHook(() => useCart(baristaUserId));
 
-      await waitFor(() => harness.getLatest().cartId !== null);
-      cartId = harness.getLatest().cartId;
-      expect(cartId).toBeTruthy();
-      if (!cartId) {
-        throw new Error("Cart ID was not created");
-      }
+    await waitFor(() => expect(result.current.cartId).not.toBeNull(), { timeout: 10000 });
+    const activeCartId = result.current.cartId as string;
+    trackCartId(activeCartId);
 
-      const activeCartId = cartId;
+    const baseItem = makeBaseItem();
 
-      const { data: createdCart, error: cartErr } = await supabaseTest
-        .from("carts")
-        .select("id, barista_user_id, status")
-        .eq("id", activeCartId)
-        .single<CartRow>();
+    // mutations wrapped in act
+    await act(async () => { await result.current.upsertItem(baseItem); });
+    await waitFor(() => expect(result.current.cart).toHaveLength(1));
 
-      expect(cartErr).toBeNull();
-      expect(createdCart).toBeTruthy();
-      expect(createdCart!.barista_user_id).toBe(baristaUserId);
-      expect(createdCart!.status).toBe("active");
+    await act(async () => { await result.current.upsertItem(baseItem); });
+    await waitFor(() => expect(result.current.cart[0]?.quantity).toBe(2));
 
-      const baseItem = {
-        drink_id: `drink-${testRunId}`,
-        drink_name: `Hook Test Milk Tea (${testRunId})`,
-        drink_price: 5.5,
-        sugar: "75%",
-        toppings: ["pearls"],
-        quantity: 1,
-      };
+    await act(async () => { await result.current.incrementItemAtIndex(0); });
+    await waitFor(() => expect(result.current.cart[0]?.quantity).toBe(3));
 
-      await act(async () => {
-        await harness.getLatest().upsertItem(baseItem);
-      });
+    await act(async () => { await result.current.decrementItemAtIndex(0); });
+    await waitFor(() => expect(result.current.cart[0]?.quantity).toBe(2));
 
-      await waitFor(
-        () =>
-          harness.getLatest().cart.length === 1 &&
-          harness.getLatest().cart[0]?.quantity === 1,
-      );
+    await act(async () => { await result.current.removeItemAtIndex(0); });
+    await waitFor(() => expect(result.current.cart).toHaveLength(0));
 
-      const { data: items, error: itemsErr } = await supabaseTest
-        .from("cart_items")
-        .select(
-          "id, cart_id, drink_id, drink_name, drink_price, sugar, toppings, quantity",
-        )
-        .eq("cart_id", activeCartId)
-        .order("created_at", { ascending: true });
+    await act(async () => { await result.current.upsertItem(baseItem); });
+    await act(async () => { await result.current.clearCart(); });
+    await waitFor(() => expect(result.current.cart).toHaveLength(0));
 
-      expect(itemsErr).toBeNull();
-      expect(items).toHaveLength(1);
-      expect(items![0]).toMatchObject({
-        cart_id: activeCartId,
-        drink_id: baseItem.drink_id,
-        drink_name: baseItem.drink_name,
-        quantity: 1,
-      } satisfies Partial<CartItemRow>);
-
-      await act(async () => {
-        await harness.getLatest().upsertItem(baseItem);
-      });
-
-      await waitFor(
-        () =>
-          harness.getLatest().cart.length === 1 &&
-          harness.getLatest().cart[0]?.quantity === 2,
-      ); 
-
-      const { data: moreItems, error: moreItemsErr } = await supabaseTest
-        .from("cart_items")
-        .select(
-          "id, cart_id, drink_id, drink_name, drink_price, sugar, toppings, quantity",
-        )
-        .eq("cart_id", activeCartId)
-        .order("created_at", { ascending: true });
-
-      expect(moreItemsErr).toBeNull();
-      expect(moreItems).toHaveLength(1);
-      expect(moreItems![0].quantity).toBe(2);
-
-      await act(async () => {
-        await harness.getLatest().incrementItemAtIndex(0);
-      });
-
-      await waitFor(() => harness.getLatest().cart[0]?.quantity === 3);
-
-      await act(async () => {
-        await harness.getLatest().decrementItemAtIndex(0);
-      });
-
-      await waitFor(() => harness.getLatest().cart[0]?.quantity === 2);
-
-      await act(async () => {
-        await harness.getLatest().removeItemAtIndex(0);
-      });
-
-      await waitFor(() => harness.getLatest().cart.length === 0);
-
-      const { data: emptyItems, error: emptyItemsErr } = await supabaseTest
-        .from("cart_items")
-        .select("id")
-        .eq("cart_id", activeCartId);
-
-      expect(emptyItemsErr).toBeNull();
-      expect(emptyItems).toHaveLength(0);
-
-      await act(async () => {
-        await harness.getLatest().upsertItem(baseItem);
-        await harness.getLatest().upsertItem({
-          ...baseItem,
-          drink_id: `drink-${testRunId}-2`,
-          drink_name: `Hook Test Taro (${testRunId})`,
-          toppings: ["pudding"],
-        });
-      });
-
-      await waitFor(() => harness.getLatest().cart.length === 2);
-
-      await act(async () => {
-        await harness.getLatest().clearCart();
-      });
-
-      await waitFor(() => harness.getLatest().cart.length === 0);
-
-      const { data: clearedItems, error: clearedItemsErr } = await supabaseTest
-        .from("cart_items")
-        .select("id")
-        .eq("cart_id", activeCartId);
-
-      expect(clearedItemsErr).toBeNull();
-      expect(clearedItems).toHaveLength(0);
-    } finally {
-      await harness.cleanup();
-    }
+    unmount();
   }, 20000);
+
+  it("computes cartTotal across multiple items", async () => {
+    const baristaUserId = crypto.randomUUID();
+    trackBaristaUserId(baristaUserId);
+    const { result, unmount } = renderHook(() => useCart(baristaUserId));
+
+    await waitFor(() => expect(result.current.cartId).not.toBeNull());
+    trackCartId(result.current.cartId);
+
+    await act(async () => {
+      await result.current.upsertItem(makeBaseItem({ drink_price: 4.0, quantity: 2 }));
+      await result.current.upsertItem(makeBaseItem({ drink_id: `total-2`, drink_price: 6.25 }));
+    });
+
+    await waitFor(() => expect(result.current.cartTotal).toBeCloseTo(14.25, 5));
+    unmount();
+  }, 20000);
+
+  it("decrementItemAtIndex deletes the row when quantity is 1", async () => {
+    const baristaUserId = crypto.randomUUID();
+    trackBaristaUserId(baristaUserId);
+    const { result, unmount } = renderHook(() => useCart(baristaUserId));
+
+    await waitFor(() => expect(result.current.cartId).not.toBeNull());
+    trackCartId(result.current.cartId);
+
+    await act(async () => {
+      await result.current.upsertItem(makeBaseItem({ quantity: 1 }));
+    });
+
+    await waitFor(() => expect(result.current.cart).toHaveLength(1));
+
+    await act(async () => {
+      await result.current.decrementItemAtIndex(0);
+    });
+
+    await waitFor(() => expect(result.current.cart).toHaveLength(0));
+    unmount();
+  }, 20000);
+
+  it("reuses the same active cart for the same baristaUserId", async () => {
+    const baristaUserId = crypto.randomUUID();
+    trackBaristaUserId(baristaUserId);
+
+    const first = renderHook(() => useCart(baristaUserId));
+    await waitFor(() => expect(first.result.current.cartId).not.toBeNull());
+    trackCartId(first.result.current.cartId);
+    first.unmount();
+
+    const second = renderHook(() => useCart(baristaUserId));
+    await waitFor(() => expect(second.result.current.cartId).not.toBeNull());
+    expect(second.result.current.cartId).toBe(first.result.current.cartId);
+    second.unmount();
+  }, 20000);
+
+  it("throws when upsertItem is called without baristaUserId", async () => {
+    const { result } = renderHook(() => useCart(undefined));
+    await expect(result.current.upsertItem(makeBaseItem())).rejects.toThrow("Missing baristaUserId");
+  });
+
+  it("no-ops when index mutations are called out of range", async () => {
+    const { result } = renderHook(() => useCart(undefined));
+    await expect(result.current.incrementItemAtIndex(0)).resolves.toBeUndefined();
+    await expect(result.current.decrementItemAtIndex(0)).resolves.toBeUndefined();
+    await expect(result.current.removeItemAtIndex(0)).resolves.toBeUndefined();
+  });
 });

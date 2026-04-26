@@ -18,7 +18,7 @@ type Cart = {
   status: "active" | "checked_out" | "abandoned";
 };
 
-export function useCart(baristaUserId?: string) {
+export function useCart(baristaUserId?: string, ) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartId, setCartId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
