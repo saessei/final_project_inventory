@@ -198,16 +198,16 @@ export const Kiosk = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="bg-cream min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4">🥤</div>
-          <p className="text-gray-600">Loading menu...</p>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="bg-cream min-h-screen flex items-center justify-center">
+  //       <div className="text-center">
+  //         <div className="text-4xl mb-4">🥤</div>
+  //         <p className="text-gray-600">Loading menu...</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   const hasNoMenu = categories.length === 0;
 
@@ -314,7 +314,6 @@ export const Kiosk = () => {
         {hasNoMenu ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <div className="text-center">
-              <div className="text-8xl mb-6">🍵</div>
               <h2 className="text-3xl font-bold text-dark-brown mb-3">No Menu Available</h2>
               <p className="text-gray-500 mb-8 max-w-md">
                 The menu is currently empty. Please add some drinks to start taking orders.
