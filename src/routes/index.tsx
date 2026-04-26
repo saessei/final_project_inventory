@@ -4,7 +4,7 @@ import { Signup } from "../components/Signup";
 import { Signin } from "../components/Signin";
 import { Kiosk } from "../components/Kiosk";
 import { QueuedOrders } from "../components/QueuedOrders";
-import { Settings } from "../components/settings";
+import { Settings } from "../components/Settings";
 import { Dashboard } from "../components/Dashboard";
 import { MenuManager } from "../components/Admin/MenuManager";
 

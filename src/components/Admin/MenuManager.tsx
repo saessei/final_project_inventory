@@ -57,7 +57,7 @@ export const MenuManager = () => {
     modalShownRef.current = true;
 
     // Check if user has a PIN
-    const { data: profile } = await supabase
+    await supabase
       .from("profiles")
       .select("admin_pin")
       .eq("id", session.user.id)
