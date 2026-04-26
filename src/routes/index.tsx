@@ -1,41 +1,73 @@
-import { createBrowserRouter } from "react-router-dom";
-import App from "../App";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { UserAuth } from "../auth/AuthContext";
 import { Signup } from "../components/Signup";
 import { Signin } from "../components/Signin";
 import { Kiosk } from "../components/Kiosk";
 import { QueuedOrders } from "../components/QueuedOrders";
-import { Settings } from "../components/Settings";
-import { RequireAuth } from "../auth/RequireAuth";
+import { Settings } from "../components/settings";
+import { Dashboard } from "../components/Dashboard";
+import { MenuManager } from "../components/Admin/MenuManager";
 
+// Simple wrapper component to protect routes
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { session, loading } = UserAuth();
+  
+  if (loading) {
+    return <div className="bg-cream min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+  
+  if (!session) {
+    return <Navigate to="/signin" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 export const router = createBrowserRouter([
-  { path: "/", element: <App /> },
+  // Public routes
+  { path: "/", element: <Navigate to="/signin" replace /> },
   { path: "/signup", element: <Signup /> },
   { path: "/signin", element: <Signin /> },
-
-  {
-    path: "/kiosk",
+  
+  // Protected routes (require login)
+  { 
+    path: "/kiosk", 
     element: (
-      <RequireAuth>
+      <ProtectedRoute>
         <Kiosk />
-      </RequireAuth>
-    ),
+      </ProtectedRoute>
+    ) 
   },
-  {
-    path: "/queued-orders",
+  { 
+    path: "/queued-orders", 
     element: (
-      <RequireAuth>
+      <ProtectedRoute>
         <QueuedOrders />
-      </RequireAuth>
-    ),
+      </ProtectedRoute>
+    ) 
   },
-
-  {
-    path: "/settings",
+  { 
+    path: "/settings", 
     element: (
-      <RequireAuth>
+      <ProtectedRoute>
         <Settings />
-      </RequireAuth>
-    ),
+      </ProtectedRoute>
+    ) 
+  },
+  { 
+    path: "/dashboard", 
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ) 
+  },
+  { 
+    path: "/admin/menu", 
+    element: (
+      <ProtectedRoute>
+        <MenuManager />
+      </ProtectedRoute>
+    ) 
   },
 ]);

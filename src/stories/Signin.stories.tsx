@@ -7,11 +7,15 @@ import { userEvent, within, expect, waitFor } from "storybook/test";
 interface MockProps {
   children: React.ReactNode;
   authValue: {
-    session: { user: { email: string } } | null;
-    signInUser?: (e: string, p: string) => Promise<{ success: boolean; error?: string }>;
-    signUpNewUser?: (e: string, p: string, n: string) => Promise<{ success: boolean; error?: string }>;
+    session: { user: { email: string; id: string; user_metadata?: { display_name?: string } } } | null;
+    loading?: boolean;
+    isAdmin?: boolean;
+    needsAdminPin?: boolean;
+    signInUser?: (e: string, p: string) => Promise<{ success: boolean; data?: unknown; error?: string }>;
+    signUpNewUser?: (e: string, p: string, n: string, pin?: string) => Promise<{ success: boolean; data?: unknown; error?: unknown }>;
     signOut?: () => Promise<void>;
     refreshSession?: () => Promise<void>;
+    setNeedsAdminPin?: (value: boolean) => void;
   };
 }
 
@@ -52,7 +56,18 @@ const fillForm = async (canvasElement: HTMLElement) => {
 
 export const Default: Story = {
   render: () => (
-    <MockProviders authValue={{ session: null, signInUser: async () => ({ success: true }) }}>
+    <MockProviders 
+      authValue={{ 
+        session: null, 
+        loading: false,
+        isAdmin: false,
+        needsAdminPin: false,
+        signInUser: async () => ({ success: true, data: {} }),
+        signOut: async () => {},
+        refreshSession: async () => {},
+        setNeedsAdminPin: () => {},
+      }}
+    >
       <Signin />
     </MockProviders>
   ),
@@ -66,7 +81,13 @@ export const InvalidCredentials: Story = {
     <MockProviders 
       authValue={{ 
         session: null, 
-        signInUser: async () => ({ success: false, error: "invalid login credentials" }) 
+        loading: false,
+        isAdmin: false,
+        needsAdminPin: false,
+        signInUser: async () => ({ success: false, error: "Invalid login credentials" }),
+        signOut: async () => {},
+        refreshSession: async () => {},
+        setNeedsAdminPin: () => {},
       }}
     >
       <Signin />
@@ -76,21 +97,32 @@ export const InvalidCredentials: Story = {
     const { submitButton, canvas } = await fillForm(canvasElement);
     await userEvent.click(submitButton);
     await waitFor(() => {
-      expect(canvas.getByText(/invalid email or password/i)).toBeInTheDocument();
+      expect(canvas.getByText(/invalid login credentials/i)).toBeInTheDocument();
     });
   },
 };
 
 export const PasswordToggle: Story = {
   render: () => (
-    <MockProviders authValue={{ session: null, signInUser: async () => ({ success: true }) }}>
+    <MockProviders 
+      authValue={{ 
+        session: null, 
+        loading: false,
+        isAdmin: false,
+        needsAdminPin: false,
+        signInUser: async () => ({ success: true, data: {} }),
+        signOut: async () => {},
+        refreshSession: async () => {},
+        setNeedsAdminPin: () => {},
+      }}
+    >
       <Signin />
     </MockProviders>
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     const passwordInput = canvas.getByPlaceholderText("Password");
-    const toggleButton = canvas.getByRole("button", { name: "" }); 
+    const toggleButton = canvas.getAllByRole("button")[0]; 
 
     await userEvent.type(passwordInput, "Secret123");
     await expect(passwordInput).toHaveAttribute("type", "password");
@@ -108,7 +140,13 @@ export const LoadingState: Story = {
     <MockProviders 
       authValue={{ 
         session: null, 
-        signInUser: () => new Promise(() => {}) 
+        loading: false,
+        isAdmin: false,
+        needsAdminPin: false,
+        signInUser: () => new Promise(() => {}),
+        signOut: async () => {},
+        refreshSession: async () => {},
+        setNeedsAdminPin: () => {},
       }}
     >
       <Signin />
@@ -120,4 +158,56 @@ export const LoadingState: Story = {
     await expect(canvas.getByText(/logging in\.\.\./i)).toBeInTheDocument();
     await expect(submitButton).toBeDisabled();
   },
+};
+
+// New story for admin PIN flow
+export const WithAdminPinRequired: Story = {
+  render: () => (
+    <MockProviders 
+      authValue={{ 
+        session: { 
+          user: { 
+            email: "admin@example.com", 
+            id: "123",
+            user_metadata: { display_name: "Admin User" }
+          } 
+        },
+        loading: false,
+        isAdmin: false,
+        needsAdminPin: true,
+        signInUser: async () => ({ success: true, data: {} }),
+        signOut: async () => {},
+        refreshSession: async () => {},
+        setNeedsAdminPin: () => {},
+      }}
+    >
+      <Signin />
+    </MockProviders>
+  ),
+};
+
+// New story for already logged in user
+export const AlreadyLoggedIn: Story = {
+  render: () => (
+    <MockProviders 
+      authValue={{ 
+        session: { 
+          user: { 
+            email: "user@example.com", 
+            id: "456",
+            user_metadata: { display_name: "Regular User" }
+          } 
+        },
+        loading: false,
+        isAdmin: false,
+        needsAdminPin: false,
+        signInUser: async () => ({ success: true, data: {} }),
+        signOut: async () => {},
+        refreshSession: async () => {},
+        setNeedsAdminPin: () => {},
+      }}
+    >
+      <Signin />
+    </MockProviders>
+  ),
 };

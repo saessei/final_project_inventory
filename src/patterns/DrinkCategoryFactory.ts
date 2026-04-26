@@ -1,42 +1,30 @@
-import { DrinkFactory, type DrinkType, type Drink } from "./DrinkFactory";
+import { Drink } from "./DrinkFactory";
+import { DrinkFactory } from "./DrinkFactory";
+import { dynamicMenu } from "../services/DynamicMenuService";
 
-export type DrinkCategoryId = "milktea" | "specials" | "fruit tea";
+export type DrinkCategoryId = string;
 
-export type DrinkCategory = {
-  id: DrinkCategoryId;
+export interface DrinkCategory {
+  id: string;
   label: string;
-  drinkIds: readonly DrinkType[];
-};
-
-const Categories: readonly DrinkCategory[] = [
-  {
-    id: "milktea",
-    label: "Milk Tea",
-    drinkIds: ["BrownSugar", "Taro"],
-  },
-  {
-    id: "specials",
-    label: "Specials",
-    drinkIds: ["Matcha"],
-  },
-  {
-    id: "fruit tea",
-    label: "Fruit Tea",
-    drinkIds: ["PassionFruit"]
-  }
-] as const;
-
-export function getCategoryFactories(): DrinkCategory[] {
-  return [...Categories];
+  description: string;
 }
 
-export function getCategoryFactory(id: DrinkCategoryId): DrinkCategory {
-  const found = Categories.find((c) => c.id === id);
-  if (!found) throw new Error(`Unknown category: ${id}`);
-  return found;
+export async function getCategoryFactories(): Promise<DrinkCategory[]> {
+  const categories = await dynamicMenu.getCategories();
+  return categories.map(cat => ({
+    id: cat.id,
+    label: cat.label,
+    description: cat.description
+  }));
 }
 
-export function createDrinksForCategory(id: DrinkCategoryId): Drink[] {
-  const category = getCategoryFactory(id);
-  return category.drinkIds.map((drinkId) => DrinkFactory.createDrink(drinkId));
+export async function createDrinksForCategory(id: DrinkCategoryId): Promise<Drink[]> {
+  const dynamicDrinks = await dynamicMenu.getDrinksByCategory(id);
+  
+  // Convert dynamic drinks to the Drink interface using the factory
+  return dynamicDrinks.map(dynamicDrink => {
+    // Map the dynamic drink to use DrinkFactory
+    return DrinkFactory.createDrink(dynamicDrink.type as any);
+  });
 }
