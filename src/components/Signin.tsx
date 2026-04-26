@@ -1,3 +1,4 @@
+// components/Signin.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../auth/AuthContext";
@@ -13,10 +14,8 @@ export const Signin = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { session, signInUser } = UserAuth()!;
+  const { signInUser } = UserAuth()!;
   const navigate = useNavigate();
-  console.log(session);
-  console.log(email, password);
 
   const handleSignIn = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,15 +28,7 @@ export const Signin = () => {
       if (result.success) {
         navigate("/kiosk");
       } else {
-        if (result.error?.toLowerCase().includes("invalid login credentials")) {
-          setError("Invalid email or password. Please try again.");
-        } else if (
-          result.error?.toLowerCase().includes("email not confirmed")
-        ) {
-          setError("Please confirm your email before signing in.");
-        } else {
-          setError(result.error || "An error occurred.");
-        }
+        setError(result.error || "Invalid email or password.");
       }
     } catch {
       setError("An unexpected error occurred.");
@@ -80,6 +71,7 @@ export const Signin = () => {
               placeholder="Email"
               className="p-3 mt-1 mb-4 rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all"
               type="email"
+              required
             />
 
             <label className="text-xs ml-2 uppercase font-semibold">
@@ -91,6 +83,7 @@ export const Signin = () => {
                 placeholder="Password"
                 className="p-3 mt-1 w-full rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all pr-12"
                 type={showPassword ? "text" : "password"}
+                required
               />
               <button
                 type="button"
@@ -109,8 +102,6 @@ export const Signin = () => {
               >
                 {loading ? "Logging in..." : "Sign In"}
               </button>
-
-          
             </div>
 
             {error && (

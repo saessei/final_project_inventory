@@ -1,11 +1,10 @@
-/* eslint-disable react-refresh/only-export-components */
-
+// auth/AuthContext.tsx
+import type { ReactNode } from "react";
 import {
   createContext,
   useState,
   useEffect,
   useContext,
-  type ReactNode,
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import supabase from "../lib/supabaseClient.ts";
@@ -13,11 +12,13 @@ import supabase from "../lib/supabaseClient.ts";
 interface AuthContextType {
   session: Session | null;
   loading: boolean;
+  hasAdminPin: boolean;
 
   signUpNewUser: (
     email: string,
     password: string,
     displayName?: string,
+    adminPin?: string,
   ) => Promise<{ success: boolean; data?: unknown; error?: unknown }>;
 
   signOut: () => Promise<void>;
@@ -34,13 +35,12 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined,
-);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthContextProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasAdminPin, setHasAdminPin] = useState(false);
 
   const refreshSession = async () => {
     const {
@@ -54,32 +54,69 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     }
 
     setSession(updatedSession ?? null);
+    
+    if (updatedSession?.user?.id) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("admin_pin")
+        .eq("id", updatedSession.user.id)
+        .single();
+      
+      setHasAdminPin(!!profile?.admin_pin);
+    } else {
+      setHasAdminPin(false);
+    }
   };
 
-  // Sign up
   const signUpNewUser = async (
     email: string,
     password: string,
     displayName?: string,
+    adminPin?: string,
   ) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          display_name: displayName || "",
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: displayName || "",
+            full_name: displayName || "",
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      console.error("There was a problem signing up:", error);
-      return { success: false, error: error.message || "Signup failed" };
+      if (error) {
+        console.error("There was a problem signing up:", error);
+        return { success: false, error: error.message || "Signup failed" };
+      }
+
+      if (data.user && adminPin && adminPin.length >= 4) {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .upsert({
+            id: data.user.id,
+            email: email,
+            full_name: displayName || "",
+            display_name: displayName || "",
+            admin_pin: adminPin,
+            updated_at: new Date().toISOString()
+          });
+
+        if (profileError) {
+          console.error("Profile update error:", profileError);
+        }
+      }
+
+      return { success: true, data };
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      return { success: false, error: "An unexpected error occurred" };
     }
-    return { success: true, data };
   };
 
-  // Sign in
   const signInUser = async (email: string, password: string) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -96,6 +133,13 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       console.error("An error occured: ", error);
       return { success: false, error: "Unexpected error" };
+    }
+  };
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("There was an error: ", error);
     }
   };
 
@@ -119,19 +163,12 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     };
   }, []);
 
-  // Sign out
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("There was an error: ", error);
-    }
-  };
-
   return (
     <AuthContext.Provider
       value={{
         session,
         loading,
+        hasAdminPin,
         signUpNewUser,
         signInUser,
         signOut,
@@ -143,12 +180,14 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
   );
 };
 
-export const UserAuth = () => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error("UserAuth must be used inside an AuthContextProvider");
+    throw new Error("useAuth must be used inside an AuthContextProvider");
   }
 
   return context;
 };
+
+export const UserAuth = useAuth;
