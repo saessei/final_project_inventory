@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
  
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Plus, Edit, Trash2, X } from "lucide-react";
+import { Plus, Edit, Trash2, X, FolderOpen, CupSoda, CirclePlus, Candy, AlertTriangle } from "lucide-react";
 import { dynamicMenu, DynamicCategory, DynamicDrink, Topping, SugarLevel } from "../../services/DynamicMenuService";
 import { Sidebar } from "../common/Sidebar";
 import { UserAuth } from "../../auth/AuthContext";
@@ -142,11 +142,7 @@ export const MenuManager = () => {
     );
   }
   
-  if (showPinModal && session) {
-    return <AdminPinModal onSuccess={handlePinSuccess} onClose={handlePinCancel} />;
-  }
-
-  if (!isAuthorized) {
+  if (!isAuthorized && !showPinModal) {
     return (
       <div className="bg-cream min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -158,7 +154,7 @@ export const MenuManager = () => {
     );
   }
   
-  if (loading) {
+  if (loading && isAuthorized) {
     return (
       <div className="bg-cream min-h-screen flex items-center justify-center">
         <div className="text-center">Loading menu manager...</div>
@@ -168,6 +164,7 @@ export const MenuManager = () => {
   
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+      <div className={showPinModal ? "pointer-events-none opacity-60" : ""}>
       <div className="fixed top-0 left-0 h-screen w-64 z-10">
         <Sidebar />
       </div>
@@ -181,10 +178,10 @@ export const MenuManager = () => {
           
           <div className="flex gap-2 mb-6 border-b flex-wrap">
             {[
-              { id: 'categories', label: 'Categories', icon: '📁', count: categories.length },
-              { id: 'drinks', label: 'Drinks', icon: '🥤', count: drinks.length },
-              { id: 'toppings', label: 'Toppings', icon: '➕', count: toppings.length },
-              { id: 'sugar-levels', label: 'Sugar Levels', icon: '🍬', count: sugarLevels.length }
+              { id: 'categories', label: 'Categories', icon: FolderOpen, count: categories.length },
+              { id: 'drinks', label: 'Drinks', icon: CupSoda, count: drinks.length },
+              { id: 'toppings', label: 'Toppings', icon: CirclePlus, count: toppings.length },
+              { id: 'sugar-levels', label: 'Sugar Levels', icon: Candy, count: sugarLevels.length }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -195,7 +192,9 @@ export const MenuManager = () => {
                     : 'text-gray-500 hover:text-dark-brown'
                 }`}
               >
-                <span className="mr-2">{tab.icon}</span>
+                <span className="mr-2 inline-flex align-middle">
+                  <tab.icon size={16} />
+                </span>
                 {tab.label}
                 <span className="ml-2 text-sm bg-gray-100 px-2 py-0.5 rounded-full">{tab.count}</span>
               </button>
@@ -210,7 +209,7 @@ export const MenuManager = () => {
                   setEditingItem(null);
                   setShowModal(true);
                 }}
-                className="mb-4 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="mb-4 flex items-center gap-2 px-4 py-2 bg-dark-brown text-white rounded-lg hover:opacity-90"
               >
                 <Plus size={18} /> Add Category
               </button>
@@ -246,7 +245,7 @@ export const MenuManager = () => {
                   setEditingItem(null);
                   setShowModal(true);
                 }}
-                className="mb-4 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="mb-4 flex items-center gap-2 px-4 py-2 bg-dark-brown text-white rounded-lg hover:opacity-90"
               >
                 <Plus size={18} /> Add Drink
               </button>
@@ -292,7 +291,7 @@ export const MenuManager = () => {
                   setEditingItem(null);
                   setShowModal(true);
                 }}
-                className="mb-4 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="mb-4 flex items-center gap-2 px-4 py-2 bg-dark-brown text-white rounded-lg hover:opacity-90"
               >
                 <Plus size={18} /> Add Topping
               </button>
@@ -323,9 +322,10 @@ export const MenuManager = () => {
           {activeTab === 'sugar-levels' && (
             <div>
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-                <p className="text-sm text-yellow-800">
-                  ⚠️ Default sugar levels are: 20%, 40%, 60%, 80%, 100%. These are available for all drinks by default.
-                </p>
+                <div className="text-sm text-yellow-800 flex items-start gap-2">
+                  <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+                  <p>Default sugar levels are: 20%, 40%, 60%, 80%, 100%. These are available for all drinks by default.</p>
+                </div>
               </div>
               <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
                 {[20, 40, 60, 80, 100].map(percentage => {
@@ -388,6 +388,11 @@ export const MenuManager = () => {
           toppings={toppings}
           sugarLevels={sugarLevels}
         />
+      )}
+      </div>
+
+      {showPinModal && session && (
+        <AdminPinModal onSuccess={handlePinSuccess} onClose={handlePinCancel} />
       )}
     </div>
   );
