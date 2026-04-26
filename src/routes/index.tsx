@@ -4,9 +4,12 @@ import { Signin } from "../components/Signin";
 import { Kiosk } from "../components/Kiosk";
 import { QueuedOrders } from "../components/QueuedOrders";
 import { Settings } from "../components/Settings";
-import { Dashboard } from "../components/Dashboard";
-import { MenuManager } from "../components/Admin/MenuManager";
+import { Reports } from "../components/Reports";
+import { MenuManager } from "../components/Admin/MenuManager"; // Keep this
 import { ProtectedRoute } from "../components/ProtectedRoute";
+
+// Remove these lines:
+// import { DrinkManager } from "../components/Admin/DrinkManager";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/signin" replace /> },
@@ -37,10 +40,10 @@ export const router = createBrowserRouter([
     ) 
   },
   { 
-    path: "/dashboard", 
+    path: "/reports", 
     element: (
       <ProtectedRoute>
-        <Dashboard />
+        <Reports />
       </ProtectedRoute>
     ) 
   },

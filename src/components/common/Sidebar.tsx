@@ -1,12 +1,15 @@
+// src/components/common/Sidebar.tsx
 import { useRef, useState } from "react";
-import { Store, List, BarChart2, Settings, LogOut, Menu, X } from "lucide-react";
+import { Store, List, BarChart2, Settings, LogOut, Menu, X, ClipboardList } from "lucide-react";
 import { UserAuth } from "../../auth/AuthContext";
+import { AdminPinModal } from "../AdminPinModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "/src/assets/QueueTea.png";
 
 export const Sidebar = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const { session, signOut } = UserAuth();
   const navigate = useNavigate();
@@ -15,8 +18,8 @@ export const Sidebar = () => {
   const sidebarItems = [
     { name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" },
     { name: "Queued Orders", icon: <List size={20} />, path: "/queued-orders" },
-    { name: "Menu Manager", icon: <Settings size={20} />, path: "/admin/menu" },
-    { name: "Reports", icon: <BarChart2 size={20} />, path: "/dashboard" },
+    { name: "Menu Manager", icon: <ClipboardList size={20} />, path: "/admin/menu" },
+    { name: "Reports", icon: <BarChart2 size={20} />, path: "/reports" },
     { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
   ];
 
@@ -25,9 +28,17 @@ export const Sidebar = () => {
     sidebarItems[0]?.name ||
     "";
 
-  const handleSignOut = async () => {
+  const handleSignOutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleSignOutConfirm = async () => {
     await signOut();
     navigate("/signin");
+  };
+
+  const handleSignOutCancel = () => {
+    setShowLogoutModal(false);
   };
 
   return (
@@ -108,7 +119,7 @@ export const Sidebar = () => {
           </div>
 
           <button
-            onClick={handleSignOut}
+            onClick={handleSignOutClick}
             className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
           >
             <LogOut size={16} />
@@ -116,6 +127,14 @@ export const Sidebar = () => {
           </button>
         </div>
       </div>
+
+      {/* Reuse AdminPinModal for logout */}
+      {showLogoutModal && (
+        <AdminPinModal 
+          onSuccess={handleSignOutConfirm} 
+          onClose={handleSignOutCancel} 
+        />
+      )}
     </>
   );
 };

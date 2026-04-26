@@ -1,44 +1,32 @@
+// src/components/Kiosk.tsx
 import { useState, useEffect } from "react";
 import { Trash, CheckCircle2, Plus } from "lucide-react";
 import { UserAuth } from "../auth/AuthContext";
 import { Sidebar } from "./common/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
-import { type Drink } from "../patterns/DrinkFactory";
-import { DrinkFactory } from "../patterns/DrinkFactory";
 import { createOrder } from "../services/orderService";
 import { useCart } from "../hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { dynamicMenu, DynamicCategory, DynamicDrink } from "../services/DynamicMenuService";
+import { drinkService, type Drink, type Topping, type SugarLevel } from "../services/DrinkService";
 
-interface CustomizationStrategy {
-  name: string;
-  options: string[];
-  priceAdjustment(option: string): number;
-}
-
-class SugarStrategy implements CustomizationStrategy {
-  name = "Sugar Level";
-  options = ["0%", "30%", "50%", "70%", "100%"];
-  priceAdjustment() {
-    return 0;
-  }
-}
-
-class ToppingStrategy implements CustomizationStrategy {
-  name = "Toppings";
-  options = ["Boba", "Pudding", "Grass Jelly", "Aloe"];
-  priceAdjustment(option: string) {
-    return option === "Boba" ? 10 : 15;
-  }
-}
-
-const sugarStrategy = new SugarStrategy();
-const toppingStrategy = new ToppingStrategy();
-
-// Helper to convert dynamic drink to Drink interface
-const convertToDrink = (dynamicDrink: DynamicDrink): Drink => {
-  const validType = dynamicDrink.type as "BrownSugar" | "Matcha" | "Taro" | "PassionFruit";
-  return DrinkFactory.createDrink(validType);
+// Image component with placeholder fallback
+const DrinkImage = ({ imageUrl, name }: { imageUrl: string; name: string }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  const getImageSrc = () => {
+    if (imageError) return placeholderImg;
+    if (imageUrl && imageUrl.trim() !== "") return imageUrl;
+    return placeholderImg;
+  };
+  
+  return (
+    <img
+      src={getImageSrc()}
+      alt={name}
+      className="h-44 w-full shrink-0 object-cover rounded-2xl group-hover:scale-110 transition-transform duration-500"
+      onError={() => setImageError(true)}
+    />
+  );
 };
 
 export const Kiosk = () => {
@@ -56,47 +44,34 @@ export const Kiosk = () => {
 
   const [customerName, setCustomerName] = useState("");
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<DynamicCategory[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("");
-  const [products, setProducts] = useState<Drink[]>([]);
-  const [allToppings, setAllToppings] = useState<string[]>([]);
-  const [allSugarLevels, setAllSugarLevels] = useState<string[]>([]);
+  const [drinks, setDrinks] = useState<Drink[]>([]);
+  const [sugarLevels, setSugarLevels] = useState<SugarLevel[]>([]);
 
+  // Customization state
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string>("regular");
+  const [selectedSugar, setSelectedSugar] = useState<SugarLevel | null>(null);
+  const [selectedToppings, setSelectedToppings] = useState<Topping[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [sugarLevel, setSugarLevel] = useState("");
-  const [selectedToppings, setSelectedToppings] = useState<string[]>([]);
   const [checkoutSuccessOpen, setCheckoutSuccessOpen] = useState(false);
   const [lastOrderSummary, setLastOrderSummary] = useState("");
 
-  // Load categories and toppings on mount
+  // Load data
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Load categories
-        const cats = await dynamicMenu.getCategories();
-        setCategories(cats);
-        if (cats.length > 0) {
-          setSelectedCategoryId(cats[0].id);
-        }
+        const [drinksData, sugarData] = await Promise.all([
+          drinkService.getAllDrinks(),
+          drinkService.getAllSugarLevels(),
+        ]);
+        setDrinks(drinksData);
+        setSugarLevels(sugarData);
         
-        // Load toppings for the strategy options
-        const toppings = await dynamicMenu.getToppings();
-        setAllToppings(toppings.map(t => t.name));
-        toppingStrategy.options = toppings.map(t => t.name);
-        
-        // Load sugar levels
-        const sugarLevels = await dynamicMenu.getSugarLevels();
-        setAllSugarLevels(sugarLevels.map(s => s.label));
-        sugarStrategy.options = sugarLevels.map(s => s.label);
-        
-        // Set default sugar level
-        if (sugarLevels.length > 0) {
-          const middleIndex = Math.floor(sugarLevels.length / 2);
-          setSugarLevel(sugarLevels[middleIndex]?.label || sugarLevels[0].label);
-        }
+        // Set default sugar level (50%)
+        const defaultSugar = sugarData.find(s => s.percentage === 50);
+        if (defaultSugar) setSelectedSugar(defaultSugar);
       } catch (error) {
         console.error("Error loading data:", error);
       } finally {
@@ -106,24 +81,46 @@ export const Kiosk = () => {
     loadData();
   }, []);
 
-  // Load products when category changes
-  useEffect(() => {
-    const loadProducts = async () => {
-      if (selectedCategoryId) {
-        const dynamicDrinks = await dynamicMenu.getDrinksByCategory(selectedCategoryId);
-        const drinkProducts = dynamicDrinks.map(convertToDrink);
-        setProducts(drinkProducts);
-      }
-    };
-    loadProducts();
-  }, [selectedCategoryId]);
-
   const openCustomization = (drink: Drink) => {
     setSelectedDrink(drink);
-    const middleIndex = Math.floor(allSugarLevels.length / 2);
-    setSugarLevel(allSugarLevels[middleIndex] || allSugarLevels[0] || "");
+    setSelectedSize("regular");
+    const defaultSugar = sugarLevels.find(s => s.percentage === 50);
+    if (defaultSugar) setSelectedSugar(defaultSugar);
     setSelectedToppings([]);
     setShowModal(true);
+  };
+
+  const calculateTotalPrice = () => {
+    if (!selectedDrink) return 0;
+    
+    // Base price from size
+    const sizePrice = selectedDrink.sizes[selectedSize as keyof typeof selectedDrink.sizes];
+    
+    // Sugar addition price
+    const sugarPrice = selectedSugar?.price_addition || 0;
+    
+    // Toppings total price
+    const toppingsPrice = selectedToppings.reduce((total, topping) => total + topping.price, 0);
+    
+    return sizePrice + sugarPrice + toppingsPrice;
+  };
+
+  const addToCart = async () => {
+    if (!selectedDrink || !selectedSugar) return;
+    
+    const totalPrice = calculateTotalPrice();
+    const sizeLabel = selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1);
+    
+    await upsertItem({
+      drink_id: selectedDrink.id,
+      drink_name: `${selectedDrink.name} (${sizeLabel})`,
+      drink_price: totalPrice,
+      sugar: selectedSugar.label,
+      toppings: selectedToppings.map(t => t.name),
+      quantity: 1,
+    });
+    
+    setShowModal(false);
   };
 
   const handleAddToOrder = async () => {
@@ -135,40 +132,19 @@ export const Kiosk = () => {
       setIsSubmitting(false);
     }
   };
-
-  const addToCart = async () => {
-    if (!selectedDrink) return;
-
-    let toppingsTotal = 0;
-    for (const topping of selectedToppings) {
-      const price = await dynamicMenu.getToppingPrice(topping);
-      toppingsTotal += price;
-    }
-
-    await upsertItem({
-      drink_id: selectedDrink.id,
-      drink_name: selectedDrink.name,
-      drink_price: selectedDrink.price + toppingsTotal,
-      sugar: sugarLevel,
-      toppings: [...selectedToppings],
-      quantity: 1,
-    });
-
-    setShowModal(false);
+  
+  const toggleTopping = (topping: Topping) => {
+    setSelectedToppings(prev =>
+      prev.some(t => t.id === topping.id)
+        ? prev.filter(t => t.id !== topping.id)
+        : [...prev, topping]
+    );
   };
 
   const cartTotal = cart.reduce(
     (sum, item) => sum + Number(item.drink_price) * item.quantity,
     0,
   );
-
-  const toggleTopping = (topping: string) => {
-    setSelectedToppings((prev) =>
-      prev.includes(topping)
-        ? prev.filter((t) => t !== topping)
-        : [...prev, topping],
-    );
-  };
 
   const handleCheckout = async () => {
     if (cart.length === 0 || isSubmitting) return;
@@ -209,7 +185,7 @@ export const Kiosk = () => {
     );
   }
 
-  const hasNoMenu = categories.length === 0;
+  const hasNoMenu = drinks.length === 0;
 
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
@@ -330,55 +306,35 @@ export const Kiosk = () => {
           </div>
         ) : (
           <>
-            {/* Category Tabs */}
-            <div className="mb-6 flex items-center gap-3 flex-wrap">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setSelectedCategoryId(cat.id)}
-                  className={`rounded-full px-5 py-2 cursor-pointer ${
-                    selectedCategoryId === cat.id
-                      ? "bg-dark-brown text-white"
-                      : "bg-white border border-slate-200 text-slate-700"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-
             {/* Products Grid */}
             <section className="grid gap-5 lg:grid-cols-2 xl:grid-cols-2 auto-rows-fr">
-              {products.map((drink) => (
+              {drinks.map((drink) => (
                 <article
                   key={drink.id}
-                  className="flex h-full flex-col border border-slate-200 rounded-3xl bg-white p-4 shadow-sm hover:shadow-md transition-shadow"
+                  className="flex h-full flex-col border border-slate-200 rounded-3xl bg-white p-4 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 group"
                 >
-                  <img
-                    src={drink.image || placeholderImg}
-                    alt={drink.name}
-                    className="h-44 w-full shrink-0 object-cover rounded-2xl"
-                    onError={(e) => ((e.target as HTMLImageElement).src = placeholderImg)}
-                  />
+                  <div className="relative overflow-hidden rounded-2xl">
+                    <DrinkImage imageUrl={drink.image_url} name={drink.name} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </div>
                   <div className="mt-4 flex flex-1 flex-col">
                     <h3 className="text-2xl font-bold">{drink.name}</h3>
                     <p className="mt-1 text-sm text-gray-500 line-clamp-3 min-h-[3rem]">
                       {drink.description}
                     </p>
                     <div className="mt-auto">
-                      <p className="mt-3 text-2xl font-extrabold">₱{drink.price.toFixed(2)}</p>
+                      <p className="mt-3 text-lg font-bold">Starts at ₱{drink.sizes.regular}</p>
                       <button
                         type="button"
                         disabled={isSubmitting}
                         onClick={() => openCustomization(drink)}
-                        className={`mt-4 w-full rounded-xl py-3 font-semibold transition-colors cursor-pointer ${
+                        className={`mt-4 w-full rounded-xl py-3 font-semibold transition-all duration-300 cursor-pointer hover:scale-105 ${
                           isSubmitting
                             ? "bg-gray-400 cursor-not-allowed"
                             : "bg-brown text-white hover:bg-brown-dark"
                         }`}
                       >
-                        + Add to Order
+                        + Customize Order
                       </button>
                     </div>
                   </div>
@@ -389,88 +345,142 @@ export const Kiosk = () => {
         )}
       </main>
 
-      {/* Customization Modal */}
+      {/* Customization Modal - Floating with animations */}
       {showModal && selectedDrink && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-5">
-          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden">
-            <div className="relative h-56">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-5 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto transform transition-all duration-300 animate-in zoom-in-95 duration-300 slide-in-from-bottom-10 hover:scale-[1.02] hover:shadow-3xl">
+            <div className="relative h-56 group overflow-hidden">
               <img
-                src={selectedDrink.image || placeholderImg}
+                src={selectedDrink.image_url || placeholderImg}
                 alt={selectedDrink.name}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                 onError={(e) => ((e.target as HTMLImageElement).src = placeholderImg)}
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
-                className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-sm font-bold hover:bg-white cursor-pointer"
+                className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-sm font-bold hover:bg-white hover:scale-110 hover:rotate-90 transition-all duration-200 cursor-pointer shadow-lg z-10"
               >
                 ✕
               </button>
             </div>
-            <div className="p-5">
+            <div className="p-5 transition-all duration-300 hover:translate-y-[-2px]">
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="text-3xl font-bold">{selectedDrink.name}</h3>
                   <p className="text-sm text-gray-500 mt-1">{selectedDrink.description}</p>
                 </div>
-                <span className="text-2xl font-black">₱{selectedDrink.price.toFixed(2)}</span>
+                <span className="text-2xl font-black text-dark-brown">₱{calculateTotalPrice().toFixed(2)}</span>
               </div>
 
+              {/* Size Selection */}
               <div className="mb-4">
-                <p className="text-lg font-semibold mb-2">Toppings</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {allToppings.map((option) => {
-                    const selected = selectedToppings.includes(option);
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => toggleTopping(option)}
-                        className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer ${
-                          selected
-                            ? "bg-dark-brown text-white border-dark-brown"
-                            : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    );
-                  })}
+                <p className="text-lg font-semibold mb-2">Select Size</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    onClick={() => setSelectedSize("regular")}
+                    className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
+                      selectedSize === "regular"
+                        ? 'bg-dark-brown text-white border-dark-brown'
+                        : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                    }`}
+                  >
+                    Regular<br/>₱{selectedDrink.sizes.regular}
+                  </button>
+                  <button
+                    onClick={() => setSelectedSize("medium")}
+                    className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
+                      selectedSize === "medium"
+                        ? 'bg-dark-brown text-white border-dark-brown'
+                        : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                    }`}
+                  >
+                    Medium<br/>₱{selectedDrink.sizes.medium}
+                  </button>
+                  <button
+                    onClick={() => setSelectedSize("large")}
+                    className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
+                      selectedSize === "large"
+                        ? 'bg-dark-brown text-white border-dark-brown'
+                        : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                    }`}
+                  >
+                    Large<br/>₱{selectedDrink.sizes.large}
+                  </button>
                 </div>
               </div>
 
+              {/* Sugar Level Selection */}
               <div className="mb-4">
                 <p className="text-lg font-semibold mb-2">Sugar Level</p>
-                <div className="grid grid-cols-5 gap-2">
-                  {allSugarLevels.map((option) => {
-                    const selected = sugarLevel === option;
-                    return (
-                      <button
-                        key={option}
-                        type="button"
-                        onClick={() => setSugarLevel(option)}
-                        className={`text-xs rounded-full px-3 py-2 font-semibold border cursor-pointer ${
-                          selected
-                            ? "bg-dark-brown text-white border-dark-brown"
-                            : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"
-                        }`}
-                      >
-                        {option}
-                      </button>
-                    );
-                  })}
+                <div className="grid grid-cols-2 gap-2">
+                  {sugarLevels.map((level) => (
+                    <button
+                      key={level.id}
+                      onClick={() => setSelectedSugar(level)}
+                      className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
+                        selectedSugar?.id === level.id
+                          ? 'bg-dark-brown text-white border-dark-brown'
+                          : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                      }`}
+                    >
+                      {level.label}
+                      {level.price_addition > 0 && (
+                        <span className="text-xs block">+₱{level.price_addition}</span>
+                      )}
+                    </button>
+                  ))}
                 </div>
               </div>
+
+              {/* Toppings Selection */}
+              {selectedDrink.available_toppings.length > 0 && (
+                <div className="mb-6">
+                  <p className="text-lg font-semibold mb-2">Add Toppings</p>
+                  <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+                    {selectedDrink.available_toppings.map((topping) => (
+                      <button
+                        key={topping.id}
+                        onClick={() => toggleTopping(topping)}
+                        className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
+                          selectedToppings.some(t => t.id === topping.id)
+                            ? 'bg-dark-brown text-white border-dark-brown'
+                            : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                        }`}
+                      >
+                        {topping.name}<br/>+₱{topping.price}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Selected Toppings Summary */}
+              {selectedToppings.length > 0 && (
+                <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                  <p className="text-sm font-semibold">Selected Toppings:</p>
+                  <p className="text-sm text-gray-600">
+                    {selectedToppings.map(t => t.name).join(", ")}
+                  </p>
+                </div>
+              )}
 
               <div className="flex justify-end gap-3">
                 <button
                   type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-5 py-2 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition-all duration-200 hover:scale-105 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
                   disabled={isSubmitting}
                   onClick={handleAddToOrder}
-                  className="px-5 py-2 rounded-xl bg-dark-brown text-white text-sm font-semibold hover:bg-brown-dark cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-dark-brown text-white text-sm font-semibold hover:bg-brown-dark transition-all duration-200 hover:scale-105 cursor-pointer disabled:opacity-50"
                 >
-                  Add to Cart
+                  Add to Cart - ₱{calculateTotalPrice().toFixed(2)}
                 </button>
               </div>
             </div>

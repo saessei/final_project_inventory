@@ -1,6 +1,6 @@
 import { Sidebar } from "./common/Sidebar";
 
-export const Dashboard = () => {
+export const Reports = () => {
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
       {/* Sidebar - Fixed on the left */}

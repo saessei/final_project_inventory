@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect, useRef } from "react";
+// src/components/AdminPinModal.tsx
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Key, Lock, X } from "lucide-react";
 import supabase from "../lib/supabaseClient";
 import { UserAuth } from "../auth/AuthContext";
@@ -7,9 +7,11 @@ import { UserAuth } from "../auth/AuthContext";
 interface AdminPinModalProps {
   onSuccess: () => void;
   onClose: () => void;
+  title?: string;
+  description?: string;
 }
 
-export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
+export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminPinModalProps) => {
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [error, setError] = useState("");
@@ -20,42 +22,8 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
   const hasVerifiedRef = useRef(false);
   const isVerifyingRef = useRef(false);
 
-  // Simplified profile check
-  const ensureProfileExists = async () => {
-    if (!session?.user?.id) return false;
-    
-    const { error } = await supabase
-      .from("profiles")
-      .upsert({ 
-        id: session.user.id, 
-        email: session.user.email,
-      }, { onConflict: 'id' });
-    
-    if (error) {
-      console.error("Error ensuring profile:", error);
-      return false;
-    }
-    return true;
-  };
-
-  useEffect(() => {
-    checkUserPinStatus();
-  }, [session]);
-
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', handleEscapeKey);
-    return () => document.removeEventListener('keydown', handleEscapeKey);
-  }, [onClose]);
-
-  const checkUserPinStatus = async () => {
+  const checkUserPinStatus = useCallback(async () => {
     try {
-      await ensureProfileExists();
-
       const { data: profile, error } = await supabase
         .from("profiles")
         .select("admin_pin")
@@ -73,7 +41,21 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
       console.error("Error checking PIN status:", err);
       setHasExistingPin(false);
     }
-  };
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    checkUserPinStatus();
+  }, [checkUserPinStatus]);
+
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => document.removeEventListener('keydown', handleEscapeKey);
+  }, [onClose]);
 
   const handleCreatePin = async () => {
     if (!session?.user?.id) return;
@@ -93,8 +75,6 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
       return;
     }
 
-    await ensureProfileExists();
-
     const { error: updateError } = await supabase
       .from("profiles")
       .update({ admin_pin: pin })
@@ -112,6 +92,7 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
       setConfirmPin("");
       setError("");
       setLoading(false);
+      onSuccess();
     }
   };
 
@@ -199,17 +180,17 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
           </div>
         </div>
 
+        <h2 className="text-2xl font-bold text-center mb-2 font-fredoka">
+          {title || (hasExistingPin ? "Verify Admin PIN" : "Setup Admin PIN")}
+        </h2>
+        <p className="text-gray-600 text-center mb-6">
+          {description || (hasExistingPin 
+            ? "Enter your admin PIN to access this feature." 
+            : "Create a PIN to access admin features.")}
+        </p>
+
         {!hasExistingPin ? (
           <>
-            <h2 className="text-2xl font-bold text-center mb-2 font-fredoka">
-              Setup Admin PIN
-            </h2>
-            <p className="text-gray-600 text-center mb-2">
-              Create a PIN to access admin features.
-            </p>
-            <p className="text-sm text-gray-500 text-center mb-6">
-              You'll need this PIN to access Menu Manager.
-            </p>
             <div className="mb-4">
               <label className="text-sm font-semibold text-dark-brown mb-2 block">
                 Create Admin PIN
@@ -243,34 +224,23 @@ export const AdminPinModal = ({ onSuccess, onClose }: AdminPinModalProps) => {
             </div>
           </>
         ) : (
-          <>
-            <h2 className="text-2xl font-bold text-center mb-2 font-fredoka">
-              Verify Admin PIN
-            </h2>
-            <p className="text-gray-600 text-center mb-2">
-              Enter your admin PIN to access Menu Manager.
-            </p>
-            <p className="text-sm text-gray-500 text-center mb-6">
-              This is the PIN you created.
-            </p>
-            <div className="mb-6">
-              <label className="text-sm font-semibold text-dark-brown mb-2 block">
-                Enter Admin PIN
-              </label>
-              <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="password"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value)}
-                  placeholder="Enter your PIN"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20 transition-all"
-                  onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-                  autoFocus
-                />
-              </div>
+          <div className="mb-6">
+            <label className="text-sm font-semibold text-dark-brown mb-2 block">
+              Enter Admin PIN
+            </label>
+            <div className="relative">
+              <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="password"
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                placeholder="Enter your PIN"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20 transition-all"
+                onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+                autoFocus
+              />
             </div>
-          </>
+          </div>
         )}
 
         {error && (
