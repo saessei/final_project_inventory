@@ -38,6 +38,7 @@ export interface DynamicCategory {
 
 class DynamicMenuService {
   private static instance: DynamicMenuService;
+  private listeners: Set<() => void> = new Set();
 
   private constructor() {}
 
@@ -48,6 +49,16 @@ class DynamicMenuService {
     return DynamicMenuService.instance;
   }
 
+  subscribe(callback: () => void): () => void {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
+
+  private notify(): void {
+    this.listeners.forEach(callback => callback());
+  }
+
+  // Category Management
   async getCategories(): Promise<DynamicCategory[]> {
     const { data, error } = await supabase
       .from('menu_categories')
@@ -83,7 +94,22 @@ class DynamicMenuService {
       console.error('Error adding category:', error);
       return null;
     }
+    this.notify();
     return data;
+  }
+
+  async updateCategory(id: string, data: Partial<DynamicCategory>): Promise<boolean> {
+    const { error } = await supabase
+      .from('menu_categories')
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error updating category:', error);
+      return false;
+    }
+    this.notify();
+    return true;
   }
 
   async deleteCategory(id: string): Promise<boolean> {
@@ -96,9 +122,11 @@ class DynamicMenuService {
       console.error('Error deleting category:', error);
       return false;
     }
+    this.notify();
     return true;
   }
 
+  // Drink Management
   async getDrinksByCategory(categoryId: string): Promise<DynamicDrink[]> {
     const { data, error } = await supabase
       .from('menu_drinks')
@@ -143,7 +171,22 @@ class DynamicMenuService {
       console.error('Error adding drink:', error);
       return null;
     }
+    this.notify();
     return data;
+  }
+
+  async updateDrink(id: string, data: Partial<DynamicDrink>): Promise<boolean> {
+    const { error } = await supabase
+      .from('menu_drinks')
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error updating drink:', error);
+      return false;
+    }
+    this.notify();
+    return true;
   }
 
   async deleteDrink(id: string): Promise<boolean> {
@@ -156,9 +199,11 @@ class DynamicMenuService {
       console.error('Error deleting drink:', error);
       return false;
     }
+    this.notify();
     return true;
   }
 
+  // Topping Management
   async getToppings(): Promise<Topping[]> {
     const { data, error } = await supabase
       .from('menu_toppings')
@@ -178,6 +223,55 @@ class DynamicMenuService {
     return topping?.price || 0;
   }
 
+  async addTopping(topping: Omit<Topping, 'id'>): Promise<Topping | null> {
+    const newTopping: Topping = {
+      ...topping,
+      id: `top_${Date.now()}`,
+    };
+    
+    const { data, error } = await supabase
+      .from('menu_toppings')
+      .insert([newTopping])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error adding topping:', error);
+      return null;
+    }
+    this.notify();
+    return data;
+  }
+
+  async updateTopping(id: string, data: Partial<Topping>): Promise<boolean> {
+    const { error } = await supabase
+      .from('menu_toppings')
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error updating topping:', error);
+      return false;
+    }
+    this.notify();
+    return true;
+  }
+
+  async deleteTopping(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('menu_toppings')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting topping:', error);
+      return false;
+    }
+    this.notify();
+    return true;
+  }
+
+  // Sugar Level Management
   async getSugarLevels(): Promise<SugarLevel[]> {
     const { data, error } = await supabase
       .from('menu_sugar_levels')
@@ -189,6 +283,54 @@ class DynamicMenuService {
       return [];
     }
     return data || [];
+  }
+
+  async addSugarLevel(level: Omit<SugarLevel, 'id'>): Promise<SugarLevel | null> {
+    const newLevel: SugarLevel = {
+      ...level,
+      id: `sugar_${Date.now()}`,
+    };
+    
+    const { data, error } = await supabase
+      .from('menu_sugar_levels')
+      .insert([newLevel])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error adding sugar level:', error);
+      return null;
+    }
+    this.notify();
+    return data;
+  }
+
+  async updateSugarLevel(id: string, data: Partial<SugarLevel>): Promise<boolean> {
+    const { error } = await supabase
+      .from('menu_sugar_levels')
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error updating sugar level:', error);
+      return false;
+    }
+    this.notify();
+    return true;
+  }
+
+  async deleteSugarLevel(id: string): Promise<boolean> {
+    const { error } = await supabase
+      .from('menu_sugar_levels')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting sugar level:', error);
+      return false;
+    }
+    this.notify();
+    return true;
   }
 }
 
