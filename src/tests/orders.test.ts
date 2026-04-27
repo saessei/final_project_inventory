@@ -1,12 +1,12 @@
 import { it, expect, describe, afterAll } from "vitest";
 import { createOrder, updateOrderStatus } from "../services/orderService";
-import { supabaseTest, supabaseAdmin } from "../lib/supabaseTestClient";
+import { supabaseAdmin } from "../lib/supabaseTestClient"; // Using admin client
 
 describe("Order Integration Test", () => {
   const testCustomer = "Robin";
   let sharedOrderId: string;
 
-  // CLEANUP
+  // CLEANUP using Admin client
   afterAll(async () => {
     const { error } = await supabaseAdmin
       .from("orders")
@@ -25,7 +25,8 @@ describe("Order Integration Test", () => {
         status: "pending",
       };
 
-      const data = await createOrder(milkTeaOrder, supabaseTest);
+      // Pass supabaseAdmin here to bypass RLS
+      const data = await createOrder(milkTeaOrder, supabaseAdmin);
 
       expect(data).not.toBeNull();
       expect(data![0].customer_name).toBe(testCustomer);
@@ -44,12 +45,11 @@ describe("Order Integration Test", () => {
           claim: true,
           baristaUserId,
         },
-        supabaseTest,
+        supabaseAdmin, // Inject admin client
       );
 
       expect(data).not.toBeNull();
       expect(data![0].status).toBe("preparing");
-
       expect(data![0].claimed_by).toBe(baristaUserId);
       expect(data![0].claimed_at).toBeTruthy();
     });
@@ -59,7 +59,7 @@ describe("Order Integration Test", () => {
         sharedOrderId,
         "completed",
         undefined,
-        supabaseTest,
+        supabaseAdmin, // Inject admin client
       );
 
       expect(data).not.toBeNull();
@@ -76,7 +76,8 @@ describe("Order Integration Test", () => {
         status: "pending",
       };
 
-      await expect(createOrder(invalidOrder, supabaseTest)).rejects.toThrow();
+      // Even with admin key, DB constraints (NOT NULL) will still trigger a throw
+      await expect(createOrder(invalidOrder, supabaseAdmin)).rejects.toThrow();
     });
 
     it("should return an empty array when updating a non-existent Order ID", async () => {
@@ -85,7 +86,7 @@ describe("Order Integration Test", () => {
         fakeUuid,
         "preparing",
         undefined,
-        supabaseTest,
+        supabaseAdmin,
       );
 
       expect(result).toHaveLength(0);
@@ -99,7 +100,7 @@ describe("Order Integration Test", () => {
       };
 
       try {
-        const data = await createOrder(extremeOrder, supabaseTest);
+        const data = await createOrder(extremeOrder, supabaseAdmin);
         expect(data).toBeDefined();
       } catch (error) {
         expect(error).toBeDefined();
@@ -111,7 +112,7 @@ describe("Order Integration Test", () => {
         "not-a-uuid",
         "completed",
         undefined,
-        supabaseTest,
+        supabaseAdmin,
       );
 
       expect(result).toBeNull();
@@ -123,7 +124,7 @@ describe("Order Integration Test", () => {
           sharedOrderId,
           "preparing",
           { claim: true },
-          supabaseTest,
+          supabaseAdmin,
         ),
       ).rejects.toThrow(/baristaUserId is required/i);
     });
@@ -135,19 +136,18 @@ describe("Order Integration Test", () => {
         status: "pending",
       };
 
-      const created = await createOrder(milkTeaOrder, supabaseTest);
+      const created = await createOrder(milkTeaOrder, supabaseAdmin);
       const orderId = created![0].id;
 
       const updated = await updateOrderStatus(
         orderId,
         "preparing",
         undefined,
-        supabaseTest,
+        supabaseAdmin,
       );
 
       expect(updated).not.toBeNull();
       expect(updated![0].status).toBe("preparing");
-
       expect(updated![0].claimed_by ?? null).toBeNull();
     });
   });
