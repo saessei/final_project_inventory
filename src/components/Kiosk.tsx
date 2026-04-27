@@ -318,7 +318,7 @@ export const Kiosk = () => {
                       {drink.description}
                     </p>
                     <div className="mt-auto">
-                      <p className="mt-3 text-lg font-bold">Starts at ₱{drink.sizes.regular}</p>
+                      <p className="mt-3 text-3xl font-bold">₱{drink.sizes.regular}</p>
                       <button
                         type="button"
                         disabled={isSubmitting}
