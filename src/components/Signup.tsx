@@ -45,7 +45,7 @@ export const Signup = () => {
       const result = await signUpNewUser(email, password, name, adminPin || undefined);
 
       if (result.success) {
-        navigate("/signin");
+        navigate("/kiosk");
       } else {
         setError(String(result.error || "An error occurred."));
       }
@@ -129,7 +129,7 @@ export const Signup = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                     className="p-3 w-full pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all pr-12"
-                    type={showPassword ? "text" : "password"}
+                     type={showPassword ? "text" : "password"}
                     required
                   />
                   <button

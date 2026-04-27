@@ -6,7 +6,6 @@
       order_details: string;
       status: string;
       user_id?: string;
-      baristaName?: string;
     },
     supabase = supabaseDefault 
   ) => {
@@ -26,7 +25,7 @@
   export const updateOrderStatus = async (
   orderId: string,
   newStatus: "pending" | "preparing" | "completed" ,
-  options?: { claim?: boolean; baristaUserId?: string, baristaName?:string },
+    options?: { claim?: boolean; baristaUserId?: string },
   supabase = supabaseDefault,
 ) => {
   const patch: Record<string, unknown> = { status: newStatus };
@@ -37,7 +36,6 @@
       throw new Error("baristaUserId is required when claim=true");
     }
     patch.claimed_by = options.baristaUserId;
-    patch.claimed_by_name = options.baristaName;
     patch.claimed_at = new Date().toISOString();
   }
 

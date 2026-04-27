@@ -36,7 +36,6 @@ describe("Milk Tea Queueing System - Full Integration", () => {
 
     it('should update order to "preparing" when the barista starts (claim)', async () => {
       const baristaUserId = crypto.randomUUID();
-      const baristaName = "Test Barista";
 
       const data = await updateOrderStatus(
         sharedOrderId,
@@ -44,7 +43,6 @@ describe("Milk Tea Queueing System - Full Integration", () => {
         {
           claim: true,
           baristaUserId,
-          baristaName,
         },
         supabaseTest,
       );
@@ -53,7 +51,6 @@ describe("Milk Tea Queueing System - Full Integration", () => {
       expect(data![0].status).toBe("preparing");
 
       expect(data![0].claimed_by).toBe(baristaUserId);
-      expect(data![0].claimed_by_name).toBe(baristaName);
       expect(data![0].claimed_at).toBeTruthy();
     });
 
@@ -125,7 +122,7 @@ describe("Milk Tea Queueing System - Full Integration", () => {
         updateOrderStatus(
           sharedOrderId,
           "preparing",
-          { claim: true, baristaName: "Test Barista" },
+          { claim: true },
           supabaseTest,
         ),
       ).rejects.toThrow(/baristaUserId is required/i);
@@ -152,7 +149,6 @@ describe("Milk Tea Queueing System - Full Integration", () => {
       expect(updated![0].status).toBe("preparing");
 
       expect(updated![0].claimed_by ?? null).toBeNull();
-      expect(updated![0].claimed_by_name ?? null).toBeNull();
     });
   });
 });
