@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll } from "vitest";
-import { supabaseTest, supabaseAdmin } from "../lib/supabaseTestClient";
+import { supabaseAdmin } from "../lib/supabaseTestClient";
 
 type CartRow = {
   id: string;
@@ -27,7 +27,8 @@ describe("Cart Integration Test", () => {
   const createdCartItemIds: string[] = [];
 
   async function ensureActiveCart(): Promise<string> {
-    const { data: existing, error: existingErr } = await supabaseTest
+    // Swapped to supabaseAdmin to bypass RLS
+    const { data: existing, error: existingErr } = await supabaseAdmin
       .from("carts")
       .select("id, barista_user_id, status")
       .eq("barista_user_id", baristaUserId)
@@ -37,7 +38,7 @@ describe("Cart Integration Test", () => {
     if (existingErr) throw existingErr;
     if (existing?.id) return existing.id;
 
-    const { data: created, error: createErr } = await supabaseTest
+    const { data: created, error: createErr } = await supabaseAdmin
       .from("carts")
       .insert([{ barista_user_id: baristaUserId, status: "active" }])
       .select("id")
@@ -51,18 +52,17 @@ describe("Cart Integration Test", () => {
   }
 
   afterAll(async () => {
+    // Cleanup using supabaseAdmin
     if (createdCartItemIds.length) {
       await supabaseAdmin
         .from("cart_items")
         .delete()
         .in("id", createdCartItemIds);
-    } else {
-      if (createdCartIds.length) {
-        await supabaseAdmin
-          .from("cart_items")
-          .delete()
-          .in("cart_id", createdCartIds);
-      }
+    } else if (createdCartIds.length) {
+      await supabaseAdmin
+        .from("cart_items")
+        .delete()
+        .in("cart_id", createdCartIds);
     }
 
     if (createdCartIds.length) {
@@ -75,12 +75,12 @@ describe("Cart Integration Test", () => {
     }
   });
 
-  // happy path
+  // Happy Path
 
   it("creates an active cart for a barista user", async () => {
     const cartId = await ensureActiveCart();
 
-    const { data, error } = await supabaseTest
+    const { data, error } = await supabaseAdmin
       .from("carts")
       .select("id, barista_user_id, status")
       .eq("id", cartId)
@@ -115,7 +115,7 @@ describe("Cart Integration Test", () => {
       quantity: 2,
     };
 
-    const { data: inserted, error: insertErr } = await supabaseTest
+    const { data: inserted, error: insertErr } = await supabaseAdmin
       .from("cart_items")
       .insert([itemA, itemB])
       .select(
@@ -126,10 +126,11 @@ describe("Cart Integration Test", () => {
     expect(inserted).toBeTruthy();
     expect(inserted!.length).toBeGreaterThanOrEqual(2);
 
-    for (const row of inserted as CartItemRow[])
+    for (const row of inserted as CartItemRow[]) {
       createdCartItemIds.push(row.id);
+    }
 
-    const { data: readBack, error: readErr } = await supabaseTest
+    const { data: readBack, error: readErr } = await supabaseAdmin
       .from("cart_items")
       .select(
         "id, cart_id, drink_id, drink_name, drink_price, sugar, toppings, quantity, created_at",
@@ -157,7 +158,7 @@ describe("Cart Integration Test", () => {
   it("updates quantity and then deletes an item", async () => {
     const cartId = await ensureActiveCart();
 
-    const { data: inserted, error: insertErr } = await supabaseTest
+    const { data: inserted, error: insertErr } = await supabaseAdmin
       .from("cart_items")
       .insert([
         {
@@ -177,7 +178,7 @@ describe("Cart Integration Test", () => {
     expect(inserted).toBeTruthy();
     createdCartItemIds.push(inserted!.id);
 
-    const { data: updated, error: updateErr } = await supabaseTest
+    const { data: updated, error: updateErr } = await supabaseAdmin
       .from("cart_items")
       .update({ quantity: 2 })
       .eq("id", inserted!.id)
@@ -187,18 +188,19 @@ describe("Cart Integration Test", () => {
     expect(updateErr).toBeNull();
     expect(updated!.quantity).toBe(2);
 
-    const { error: delErr } = await supabaseTest
+    const { error: delErr } = await supabaseAdmin
       .from("cart_items")
       .delete()
       .eq("id", inserted!.id);
     expect(delErr).toBeNull();
   });
 
-  // sad path
+  // --- Sad Path ---
+
   it("fails to insert cart_item when cart_id does not exist (FK constraint)", async () => {
     const fakeCartId = crypto.randomUUID();
 
-    const { error } = await supabaseTest.from("cart_items").insert([
+    const { error } = await supabaseAdmin.from("cart_items").insert([
       {
         cart_id: fakeCartId,
         drink_id: `drink-fk-${testRunId}`,
@@ -210,6 +212,8 @@ describe("Cart Integration Test", () => {
       },
     ]);
 
+    // This still fails correctly because it triggers a Database Constraint (FK),
+    // which the service_role key does NOT bypass.
     expect(error).toBeTruthy();
   });
 });

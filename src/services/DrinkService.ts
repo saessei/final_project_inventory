@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import supabase from "../lib/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export interface Drink {
   id: string;
@@ -52,9 +53,17 @@ class DrinkService {
     this.listeners.forEach(callback => callback());
   }
 
+  /**
+   * Helper to determine which client to use. 
+   * Defaults to the standard client if no override is provided.
+   */
+  private getClient(client?: SupabaseClient) {
+    return client || supabase;
+  }
+
   // ============ TOPPINGS ============
-  async getAllToppings(): Promise<Topping[]> {
-    const { data, error } = await supabase
+  async getAllToppings(client?: SupabaseClient): Promise<Topping[]> {
+    const { data, error } = await this.getClient(client)
       .from("default_toppings")
       .select("*")
       .eq("is_available", true)
@@ -72,8 +81,8 @@ class DrinkService {
     }));
   }
 
-  async addTopping(name: string, price: number): Promise<boolean> {
-    const { error } = await supabase
+  async addTopping(name: string, price: number, client?: SupabaseClient): Promise<boolean> {
+    const { error } = await this.getClient(client)
       .from("default_toppings")
       .insert({ name, price });
 
@@ -85,8 +94,8 @@ class DrinkService {
     return true;
   }
 
-  async updateTopping(id: string, name: string, price: number): Promise<boolean> {
-    const { error } = await supabase
+  async updateTopping(id: string, name: string, price: number, client?: SupabaseClient): Promise<boolean> {
+    const { error } = await this.getClient(client)
       .from("default_toppings")
       .update({ name, price })
       .eq("id", id);
@@ -99,8 +108,8 @@ class DrinkService {
     return true;
   }
 
-  async deleteTopping(id: string): Promise<boolean> {
-    const { error } = await supabase
+  async deleteTopping(id: string, client?: SupabaseClient): Promise<boolean> {
+    const { error } = await this.getClient(client)
       .from("default_toppings")
       .delete()
       .eq("id", id);
@@ -114,8 +123,8 @@ class DrinkService {
   }
 
   // ============ SUGAR LEVELS ============
-  async getAllSugarLevels(): Promise<SugarLevel[]> {
-    const { data, error } = await supabase
+  async getAllSugarLevels(client?: SupabaseClient): Promise<SugarLevel[]> {
+    const { data, error } = await this.getClient(client)
       .from("sugar_levels")
       .select("*")
       .order("percentage");
@@ -127,8 +136,8 @@ class DrinkService {
     return data || [];
   }
 
-  async updateSugarLevel(id: string, price_addition: number): Promise<boolean> {
-    const { error } = await supabase
+  async updateSugarLevel(id: string, price_addition: number, client?: SupabaseClient): Promise<boolean> {
+    const { error } = await this.getClient(client)
       .from("sugar_levels")
       .update({ price_addition })
       .eq("id", id);
@@ -142,8 +151,8 @@ class DrinkService {
   }
 
   // ============ DRINKS ============
-  async getAllDrinks(): Promise<Drink[]> {
-    const { data: drinks, error } = await supabase
+  async getAllDrinks(client?: SupabaseClient): Promise<Drink[]> {
+    const { data: drinks, error } = await this.getClient(client)
       .from("drinks")
       .select("*")
       .eq("is_available", true)
@@ -157,16 +166,16 @@ class DrinkService {
     const drinksWithDetails = await Promise.all(
       (drinks || []).map(async (drink) => ({
         ...drink,
-        sizes: await this.getDrinkSizes(drink.id),
-        available_toppings: await this.getDrinkToppings(drink.id),
+        sizes: await this.getDrinkSizes(drink.id, client),
+        available_toppings: await this.getDrinkToppings(drink.id, client),
       }))
     );
 
     return drinksWithDetails;
   }
 
-  async getDrinkSizes(drinkId: string): Promise<{ regular: number; medium: number; large: number }> {
-    const { data, error } = await supabase
+  async getDrinkSizes(drinkId: string, client?: SupabaseClient): Promise<{ regular: number; medium: number; large: number }> {
+    const { data, error } = await this.getClient(client)
       .from("drink_sizes")
       .select("size, price")
       .eq("drink_id", drinkId);
@@ -178,48 +187,49 @@ class DrinkService {
 
     const result = { regular: 0, medium: 0, large: 0 };
     (data || []).forEach((item: { size: string; price: number }) => {
-    result[item.size as keyof typeof result] = item.price;
+      result[item.size as keyof typeof result] = item.price;
     });
     return result;
   }
 
-    async getDrinkToppings(drinkId: string): Promise<Topping[]> {
-    const { data, error } = await supabase
-        .from("drink_toppings")
-        .select(`
+  async getDrinkToppings(drinkId: string, client?: SupabaseClient): Promise<Topping[]> {
+    const { data, error } = await this.getClient(client)
+      .from("drink_toppings")
+      .select(`
         topping:default_toppings(*)
-        `)
-        .eq("drink_id", drinkId);
+      `)
+      .eq("drink_id", drinkId);
 
     if (error) {
-        console.error("Error fetching drink toppings:", error);
-        return [];
+      console.error("Error fetching drink toppings:", error);
+      return [];
     }
 
     if (!data) return [];
 
     return data.map((item: any) => {
-        // Handle case where topping might be an array
-        const toppingData = Array.isArray(item.topping) ? item.topping[0] : item.topping;
-        
-        if (!toppingData) return null;
-        
-        return {
+      const toppingData = Array.isArray(item.topping) ? item.topping[0] : item.topping;
+      if (!toppingData) return null;
+      
+      return {
         id: toppingData.id,
         name: toppingData.name,
         price: toppingData.price ?? 0,
         is_available: toppingData.is_available,
-        };
+      };
     }).filter(Boolean) as Topping[];
-    }
+  }
 
   async createDrink(
     drink: { name: string; description: string; image_url: string },
     sizes: { regular: number; medium: number; large: number },
-    toppingIds: string[]
+    toppingIds: string[],
+    client?: SupabaseClient
   ): Promise<boolean> {
-    // Insert drink
-    const { data: drinkData, error: drinkError } = await supabase
+    const db = this.getClient(client);
+
+    // 1. Insert drink
+    const { data: drinkData, error: drinkError } = await db
       .from("drinks")
       .insert({
         name: drink.name,
@@ -235,26 +245,26 @@ class DrinkService {
       return false;
     }
 
-    // Insert sizes
+    // 2. Insert sizes
     const sizeInserts = [
       { drink_id: drinkData.id, size: "regular", price: sizes.regular },
       { drink_id: drinkData.id, size: "medium", price: sizes.medium },
       { drink_id: drinkData.id, size: "large", price: sizes.large },
     ];
 
-    const { error: sizeError } = await supabase.from("drink_sizes").insert(sizeInserts);
+    const { error: sizeError } = await db.from("drink_sizes").insert(sizeInserts);
     if (sizeError) {
       console.error("Error inserting sizes:", sizeError);
       return false;
     }
 
-    // Insert toppings
+    // 3. Insert toppings
     if (toppingIds.length > 0) {
       const toppingInserts = toppingIds.map(toppingId => ({
         drink_id: drinkData.id,
         topping_id: toppingId,
       }));
-      const { error: toppingError } = await supabase.from("drink_toppings").insert(toppingInserts);
+      const { error: toppingError } = await db.from("drink_toppings").insert(toppingInserts);
       if (toppingError) {
         console.error("Error inserting toppings:", toppingError);
       }
@@ -268,10 +278,13 @@ class DrinkService {
     drinkId: string,
     updates: { name?: string; description?: string; image_url?: string },
     sizes?: { regular: number; medium: number; large: number },
-    toppingIds?: string[]
+    toppingIds?: string[],
+    client?: SupabaseClient
   ): Promise<boolean> {
-    // Update drink
-    const { error: drinkError } = await supabase
+    const db = this.getClient(client);
+
+    // 1. Update drink
+    const { error: drinkError } = await db
       .from("drinks")
       .update({ ...updates })
       .eq("id", drinkId);
@@ -281,10 +294,10 @@ class DrinkService {
       return false;
     }
 
-    // Update sizes
+    // 2. Update sizes
     if (sizes) {
       for (const [size, price] of Object.entries(sizes)) {
-        await supabase
+        await db
           .from("drink_sizes")
           .update({ price })
           .eq("drink_id", drinkId)
@@ -292,16 +305,16 @@ class DrinkService {
       }
     }
 
-    // Update toppings (delete existing, insert new)
+    // 3. Update toppings (delete existing, insert new)
     if (toppingIds !== undefined) {
-      await supabase.from("drink_toppings").delete().eq("drink_id", drinkId);
+      await db.from("drink_toppings").delete().eq("drink_id", drinkId);
       
       if (toppingIds.length > 0) {
         const toppingInserts = toppingIds.map(toppingId => ({
           drink_id: drinkId,
           topping_id: toppingId,
         }));
-        await supabase.from("drink_toppings").insert(toppingInserts);
+        await db.from("drink_toppings").insert(toppingInserts);
       }
     }
 
@@ -309,8 +322,12 @@ class DrinkService {
     return true;
   }
 
-  async deleteDrink(drinkId: string): Promise<boolean> {
-    const { error } = await supabase.from("drinks").delete().eq("id", drinkId);
+  async deleteDrink(drinkId: string, client?: SupabaseClient): Promise<boolean> {
+    const { error } = await this.getClient(client)
+      .from("drinks")
+      .delete()
+      .eq("id", drinkId);
+
     if (error) {
       console.error("Error deleting drink:", error);
       return false;

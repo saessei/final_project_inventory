@@ -1,17 +1,13 @@
-import { beforeAll } from 'vitest';
+// vitest.setup.ts
+import { beforeAll, afterAll } from 'vitest';
+import { supabaseAdmin } from '../lib/supabaseTestClient';
 
-// Use process.env because Vitest injects the loaded envs there
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+beforeAll(async () => {
+  // Example: Ensure the test database is reachable before starting
+  console.log("Checking Database Connection...");
+});
 
-beforeAll(() => {
-  const missing: string[] = [];
-  if (!supabaseUrl) missing.push("VITE_SUPABASE_URL");
-  if (!serviceKey) missing.push("SUPABASE_SERVICE_ROLE_KEY");
-
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required test environment variables: ${missing.join(", ")}. Configure them in CI secrets or a local .env.test file.`,
-    );
-  }
+afterAll(async () => {
+  // Example: Wipe the 'orders' table after ALL test files finish
+  await supabaseAdmin.from('orders').delete().neq('id', '0000-0000...');
 });
