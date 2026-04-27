@@ -1,6 +1,6 @@
 // src/components/Admin/MenuManager.tsx
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Plus, Edit, Trash2, X, Upload, Tag, TrendingUp, FolderOpen, CupSoda, CirclePlus, Candy, AlertTriangle } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, Tag, TrendingUp, FolderOpen, CupSoda, CirclePlus, Candy } from "lucide-react";
 import { dynamicMenu, } from "../../services/DynamicMenuService";
 import { drinkService } from "../../services/DrinkService";
 import { Sidebar } from "../common/Sidebar";
@@ -450,7 +450,10 @@ export const MenuManager = () => {
                   : 'text-gray-500 hover:text-dark-brown'
               }`}
             >
-              📁 Categories ({categories.length})
+              <span className="inline-flex items-center gap-2">
+                <FolderOpen size={18} />
+                Categories ({categories.length})
+              </span>
             </button>
             <button
               onClick={() => setActiveTab('drinks')}
@@ -460,7 +463,10 @@ export const MenuManager = () => {
                   : 'text-gray-500 hover:text-dark-brown'
               }`}
             >
-              🥤 Drinks ({drinks.length})
+              <span className="inline-flex items-center gap-2">
+                <CupSoda size={18} />
+                Drinks ({drinks.length})
+              </span>
             </button>
             <button
               onClick={() => setActiveTab('toppings')}
@@ -470,7 +476,10 @@ export const MenuManager = () => {
                   : 'text-gray-500 hover:text-dark-brown'
               }`}
             >
-              ➕ Toppings ({toppings.length})
+              <span className="inline-flex items-center gap-2">
+                <CirclePlus size={18} />
+                Toppings ({toppings.length})
+              </span>
             </button>
             <button
               onClick={() => setActiveTab('sugar-levels')}
@@ -480,7 +489,10 @@ export const MenuManager = () => {
                   : 'text-gray-500 hover:text-dark-brown'
               }`}
             >
-              🍬 Sugar Levels
+              <span className="inline-flex items-center gap-2">
+                <Candy size={18} />
+                Sugar Levels
+              </span>
             </button>
           </div>
           
@@ -618,11 +630,6 @@ export const MenuManager = () => {
             setEditingTopping(null);
           }}
         />
-      )}
-      </div>
-
-      {showPinModal && session && (
-        <AdminPinModal onSuccess={handlePinSuccess} onClose={handlePinCancel} />
       )}
       </div>
 
