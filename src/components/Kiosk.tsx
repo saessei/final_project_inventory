@@ -333,7 +333,7 @@ export const Kiosk = () => {
                             : "bg-brown text-white hover:bg-brown-dark"
                         }`}
                       >
-                        + Customize Order
+                        + Add to Cart
                       </button>
                     </div>
                   </div>
