@@ -9,7 +9,6 @@ export interface Order {
   status: "pending" | "preparing" | "completed";
   created_at: string;
   claimed_by: string | null;
-  claimed_by_name: string | null;
   claimed_at: string | null;
 }
 

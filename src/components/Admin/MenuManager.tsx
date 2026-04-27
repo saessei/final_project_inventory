@@ -1,6 +1,6 @@
 // src/components/Admin/MenuManager.tsx
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Plus, Edit, Trash2, X, Upload, Tag, TrendingUp } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, Tag, TrendingUp, FolderOpen, CupSoda, CirclePlus, Candy, AlertTriangle } from "lucide-react";
 import { dynamicMenu, } from "../../services/DynamicMenuService";
 import { drinkService } from "../../services/DrinkService";
 import { Sidebar } from "../common/Sidebar";
@@ -407,11 +407,7 @@ export const MenuManager = () => {
     );
   }
   
-  if (showPinModal && session) {
-    return <AdminPinModal onSuccess={handlePinSuccess} onClose={handlePinCancel} />;
-  }
-
-  if (!isAuthorized) {
+  if (!isAuthorized && !showPinModal) {
     return (
       <div className="bg-cream min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -423,7 +419,7 @@ export const MenuManager = () => {
     );
   }
   
-  if (loading) {
+  if (loading && isAuthorized) {
     return (
       <div className="bg-cream min-h-screen flex items-center justify-center">
         <div className="text-center">Loading menu manager...</div>
@@ -433,6 +429,7 @@ export const MenuManager = () => {
   
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+      <div className={showPinModal ? "pointer-events-none opacity-60" : ""}>
       <div className="fixed top-0 left-0 h-screen w-64 z-10">
         <Sidebar />
       </div>
@@ -495,7 +492,7 @@ export const MenuManager = () => {
                   setEditingItem(null);
                   setShowModal(true);
                 }}
-                className="mb-4 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="mb-4 flex items-center gap-2 px-4 py-2 bg-dark-brown text-white rounded-lg hover:opacity-90"
               >
                 <Plus size={18} /> Add Category
               </button>
@@ -520,7 +517,7 @@ export const MenuManager = () => {
                   setEditingItem(null);
                   setShowModal(true);
                 }}
-                className="mb-4 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="mb-4 flex items-center gap-2 px-4 py-2 bg-dark-brown text-white rounded-lg hover:opacity-90"
               >
                 <Plus size={18} /> Add Drink
               </button>
@@ -542,7 +539,7 @@ export const MenuManager = () => {
             <div>
               <button
                 onClick={handleAddTopping}
-                className="mb-4 flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                className="mb-4 flex items-center gap-2 px-4 py-2 bg-dark-brown text-white rounded-lg hover:opacity-90 transition-colors"
               >
                 <Plus size={18} /> Add Topping
               </button>
@@ -621,6 +618,16 @@ export const MenuManager = () => {
             setEditingTopping(null);
           }}
         />
+      )}
+      </div>
+
+      {showPinModal && session && (
+        <AdminPinModal onSuccess={handlePinSuccess} onClose={handlePinCancel} />
+      )}
+      </div>
+
+      {showPinModal && session && (
+        <AdminPinModal onSuccess={handlePinSuccess} onClose={handlePinCancel} />
       )}
     </div>
   );

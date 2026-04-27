@@ -40,10 +40,3 @@ export const Completed: Story = {
     status: 'completed',
   },
 };
-
-// Interactive Example (Playground)
-export const Interactive: Story = {
-  args: {
-    status: 'pending',
-  },
-};
