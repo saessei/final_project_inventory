@@ -24,5 +24,10 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts", 
+    "**/*.test.tsx",
+    "src/tests"],
   "include": ["src", "src/tests", "tests/kiosk.spec.ts", "tests/auth.spec.ts"]
 }
