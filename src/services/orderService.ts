@@ -1,36 +1,45 @@
-  import supabaseDefault from "../lib/supabaseClient.ts";
+import supabase from "../lib/supabaseClient";
 
-  export const createOrder = async (
-    order: {
-      customer_name: string;
-      order_details: string;
-      status: string;
-      user_id?: string;
-    },
-    supabase = supabaseDefault 
-  ) => {
-    const { data, error } = await supabase
-      .from('orders')
-      .insert([order])
-      .select();
-
-    if (error) {
-      console.error('Create order failed:', error.message);
-      throw new Error(error.message);
-    }
-
-    return data;
+export const createOrder = async (order: {
+  customer_name: string;
+  order_details: string;
+  status: string;
+  total_price?: number;
+}) => {
+  console.log("🔍 DEBUG - Received order object:", order);
+  console.log("🔍 DEBUG - total_price value:", order.total_price);
+  
+  const orderToSave = {
+    customer_name: order.customer_name,
+    order_details: order.order_details,
+    status: order.status,
+    total_price: order.total_price || 0,
+    created_at: new Date().toISOString()
   };
+  
+  console.log("🔍 DEBUG - Saving this to database:", orderToSave);
 
-  export const updateOrderStatus = async (
+  const { data, error } = await supabase
+    .from('orders')
+    .insert([orderToSave])
+    .select();
+
+  if (error) {
+    console.error('❌ Create order failed:', error);
+    throw new Error(error.message);
+  }
+
+  console.log("✅ Order saved successfully:", data);
+  return data;
+};
+
+export const updateOrderStatus = async (
   orderId: string,
-  newStatus: "pending" | "preparing" | "completed" ,
-    options?: { claim?: boolean; baristaUserId?: string },
-  supabase = supabaseDefault,
+  newStatus: "pending" | "preparing" | "completed",
+  options?: { claim?: boolean; baristaUserId?: string }
 ) => {
   const patch: Record<string, unknown> = { status: newStatus };
 
-  // If claiming, write claimed_by/claimed_at
   if (options?.claim) {
     if (!options.baristaUserId) {
       throw new Error("baristaUserId is required when claim=true");
@@ -41,7 +50,6 @@
 
   let query = supabase.from("orders").update(patch).eq("id", orderId);
 
-  // prevent two baristas claiming the same order
   if (options?.claim) {
     query = query.is("claimed_by", null);
   }

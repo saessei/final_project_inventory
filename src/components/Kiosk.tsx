@@ -142,8 +142,12 @@ export const Kiosk = () => {
     0,
   );
 
-  const handleCheckout = async () => {
+      const handleCheckout = async () => {
     if (cart.length === 0 || isSubmitting) return;
+
+    console.log("🛒 Cart before checkout:", cart);
+    console.log("💰 cartTotal being sent:", cartTotal);
+    console.log("💰 cartTotal type:", typeof cartTotal);
 
     const orderDetails = cart
       .map((item) => {
@@ -154,22 +158,26 @@ export const Kiosk = () => {
       })
       .join(" • ");
 
+    console.log("📝 Order details:", orderDetails);
+
     try {
-      await createOrder({
+      const result = await createOrder({
         customer_name: customerName.trim() || "Guest",
         order_details: orderDetails,
         status: "pending",
+        total_price: Number(cartTotal), // Force to number
       });
+
+      console.log("✅ Order result:", result);
 
       await clearCart();
       setLastOrderSummary(orderDetails);
       setCustomerName("");
       setCheckoutSuccessOpen(true);
     } catch (error) {
-      console.error("Failed to send order to queue:", error);
+      console.error("❌ Failed to send order to queue:", error);
     }
   };
-
   // if (loading) {
   //   return (
   //     <div className="bg-cream min-h-screen flex items-center justify-center">
