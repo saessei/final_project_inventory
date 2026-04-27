@@ -5,7 +5,7 @@ import { UserAuth } from "../auth/AuthContext";
 import { Header } from "./common/Header";
 import { BobaFooter } from "./common/BobaFooter";
 import * as React from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 
 export const Signin = () => {
   const [email, setEmail] = useState("");
@@ -38,13 +38,18 @@ export const Signin = () => {
   };
 
   return (
-    <div className="bg-cream h-screen w-full overflow-hidden flex flex-col relative">
-      <Header />
+    <div className="bg-cream min-h-screen w-full overflow-hidden flex flex-col relative">
+      <div className="pointer-events-none absolute -top-20 -left-20 h-72 w-72 rounded-full bg-brown/20 blur-3xl" />
+      <div className="pointer-events-none absolute top-1/3 -right-16 h-80 w-80 rounded-full bg-dark-brown/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-4 left-1/4 h-40 w-40 rounded-full bg-brown-two/10 blur-2xl" />
+      <div className="absolute top-0 left-0 z-20">
+        <Header />
+      </div>
 
-      <main className="flex-grow flex flex-col items-center justify-center relative z-10 pb-12">
+      <main className="min-h-screen flex flex-col items-center justify-center relative z-10 px-4 py-8">
         <form
           onSubmit={handleSignIn}
-          className="max-w-md w-full p-8 rounded-2xl shadow-xl bg-white border border-gray-100"
+          className="max-w-md w-full p-8 rounded-3xl shadow-2xl bg-white/95 border border-white/70 backdrop-blur"
         >
           <h2 className="text-brown-two text-3xl font-bold font-fredoka pb-2 text-center tracking-tight">
             Sign In
@@ -66,22 +71,26 @@ export const Signin = () => {
             <label className="text-xs ml-2 uppercase font-semibold">
               Email
             </label>
-            <input
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="p-3 mt-1 mb-4 rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all"
-              type="email"
-              required
-            />
+            <div className="relative mb-4 mt-1">
+              <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
+              <input
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full p-3 pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all"
+                type="email"
+                required
+              />
+            </div>
 
             <label className="text-xs ml-2 uppercase font-semibold">
               Password
             </label>
-            <div className="relative flex items-center">
+            <div className="relative flex items-center mt-1">
+              <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
               <input
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
-                className="p-3 mt-1 w-full rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all pr-12"
+                className="p-3 pl-10 w-full rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all pr-12"
                 type={showPassword ? "text" : "password"}
                 required
               />
@@ -98,14 +107,17 @@ export const Signin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 rounded-2xl font-bold bg-gradient-to-r from-brown-two to-dark-brown px-4 py-3 text-white duration-300 hover:scale-[1.04] active:scale-95 shadow-md uppercase text-sm"
+                className="flex-1 rounded-2xl font-bold bg-gradient-to-r from-brown-two to-dark-brown px-4 py-3 text-white duration-300 hover:scale-[1.02] active:scale-95 shadow-md uppercase text-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                {loading ? "Logging in..." : "Sign In"}
+                <span className="inline-flex items-center justify-center gap-2">
+                  {loading && <Loader2 size={16} className="animate-spin" />}
+                  {loading ? "Logging in..." : "Sign In"}
+                </span>
               </button>
             </div>
 
             {error && (
-              <p className="text-red-500 pt-4 text-center text-sm font-bold animate-pulse">
+              <p className="text-red-600 pt-4 text-center text-sm font-semibold bg-red-50 border border-red-200 rounded-xl px-3 py-2 mt-4">
                 {error}
               </p>
             )}

@@ -13,11 +13,6 @@ export const QueuedOrders = () => {
   const { session } = UserAuth();
   const baristaUserId = session?.user?.id;
 
-  const baristaName =
-    session?.user?.user_metadata?.display_name ||
-    session?.user?.email?.split("@")[0] ||
-    "Guest";
-
   const incomingOrders = orders.filter((order) => order.status === "pending");
   const preparingOrders = orders.filter(
     (order) => order.status === "preparing",
@@ -43,7 +38,6 @@ export const QueuedOrders = () => {
       const updated = await updateOrderStatus(order.id, "preparing", {
         claim: true,
         baristaUserId,
-        baristaName,
       });
 
       if (!updated) {
@@ -187,10 +181,6 @@ export const QueuedOrders = () => {
                 </div>
 
                 <div className="mt-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                  <div className="text-sm text-gray-600">
-                    Barista: {order.claimed_by_name ?? "Unknown"}
-                  </div>
-
                   {(order.status === "pending" ||
                     order.status === "preparing" ||
                     order.status === "completed") && (

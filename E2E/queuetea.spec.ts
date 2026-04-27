@@ -35,7 +35,6 @@ interface OrderRow {
   status: "pending" | "preparing" | "completed";
   created_at: string;
   claimed_by: string | null;
-  claimed_by_name: string | null;
   claimed_at: string | null;
 }
 
@@ -182,7 +181,6 @@ async function mockUnifiedApi(page: Page, state: UserState) {
         status: payload[0].status,
         created_at: new Date().toISOString(),
         claimed_by: null,
-        claimed_by_name: null,
         claimed_at: null,
       };
 
@@ -267,7 +265,6 @@ test.describe("User flow", () => {
           status: "pending",
           created_at: new Date().toISOString(),
           claimed_by: null,
-          claimed_by_name: null,
           claimed_at: null,
         },
       ],
@@ -285,7 +282,6 @@ test.describe("User flow", () => {
 
     await page.getByRole("button", { name: "Start Preparing" }).click();
     await expect(page.getByText("In queue")).toBeVisible();
-    await expect(page.getByText(`Barista: ${state.displayName}`)).toBeVisible();
 
     await page.getByRole("button", { name: "Mark as Complete" }).click();
     await page.getByRole("button", { name: "Completed" }).click();
@@ -338,7 +334,6 @@ test.describe("User flow", () => {
 
     await page.getByRole("button", { name: "Start Preparing" }).click();
     await expect(page.getByText("In queue")).toBeVisible();
-    await expect(page.getByText(`Barista: ${state.displayName}`)).toBeVisible();
 
     await page.getByRole("button", { name: "Mark as Complete" }).click();
     await page.getByRole("button", { name: "Completed" }).click();
