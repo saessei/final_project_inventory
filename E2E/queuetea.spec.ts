@@ -28,6 +28,39 @@ interface CartItem {
   quantity: number;
 }
 
+interface DrinkRow {
+  id: string;
+  name: string;
+  description: string;
+  image_url: string;
+  is_available: boolean;
+  created_at: string;
+}
+
+interface DrinkSizeRow {
+  drink_id: string;
+  size: "regular" | "medium" | "large";
+  price: number;
+}
+
+interface DefaultToppingRow {
+  id: string;
+  name: string;
+  price: number;
+  is_available: boolean;
+}
+
+interface DrinkToppingRow {
+  drink_id: string;
+  topping_id: string;
+}
+interface SugarLevelRow {
+  id: string;
+  percentage: number;
+  label: string;
+  price_addition: number;
+}
+
 interface OrderRow {
   id: string;
   customer_name: string;
@@ -44,6 +77,12 @@ interface UserState {
   displayName: string;
   cartItems: CartItem[];
   orders: OrderRow[];
+
+  drinks: DrinkRow[];
+  drinkSizes: DrinkSizeRow[];
+  defaultToppings: DefaultToppingRow[];
+  drinkToppings: DrinkToppingRow[];
+  sugarLevels: SugarLevelRow[];
 }
 
 function buildSession(email: string, userId: string, displayName: string): AuthSession {
@@ -71,6 +110,11 @@ function readEqParam(param: string | null): string | null {
   return decodeURIComponent(param.slice(3));
 }
 
+function wantsObjectResponse(request: { headers(): Record<string, string> }): boolean {
+  const accept = request.headers()["accept"]?.toLowerCase() ?? "";
+  return accept.includes("application/vnd.pgrst.object+json");
+}
+
 async function seedSession(
   page: Page,
   email: string,
@@ -88,6 +132,7 @@ async function mockUnifiedApi(page: Page, state: UserState) {
     const url = new URL(req.url());
     const method = req.method();
     const pathname = url.pathname;
+    const objectResponse = wantsObjectResponse(req);
 
     const common = {
       headers: {
@@ -104,10 +149,48 @@ async function mockUnifiedApi(page: Page, state: UserState) {
     }
 
     if (pathname.endsWith("/carts") && method === "GET") {
+      const byBarista = readEqParam(url.searchParams.get("barista_user_id"));
+      const byStatus = readEqParam(url.searchParams.get("status"));
+      const cart = {
+        id: state.cartId,
+        barista_user_id: state.userId,
+        status: "active",
+      };
+
+      const matches =
+        (!byBarista || byBarista === cart.barista_user_id) &&
+        (!byStatus || byStatus === cart.status);
+
+      if (!matches) {
+        // Supabase/PostgREST returns 406 when Accept: object and no rows.
+        if (objectResponse) {
+          await route.fulfill({ status: 406, ...common, body: JSON.stringify({ message: "Results contain 0 rows" }) });
+        } else {
+          await route.fulfill({ status: 200, ...common, body: JSON.stringify([]) });
+        }
+        return;
+      }
+
       await route.fulfill({
         status: 200,
         ...common,
-        body: JSON.stringify({ id: state.cartId, barista_user_id: state.userId, status: "active" }),
+        body: JSON.stringify(objectResponse ? cart : [cart]),
+      });
+      return;
+    }
+
+    if (pathname.endsWith("/carts") && method === "POST") {
+      const payload = req.postDataJSON() as Array<Pick<DrinkRow, never> & { barista_user_id: string; status: string }>;
+      const created = {
+        id: state.cartId,
+        barista_user_id: payload?.[0]?.barista_user_id ?? state.userId,
+        status: payload?.[0]?.status ?? "active",
+      };
+
+      await route.fulfill({
+        status: 201,
+        ...common,
+        body: JSON.stringify(objectResponse ? created : [created]),
       });
       return;
     }
@@ -212,11 +295,132 @@ async function mockUnifiedApi(page: Page, state: UserState) {
       return;
     }
 
+    if (pathname.endsWith("/sugar_levels") && method === "GET") {
+      await route.fulfill({ status: 200, ...common, body: JSON.stringify(state.sugarLevels) });
+      return;
+    }
+
+    if (pathname.endsWith("/drinks") && method === "GET") {
+      // DrinkService filters available drinks via eq("is_available", true)
+      const onlyAvailable = readEqParam(url.searchParams.get("is_available"));
+      const rows = onlyAvailable === "true"
+        ? state.drinks.filter((d) => d.is_available)
+        : state.drinks;
+      await route.fulfill({ status: 200, ...common, body: JSON.stringify(rows) });
+      return;
+    }
+
+    if (pathname.endsWith("/drink_sizes") && method === "GET") {
+      const drinkId = readEqParam(url.searchParams.get("drink_id"));
+      const rows = drinkId
+        ? state.drinkSizes.filter((s) => s.drink_id === drinkId)
+        : state.drinkSizes;
+      await route.fulfill({ status: 200, ...common, body: JSON.stringify(rows) });
+      return;
+    }
+
+    if (pathname.endsWith("/drink_toppings") && method === "GET") {
+      const drinkId = readEqParam(url.searchParams.get("drink_id"));
+      const rows = (drinkId
+        ? state.drinkToppings.filter((dt) => dt.drink_id === drinkId)
+        : state.drinkToppings
+      ).map((dt) => {
+        const topping = state.defaultToppings.find((t) => t.id === dt.topping_id) ?? null;
+        return { topping };
+      });
+
+      await route.fulfill({ status: 200, ...common, body: JSON.stringify(rows) });
+      return;
+    }
+
     await route.fulfill({ status: 200, ...common, body: "[]" });
   });
 }
 
 test.describe("User flow", () => {
+  test("protected routes redirect to sign in when unauthenticated", async ({ page }) => {
+    // No seeded session.
+    await page.goto("/kiosk");
+    await expect(page).toHaveURL(/\/signin$/);
+    await expect(page.getByRole("heading", { name: "Sign In" })).toBeVisible();
+  });
+
+  test("kiosk checkout is disabled until customer name is provided", async ({ page }) => {
+    const state: UserState = {
+      cartId: "cart-user-checkout-disabled",
+      userId: "user-checkout-disabled",
+      displayName: "User QA",
+      cartItems: [],
+      orders: [],
+
+      drinks: [
+        {
+          id: "drink-1",
+          name: "Wintermelon",
+          description: "Classic wintermelon milk tea",
+          image_url: "",
+          is_available: true,
+          created_at: new Date().toISOString(),
+        },
+      ],
+      drinkSizes: [
+        { drink_id: "drink-1", size: "regular", price: 90 },
+        { drink_id: "drink-1", size: "medium", price: 110 },
+        { drink_id: "drink-1", size: "large", price: 130 },
+      ],
+      defaultToppings: [
+        { id: "topping-1", name: "Boba", price: 10, is_available: true },
+      ],
+      drinkToppings: [
+        { drink_id: "drink-1", topping_id: "topping-1" },
+      ],
+      sugarLevels: [
+        { id: "sugar-50", percentage: 50, label: "50%", price_addition: 0 },
+      ],
+    };
+
+    await seedSession(page, "user-checkout@example.com", state.userId, state.displayName);
+    await mockUnifiedApi(page, state);
+
+    await page.goto("/kiosk");
+    await expect(page.getByRole("heading", { name: "Kiosk" })).toBeVisible();
+
+    const checkoutButton = page.getByRole("button", { name: "Check Out" });
+    await expect(checkoutButton).toBeDisabled();
+
+    await page.getByRole("button", { name: "+ Customize Order" }).first().click();
+    await page.getByRole("button", { name: /^Add to Cart/i }).click();
+
+    // Still disabled until customer name is filled.
+    await expect(checkoutButton).toBeDisabled();
+
+    await page.getByLabel("Customer name").fill("Customer QA");
+    await expect(checkoutButton).toBeEnabled();
+  });
+
+  test("queued orders shows empty state when there are no active orders", async ({ page }) => {
+    const state: UserState = {
+      cartId: "cart-user-empty-queue",
+      userId: "user-empty-queue",
+      displayName: "User QA",
+      cartItems: [],
+      orders: [],
+
+      drinks: [],
+      drinkSizes: [],
+      defaultToppings: [],
+      drinkToppings: [],
+      sugarLevels: [],
+    };
+
+    await seedSession(page, "user-empty-queue@example.com", state.userId, state.displayName);
+    await mockUnifiedApi(page, state);
+
+    await page.goto("/queued-orders");
+    await expect(page.getByRole("heading", { name: "Barista Station" })).toBeVisible();
+    await expect(page.getByText("No incoming or preparing orders yet.")).toBeVisible();
+  });
+
   test("user can create order in kiosk", async ({ page }) => {
     const state: UserState = {
       cartId: "cart-user-1",
@@ -224,6 +428,34 @@ test.describe("User flow", () => {
       displayName: "User QA",
       cartItems: [],
       orders: [],
+
+      drinks: [
+        {
+          id: "drink-1",
+          name: "Wintermelon",
+          description: "Classic wintermelon milk tea",
+          image_url: "",
+          is_available: true,
+          created_at: new Date().toISOString(),
+        },
+      ],
+      drinkSizes: [
+        { drink_id: "drink-1", size: "regular", price: 90 },
+        { drink_id: "drink-1", size: "medium", price: 110 },
+        { drink_id: "drink-1", size: "large", price: 130 },
+      ],
+      defaultToppings: [
+        { id: "topping-1", name: "Boba", price: 10, is_available: true },
+      ],
+      drinkToppings: [
+        { drink_id: "drink-1", topping_id: "topping-1" },
+      ],
+      sugarLevels: [
+        { id: "sugar-0", percentage: 0, label: "0%", price_addition: 0 },
+        { id: "sugar-50", percentage: 50, label: "50%", price_addition: 0 },
+        { id: "sugar-70", percentage: 70, label: "70%", price_addition: 0 },
+        { id: "sugar-100", percentage: 100, label: "100%", price_addition: 0 },
+      ],
     };
 
     await seedSession(page, "user@example.com", state.userId, state.displayName);
@@ -232,10 +464,10 @@ test.describe("User flow", () => {
     await page.goto("/kiosk");
     await expect(page.getByRole("heading", { name: "Kiosk" })).toBeVisible();
 
-    await page.getByRole("button", { name: "+ Add to Order" }).first().click();
-    await page.getByRole("button", { name: "Boba (+₱10)" }).click();
+    await page.getByRole("button", { name: "+ Customize Order" }).first().click();
+    await page.getByRole("button", { name: /Boba/i }).click();
     await page.getByRole("button", { name: "70%" }).click();
-    await page.getByRole("button", { name: "Add to Cart" }).click();
+    await page.getByRole("button", { name: /^Add to Cart/i }).click();
     await expect(page.getByText("1 items")).toBeVisible();
 
     await page.getByLabel("Customer name").fill("One User Customer");
@@ -268,6 +500,12 @@ test.describe("User flow", () => {
           claimed_at: null,
         },
       ],
+
+      drinks: [],
+      drinkSizes: [],
+      defaultToppings: [],
+      drinkToppings: [],
+      sugarLevels: [],
     };
 
     await seedSession(page, "user2@example.com", state.userId, state.displayName);
@@ -285,9 +523,9 @@ test.describe("User flow", () => {
 
     await page.getByRole("button", { name: "Mark as Complete" }).click();
     await page.getByRole("button", { name: "Completed" }).click();
-
     const completedCard = page.getByRole("article").filter({ hasText: "Queue Customer" });
     await expect(completedCard).toBeVisible();
+    await expect(completedCard.getByText("Completed")).toBeVisible();
     await expect(completedCard.getByRole("button", { name: "Archive Order" })).toBeVisible();
 
     expect(state.orders[0].status).toBe("completed");
@@ -300,6 +538,34 @@ test.describe("User flow", () => {
       displayName: "User QA",
       cartItems: [],
       orders: [],
+
+      drinks: [
+        {
+          id: "drink-1",
+          name: "Wintermelon",
+          description: "Classic wintermelon milk tea",
+          image_url: "",
+          is_available: true,
+          created_at: new Date().toISOString(),
+        },
+      ],
+      drinkSizes: [
+        { drink_id: "drink-1", size: "regular", price: 90 },
+        { drink_id: "drink-1", size: "medium", price: 110 },
+        { drink_id: "drink-1", size: "large", price: 130 },
+      ],
+      defaultToppings: [
+        { id: "topping-1", name: "Boba", price: 10, is_available: true },
+      ],
+      drinkToppings: [
+        { drink_id: "drink-1", topping_id: "topping-1" },
+      ],
+      sugarLevels: [
+        { id: "sugar-0", percentage: 0, label: "0%", price_addition: 0 },
+        { id: "sugar-50", percentage: 50, label: "50%", price_addition: 0 },
+        { id: "sugar-70", percentage: 70, label: "70%", price_addition: 0 },
+        { id: "sugar-100", percentage: 100, label: "100%", price_addition: 0 },
+      ],
     };
 
     await seedSession(page, "user3@example.com", state.userId, state.displayName);
@@ -308,10 +574,10 @@ test.describe("User flow", () => {
     await page.goto("/kiosk");
     await expect(page.getByRole("heading", { name: "Kiosk" })).toBeVisible();
 
-    await page.getByRole("button", { name: "+ Add to Order" }).first().click();
-    await page.getByRole("button", { name: "Boba (+₱10)" }).click();
+    await page.getByRole("button", { name: "+ Customize Order" }).first().click();
+    await page.getByRole("button", { name: /Boba/i }).click();
     await page.getByRole("button", { name: "70%" }).click();
-    await page.getByRole("button", { name: "Add to Cart" }).click();
+    await page.getByRole("button", { name: /^Add to Cart/i }).click();
     await expect(page.getByText("1 items")).toBeVisible();
 
     await page.getByLabel("Customer name").fill("One User Customer");
@@ -337,9 +603,9 @@ test.describe("User flow", () => {
 
     await page.getByRole("button", { name: "Mark as Complete" }).click();
     await page.getByRole("button", { name: "Completed" }).click();
-
     const completedCard = page.getByRole("article").filter({ hasText: "One User Customer" });
     await expect(completedCard).toBeVisible();
+    await expect(completedCard.getByText("Completed")).toBeVisible();
     await expect(completedCard.getByRole("button", { name: "Archive Order" })).toBeVisible();
 
     expect(state.orders[0].status).toBe("completed");

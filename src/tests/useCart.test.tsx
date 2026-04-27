@@ -1,5 +1,6 @@
-import { afterAll, describe, expect, it } from "vitest";
-import { renderHook, waitFor, act } from "@testing-library/react"; // Added act
+import { beforeAll, afterAll, describe, expect, it } from "vitest";
+import { renderHook, act } from "@testing-library/react"; // Added act
+import { waitFor } from "@testing-library/dom";
 import { useCart, type CartItem } from "../hooks/useCart";
 import { supabaseAdmin } from "../lib/supabaseTestClient";
 
@@ -29,13 +30,26 @@ describe("useCart (integration, real Supabase DB)", () => {
     } satisfies Omit<CartItem, "id" | "cart_id">;
   }
 
+    beforeAll(async () => {
+    await supabaseAdmin.auth.signInWithPassword({
+      email: "test@example.com",
+      password: "password123",
+    });
+  });
+  
   afterAll(async () => {
     if (createdCartIds.length) {
-      await supabaseAdmin.from("cart_items").delete().in("cart_id", createdCartIds);
+      await supabaseAdmin
+        .from("cart_items")
+        .delete()
+        .in("cart_id", createdCartIds);
       await supabaseAdmin.from("carts").delete().in("id", createdCartIds);
     }
     if (createdBaristaUserIds.length) {
-      await supabaseAdmin.from("carts").delete().in("barista_user_id", createdBaristaUserIds);
+      await supabaseAdmin
+        .from("carts")
+        .delete()
+        .in("barista_user_id", createdBaristaUserIds);
     }
   });
 
@@ -45,30 +59,46 @@ describe("useCart (integration, real Supabase DB)", () => {
 
     const { result, unmount } = renderHook(() => useCart(baristaUserId));
 
-    await waitFor(() => expect(result.current.cartId).not.toBeNull(), { timeout: 10000 });
+    await waitFor(() => expect(result.current.cartId).not.toBeNull(), {
+      timeout: 10000,
+    });
     const activeCartId = result.current.cartId as string;
     trackCartId(activeCartId);
 
     const baseItem = makeBaseItem();
 
     // mutations wrapped in act
-    await act(async () => { await result.current.upsertItem(baseItem); });
+    await act(async () => {
+      await result.current.upsertItem(baseItem);
+    });
     await waitFor(() => expect(result.current.cart).toHaveLength(1));
 
-    await act(async () => { await result.current.upsertItem(baseItem); });
+    await act(async () => {
+      await result.current.upsertItem(baseItem);
+    });
     await waitFor(() => expect(result.current.cart[0]?.quantity).toBe(2));
 
-    await act(async () => { await result.current.incrementItemAtIndex(0); });
+    await act(async () => {
+      await result.current.incrementItemAtIndex(0);
+    });
     await waitFor(() => expect(result.current.cart[0]?.quantity).toBe(3));
 
-    await act(async () => { await result.current.decrementItemAtIndex(0); });
+    await act(async () => {
+      await result.current.decrementItemAtIndex(0);
+    });
     await waitFor(() => expect(result.current.cart[0]?.quantity).toBe(2));
 
-    await act(async () => { await result.current.removeItemAtIndex(0); });
+    await act(async () => {
+      await result.current.removeItemAtIndex(0);
+    });
     await waitFor(() => expect(result.current.cart).toHaveLength(0));
 
-    await act(async () => { await result.current.upsertItem(baseItem); });
-    await act(async () => { await result.current.clearCart(); });
+    await act(async () => {
+      await result.current.upsertItem(baseItem);
+    });
+    await act(async () => {
+      await result.current.clearCart();
+    });
     await waitFor(() => expect(result.current.cart).toHaveLength(0));
 
     unmount();
@@ -83,8 +113,12 @@ describe("useCart (integration, real Supabase DB)", () => {
     trackCartId(result.current.cartId);
 
     await act(async () => {
-      await result.current.upsertItem(makeBaseItem({ drink_price: 4.0, quantity: 2 }));
-      await result.current.upsertItem(makeBaseItem({ drink_id: `total-2`, drink_price: 6.25 }));
+      await result.current.upsertItem(
+        makeBaseItem({ drink_price: 4.0, quantity: 2 }),
+      );
+      await result.current.upsertItem(
+        makeBaseItem({ drink_id: `total-2`, drink_price: 6.25 }),
+      );
     });
 
     await waitFor(() => expect(result.current.cartTotal).toBeCloseTo(14.25, 5));
@@ -130,13 +164,19 @@ describe("useCart (integration, real Supabase DB)", () => {
 
   it("throws when upsertItem is called without baristaUserId", async () => {
     const { result } = renderHook(() => useCart(undefined));
-    await expect(result.current.upsertItem(makeBaseItem())).rejects.toThrow("Missing baristaUserId");
+    await expect(result.current.upsertItem(makeBaseItem())).rejects.toThrow(
+      "Missing baristaUserId",
+    );
   });
 
   it("no-ops when index mutations are called out of range", async () => {
     const { result } = renderHook(() => useCart(undefined));
-    await expect(result.current.incrementItemAtIndex(0)).resolves.toBeUndefined();
-    await expect(result.current.decrementItemAtIndex(0)).resolves.toBeUndefined();
+    await expect(
+      result.current.incrementItemAtIndex(0),
+    ).resolves.toBeUndefined();
+    await expect(
+      result.current.decrementItemAtIndex(0),
+    ).resolves.toBeUndefined();
     await expect(result.current.removeItemAtIndex(0)).resolves.toBeUndefined();
   });
 });
