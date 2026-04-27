@@ -43,7 +43,6 @@ export const Kiosk = () => {
   } = useCart(baristaUserId);
 
   const [customerName, setCustomerName] = useState("");
-  const [loading, setLoading] = useState(true);
   const [drinks, setDrinks] = useState<Drink[]>([]);
   const [sugarLevels, setSugarLevels] = useState<SugarLevel[]>([]);
 
@@ -60,7 +59,6 @@ export const Kiosk = () => {
   // Load data
   useEffect(() => {
     const loadData = async () => {
-      setLoading(true);
       try {
         const [drinksData, sugarData] = await Promise.all([
           drinkService.getAllDrinks(),
@@ -74,8 +72,6 @@ export const Kiosk = () => {
         if (defaultSugar) setSelectedSugar(defaultSugar);
       } catch (error) {
         console.error("Error loading data:", error);
-      } finally {
-        setLoading(false);
       }
     };
     loadData();

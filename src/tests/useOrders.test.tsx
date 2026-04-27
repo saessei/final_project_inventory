@@ -1,5 +1,6 @@
 import { describe, it, expect, afterAll } from "vitest";
-import { renderHook, waitFor, act } from "@testing-library/react"; // Added act
+import { renderHook, act } from "@testing-library/react"; // Added act
+import { waitFor } from "@testing-library/dom";
 import { useOrders } from "../hooks/useOrders";
 import { supabaseTest, supabaseAdmin } from "../lib/supabaseTestClient";
 import { createOrder } from "../services/orderService";
