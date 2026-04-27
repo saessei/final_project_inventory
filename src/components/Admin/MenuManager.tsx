@@ -85,7 +85,7 @@ const SugarLevelCard = ({ level, onUpdate }: { level: SugarLevel; onUpdate: (id:
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow border hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+    <div className="bg-white p-4 rounded-lg shadow border border-slate-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
       <h3 className="font-bold text-xl text-center">{level.label}</h3>
       <p className="text-center text-gray-500">{level.percentage}% sweetness</p>
       <div className="mt-4">
@@ -118,7 +118,7 @@ const DrinkCard = ({ drink, onEdit, onDelete }: { drink: DrinkType; onEdit: () =
   };
   
   return (
-    <div className="bg-white rounded-xl shadow-md border hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group cursor-pointer overflow-hidden">
+    <div className="bg-white rounded-xl shadow-md border border-slate-200 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 group cursor-pointer overflow-hidden">
       <div className="relative">
         <img 
           src={getImageSrc()} 
@@ -139,7 +139,7 @@ const DrinkCard = ({ drink, onEdit, onDelete }: { drink: DrinkType; onEdit: () =
       <div className="p-4">
         <h3 className="font-bold text-lg">{drink.name}</h3>
         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{drink.description}</p>
-        <div className="mt-3 pt-2 border-t">
+        <div className="mt-3 pt-2 border-t border-slate-200">
           <div className="grid grid-cols-3 gap-2 text-sm">
             <div className="text-center">
               <span className="text-xs text-gray-500">Regular</span>
@@ -166,7 +166,7 @@ const DrinkCard = ({ drink, onEdit, onDelete }: { drink: DrinkType; onEdit: () =
 // Topping Card Component
 const ToppingCard = ({ topping, onEdit, onDelete }: { topping: ToppingType; onEdit: () => void; onDelete: () => void }) => {
   return (
-    <div className="bg-white p-4 rounded-xl shadow-md border hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+    <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
       <div className="flex justify-between items-center">
         <div className="flex-1">
           <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ const ToppingCard = ({ topping, onEdit, onDelete }: { topping: ToppingType; onEd
 // Category Card Component
 const CategoryCard = ({ category, onEdit, onDelete }: { category: CategoryType; onEdit: () => void; onDelete: () => void }) => {
   return (
-    <div className="bg-white p-4 rounded-xl shadow-md border hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+    <div className="bg-white p-4 rounded-xl shadow-md border border-slate-200 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
       <div className="flex justify-between items-start">
         <div>
           <h3 className="font-bold text-lg">{category.label}</h3>
