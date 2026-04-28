@@ -1,13 +1,17 @@
 import supabase from "../lib/supabaseClient";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
-export const createOrder = async (order: {
+export const createOrder = async (
+  order: {
   customer_name: string;
   order_details: string;
   status: string;
   total_price?: number;
-}) => {
-  console.log("🔍 DEBUG - Received order object:", order);
-  console.log("🔍 DEBUG - total_price value:", order.total_price);
+  },
+  client: SupabaseClient = supabase,
+) => {
+  console.log("Received order object:", order);
+  console.log("total_price value:", order.total_price);
   
   const orderToSave = {
     customer_name: order.customer_name,
@@ -19,7 +23,7 @@ export const createOrder = async (order: {
   
   console.log("🔍 DEBUG - Saving this to database:", orderToSave);
 
-  const { data, error } = await supabase
+  const { data, error } = await client
     .from('orders')
     .insert([orderToSave])
     .select();
@@ -36,7 +40,8 @@ export const createOrder = async (order: {
 export const updateOrderStatus = async (
   orderId: string,
   newStatus: "pending" | "preparing" | "completed",
-  options?: { claim?: boolean; baristaUserId?: string }
+  options?: { claim?: boolean; baristaUserId?: string },
+  client: SupabaseClient = supabase,
 ) => {
   const patch: Record<string, unknown> = { status: newStatus };
 
@@ -48,7 +53,7 @@ export const updateOrderStatus = async (
     patch.claimed_at = new Date().toISOString();
   }
 
-  let query = supabase.from("orders").update(patch).eq("id", orderId);
+  let query = client.from("orders").update(patch).eq("id", orderId);
 
   if (options?.claim) {
     query = query.is("claimed_by", null);
