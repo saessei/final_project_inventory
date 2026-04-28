@@ -40,16 +40,24 @@ const fillForm = async (canvasElement: HTMLElement) => {
   const nameInput = await canvas.findByPlaceholderText("Name");
   const emailInput = canvas.getByPlaceholderText("Email");
   const passwordInput = canvas.getByPlaceholderText("Password");
+  const adminPinInput = canvas.getByPlaceholderText("Enter admin PIN (4+ digits)");
+  const confirmAdminPinInput = canvas.getByPlaceholderText("Confirm admin PIN");
+
   
   const submitButton = canvas.getByRole("button", { name: /create account/i });
 
   await userEvent.type(nameInput, "Cardo Dalisay", { delay: 50 });
   await userEvent.type(emailInput, "boba.lover@example.com", { delay: 50 });
   await userEvent.type(passwordInput, "Password123!", { delay: 50 });
+  await userEvent.type(adminPinInput, "1234", {delay: 50});
+  await userEvent.type(confirmAdminPinInput, "1234", {delay: 50});
   
   await expect(nameInput).toHaveValue("Cardo Dalisay");
   await expect(emailInput).toHaveValue("boba.lover@example.com");
   await expect(passwordInput).toHaveValue("Password123!");
+  await expect(adminPinInput).toHaveValue("1234");
+  await expect(confirmAdminPinInput).toHaveValue("1234");
+  
 
   return { submitButton, canvas, passwordInput };
 };
@@ -125,10 +133,11 @@ export const TogglePasswordVisibility: Story = {
 
     await expect(passwordInput).toHaveAttribute("type", "password");
 
-    await userEvent.click(toggleButton);
+    await userEvent.click(toggleButton, {delay: 50});
     await expect(passwordInput).toHaveAttribute("type", "text");
 
-    await userEvent.click(toggleButton);
+    await userEvent.click(toggleButton, {delay: 50});
     await expect(passwordInput).toHaveAttribute("type", "password");
+    
   },
 };
