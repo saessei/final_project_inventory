@@ -705,19 +705,21 @@ const DrinkModal = ({
   });
   const [imagePreview, setImagePreview] = useState(item?.image_url || "");
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
     setUploading(true);
+    setUploadError("");
     try {
       const url = await uploadImage(file);
       setImagePreview(url);
       setFormData({ ...formData, image_url: url });
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Failed to upload image");
+      setUploadError("Failed to upload image");
     } finally {
       setUploading(false);
     }
@@ -770,6 +772,11 @@ const DrinkModal = ({
                 />
               </label>
             </div>
+            {uploadError && (
+              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+                {uploadError}
+              </div>
+            )}
           </div>
           
           {/* Name */}
@@ -877,6 +884,7 @@ const ToppingModalComponent = ({ item, onSave, onClose }: { item: ToppingType | 
     price: item?.price?.toString() || "0"
   });
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const handleNumberChange = (value: string) => {
     if (value === "" || /^\d*\.?\d*$/.test(value)) {
@@ -885,14 +893,16 @@ const ToppingModalComponent = ({ item, onSave, onClose }: { item: ToppingType | 
   };
 
   const handleSubmit = async () => {
+    setError("");
+    
     if (!formData.name.trim()) {
-      alert("Please enter a topping name");
+      setError("Please enter a topping name");
       return;
     }
     
     const price = formData.price === "" ? 0 : parseFloat(formData.price);
     if (isNaN(price)) {
-      alert("Please enter a valid price");
+      setError("Please enter a valid price");
       return;
     }
 
@@ -916,6 +926,11 @@ const ToppingModalComponent = ({ item, onSave, onClose }: { item: ToppingType | 
             <X size={24} />
           </button>
         </div>
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+            {error}
+          </div>
+        )}
         <div className="space-y-4">
           <div>
             <label className="font-semibold text-sm">Topping Name *</label>
