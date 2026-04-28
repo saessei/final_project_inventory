@@ -419,13 +419,13 @@ export const MenuManager = () => {
     );
   }
   
-  // if (loading && isAuthorized) {
-  //   return (
-  //     <div className="bg-cream min-h-screen flex items-center justify-center">
-  //       <div className="text-center">Loading menu manager...</div>
-  //     </div>
-  //   );
-  // }
+  if (loading && isAuthorized) {
+    return (
+      <div className="bg-cream min-h-screen flex items-center justify-center">
+        <div className="text-center">Loading menu manager...</div>
+      </div>
+    );
+  }
   
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
