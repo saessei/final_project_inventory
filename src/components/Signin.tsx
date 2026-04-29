@@ -75,7 +75,7 @@ export const Signin = () => {
               <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
               <input
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
+                placeholder="Email"
                 className="w-full p-3 pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all"
                 type="email"
                 required
