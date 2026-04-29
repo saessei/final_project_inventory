@@ -178,16 +178,6 @@ export const Kiosk = () => {
       console.error("❌ Failed to send order to queue:", error);
     }
   };
-  // if (loading) {
-  //   return (
-  //     <div className="bg-cream min-h-screen flex items-center justify-center">
-  //       <div className="text-center">
-  //         <div className="text-4xl mb-4">🥤</div>
-  //         <p className="text-gray-600">Loading menu...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   const hasNoMenu = drinks.length === 0;
 

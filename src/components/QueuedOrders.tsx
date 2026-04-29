@@ -29,6 +29,7 @@ export const QueuedOrders = () => {
       ? orders.filter(
           (order) => order.status === "pending" || order.status === "preparing",
         )
+        .sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
       : completedOrders;
 
   const handleStatusChange = async (order: Order) => {
