@@ -1,7 +1,7 @@
 // src/components/Admin/MenuManager.tsx
 import { useState, useEffect, useCallback } from "react";
-import { dynamicMenu } from "@/services/DynamicMenuService";
-import { drinkService } from "@/services/DrinkService";
+import { dynamicMenu } from "@/services/dynamicMenuService";
+import { drinkService } from "@/services/drinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -218,36 +218,36 @@ export const MenuManager = () => {
             </p>
           </div>
 
-            <AdminTabs
-              activeTab={activeTab}
-              categories={categories}
-              drinks={drinks}
-              toppings={toppings}
-              sugarLevels={sugarLevels}
-              onTabChange={setActiveTab}
-              onAddCategory={() => {
-                setEditingItem(null);
-                setShowModal(true);
-              }}
-              onEditCategory={(category: CategoryType) => {
-                setEditingItem(category);
-                setShowModal(true);
-              }}
-              onDeleteCategory={handleDeleteCategory}
-              onAddDrink={() => {
-                setEditingItem(null);
-                setShowModal(true);
-              }}
-              onEditDrink={(drink: DrinkType) => {
-                setEditingItem(drink);
-                setShowModal(true);
-              }}
-              onDeleteDrink={handleDeleteDrink}
-              onAddTopping={handleAddTopping}
-              onEditTopping={handleEditTopping}
-              onDeleteTopping={handleDeleteTopping}
-              onUpdateSugarLevel={handleUpdateSugarLevel}
-            />
+          <AdminTabs
+            activeTab={activeTab}
+            categories={categories}
+            drinks={drinks}
+            toppings={toppings}
+            sugarLevels={sugarLevels}
+            onTabChange={setActiveTab}
+            onAddCategory={() => {
+              setEditingItem(null);
+              setShowModal(true);
+            }}
+            onEditCategory={(category: CategoryType) => {
+              setEditingItem(category);
+              setShowModal(true);
+            }}
+            onDeleteCategory={handleDeleteCategory}
+            onAddDrink={() => {
+              setEditingItem(null);
+              setShowModal(true);
+            }}
+            onEditDrink={(drink: DrinkType) => {
+              setEditingItem(drink);
+              setShowModal(true);
+            }}
+            onDeleteDrink={handleDeleteDrink}
+            onAddTopping={handleAddTopping}
+            onEditTopping={handleEditTopping}
+            onDeleteTopping={handleDeleteTopping}
+            onUpdateSugarLevel={handleUpdateSugarLevel}
+          />
         </div>
       </main>
 
