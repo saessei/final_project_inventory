@@ -8,7 +8,7 @@ import type {
   DrinkType,
   SugarLevel,
   ToppingType,
-} from "../../types/menuTypes";
+} from "@/types/menuTypes";
 
 interface SugarLevelCardProps {
   level: SugarLevel;

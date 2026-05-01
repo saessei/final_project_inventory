@@ -16,7 +16,7 @@ import type {
   SugarLevel,
   TabType,
   ToppingType,
-} from "../../types/menuTypes";
+} from "@/types/menuTypes";
 
 export const MenuManager = () => {
   const [activeTab, setActiveTab] = useState<TabType>("drinks");

@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react";
-import type { BusyHour } from "../../types/reportTypes";
+import type { BusyHour } from "@/types/reportTypes";
 
 interface BusyHoursPanelProps {
   busyHours: BusyHour[];

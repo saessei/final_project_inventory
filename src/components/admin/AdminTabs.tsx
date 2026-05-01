@@ -20,7 +20,7 @@ import type {
   SugarLevel,
   TabType,
   ToppingType,
-} from "../../types/menuTypes";
+} from "@/types/menuTypes";
 
 interface AdminTabsProps {
   activeTab: TabType;

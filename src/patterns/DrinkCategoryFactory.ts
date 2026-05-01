@@ -1,5 +1,4 @@
-import { Drink } from "./DrinkFactory";
-import { DrinkFactory } from "./DrinkFactory";
+import { Drink, DrinkFactory } from "@/patterns/drinkFactory";
 import { dynamicMenu } from "@/services/dynamicMenuService";
 
 export type DrinkCategoryId = string;

@@ -7,7 +7,7 @@ import { ReportsHeader } from "@/components/reports/ReportsHeader";
 import { StatsCards } from "@/components/reports/StatsCards";
 import { TopDrinksPanel } from "@/components/reports/TopDrinksPanel";
 import { TopToppingsPanel } from "@/components/reports/TopToppingsPanel";
-import { useReportMetrics } from "@/components/reports/useReportMetrics";
+import { useReportMetrics } from "@/hooks/useReportMetrics";
 import type { ReportOrder } from "@/types/reportTypes";
 
 export const Reports = () => {

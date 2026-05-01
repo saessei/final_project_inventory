@@ -10,7 +10,7 @@ import type {
   DrinkModalData,
   DrinkType,
   ToppingType,
-} from "../../types/menuTypes";
+} from "@/types/menuTypes";
 
 interface CategoryModalProps {
   item: CategoryType | null;

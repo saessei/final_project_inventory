@@ -1,4 +1,4 @@
-import type { ReportOrder } from "../../types/reportTypes";
+import type { ReportOrder } from "@/types/reportTypes";
 
 export const useReportMetrics = (orders: ReportOrder[]) => {
   const totalRevenue = orders.reduce(

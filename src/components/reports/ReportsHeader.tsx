@@ -1,7 +1,7 @@
 import { Calendar, ChevronRight, Download, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
-import type { DateRange } from "../../types/reportTypes";
+import type { DateRange } from "@/types/reportTypes";
 
 interface ReportsHeaderProps {
   dateRange: DateRange;

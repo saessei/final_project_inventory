@@ -1,5 +1,5 @@
 import { ListTodo } from "lucide-react";
-import type { ReportOrder } from "../../types/reportTypes";
+import type { ReportOrder } from "@/types/reportTypes";
 
 interface RecentOrdersTableProps {
   loading: boolean;
