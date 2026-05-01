@@ -1,7 +1,7 @@
 // src/components/Admin/MenuManager.tsx
 import { useState, useEffect, useRef, useCallback } from "react";
-import { dynamicMenu } from "@/services/DynamicMenuService";
-import { drinkService } from "@/services/DrinkService";
+import { dynamicMenu } from "@/services/dynamicMenuService";
+import { drinkService } from "@/services/drinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { AdminPinModal } from "@/components/admin/AdminPinModal";
