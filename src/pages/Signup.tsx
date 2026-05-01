@@ -2,19 +2,15 @@
 import { useState } from "react";
 import { Header } from "@/components/ui/Header";
 import { BobaFooter } from "@/components/ui/BobaFooter";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { TextField } from "@/components/ui/TextField";
 import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "@/components/auth/AuthContext";
 import * as React from "react";
 import "../index.css";
-import {
-  Eye,
-  EyeOff,
-  Mail,
-  Lock,
-  UserRound,
-  KeyRound,
-  Loader2,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, UserRound, KeyRound } from "lucide-react";
 
 export const Signup = () => {
   const [email, setEmail] = useState("");
@@ -100,148 +96,114 @@ export const Signup = () => {
 
           <div className="grid md:grid-cols-2 gap-6 md:gap-8 font-quicksand text-brown-two items-start">
             <section className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs uppercase ml-2 font-semibold">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <UserRound
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
-                  />
-                  <input
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Name"
-                    className="w-full p-3 pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all"
-                    type="text"
-                    required
-                  />
-                </div>
-              </div>
+              <TextField
+                label="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Name"
+                type="text"
+                leftIcon={<UserRound size={18} />}
+                required
+              />
 
-              <div className="space-y-1">
-                <label className="text-xs ml-2 uppercase font-semibold">
-                  Email
-                </label>
-                <div className="relative">
-                  <Mail
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
-                  />
-                  <input
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    className="w-full p-3 pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all"
-                    type="email"
-                    required
-                  />
-                </div>
-              </div>
+              <TextField
+                label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                type="email"
+                leftIcon={<Mail size={18} />}
+                required
+              />
 
-              <div className="space-y-1">
-                <label className="text-xs ml-2 uppercase font-semibold">
-                  Password
-                </label>
-                <div className="relative flex items-center">
-                  <Lock
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
-                  />
-                  <input
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="p-3 w-full pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all pr-12"
-                    type={showPassword ? "text" : "password"}
-                    required
-                  />
-                  <button
-                    type="button"
+              <TextField
+                label="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                type={showPassword ? "text" : "password"}
+                leftIcon={<Lock size={18} />}
+                rightElement={
+                  <IconButton
+                    label={showPassword ? "Hide password" : "Show password"}
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brown-two transition-colors"
+                    className="h-auto w-auto p-0 text-gray-400 hover:bg-transparent hover:text-brown-two"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
+                  </IconButton>
+                }
+                required
+              />
             </section>
 
             <section className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs ml-2 uppercase font-semibold">
-                  Admin PIN
-                </label>
-                <div className="relative flex items-center">
-                  <KeyRound
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
-                  />
-                  <input
-                    onChange={(e) => setAdminPin(e.target.value)}
-                    placeholder="Enter admin PIN (4+ digits)"
-                    className="p-3 w-full pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all pr-12"
-                    type={showAdminPin ? "text" : "password"}
-                  />
-                  <button
-                    type="button"
+              <TextField
+                label="Admin PIN"
+                value={adminPin}
+                onChange={(e) => setAdminPin(e.target.value)}
+                placeholder="Enter admin PIN (4+ digits)"
+                type={showAdminPin ? "text" : "password"}
+                leftIcon={<KeyRound size={18} />}
+                rightElement={
+                  <IconButton
+                    label={showAdminPin ? "Hide admin PIN" : "Show admin PIN"}
                     onClick={() => setShowAdminPin(!showAdminPin)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brown-two transition-colors"
+                    className="h-auto w-auto p-0 text-gray-400 hover:bg-transparent hover:text-brown-two"
                   >
                     {showAdminPin ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </button>
-                </div>
-              </div>
+                  </IconButton>
+                }
+              />
 
-              <div className="space-y-1">
-                <label className="text-xs ml-2 uppercase font-semibold">
-                  Confirm Admin PIN
-                </label>
-                <div className="relative flex items-center">
-                  <KeyRound
-                    size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
-                  />
-                  <input
-                    onChange={(e) => setConfirmAdminPin(e.target.value)}
-                    placeholder="Confirm admin PIN"
-                    className="p-3 w-full pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all pr-12"
-                    type={showConfirmAdminPin ? "text" : "password"}
-                  />
-                  <button
-                    type="button"
+              <TextField
+                label="Confirm Admin PIN"
+                value={confirmAdminPin}
+                onChange={(e) => setConfirmAdminPin(e.target.value)}
+                placeholder="Confirm admin PIN"
+                type={showConfirmAdminPin ? "text" : "password"}
+                leftIcon={<KeyRound size={18} />}
+                rightElement={
+                  <IconButton
+                    label={
+                      showConfirmAdminPin
+                        ? "Hide admin PIN confirmation"
+                        : "Show admin PIN confirmation"
+                    }
                     onClick={() => setShowConfirmAdminPin(!showConfirmAdminPin)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brown-two transition-colors"
+                    className="h-auto w-auto p-0 text-gray-400 hover:bg-transparent hover:text-brown-two"
                   >
                     {showConfirmAdminPin ? (
                       <EyeOff size={20} />
                     ) : (
                       <Eye size={20} />
                     )}
-                  </button>
-                </div>
-              </div>
+                  </IconButton>
+                }
+              />
 
-              <p className="text-xs text-text-gray bg-cream/70 border border-brown/15 rounded-xl px-3 py-2 mt-2">
+              <Alert variant="info" className="text-xs font-normal">
                 Add an admin PIN only if you need Menu Manager access.
-              </p>
+              </Alert>
             </section>
 
             <div className="md:col-span-2 flex flex-row gap-3 mt-2 items-center justify-center">
-              <button
+              <Button
                 type="submit"
-                disabled={loading}
-                className="w-full md:max-w-md rounded-2xl font-bold bg-gradient-to-r from-brown-two to-dark-brown px-4 py-3 text-white duration-300 hover:scale-[1.02] active:scale-95 shadow-md uppercase text-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
+                variant="primary"
+                size="lg"
+                fullWidth
+                isLoading={loading}
+                loadingText="Creating..."
+                className="md:max-w-md uppercase"
               >
-                <span className="inline-flex items-center justify-center gap-2">
-                  {loading && <Loader2 size={16} className="animate-spin" />}
-                  {loading ? "Creating..." : "Create Account"}
-                </span>
-              </button>
+                Create Account
+              </Button>
             </div>
 
             {error && (
-              <p className="md:col-span-2 text-red-600 text-center text-sm font-semibold bg-red-50 border border-red-200 rounded-xl px-3 py-2 mt-2">
+              <Alert variant="error" className="md:col-span-2 text-center mt-2">
                 {error}
-              </p>
+              </Alert>
             )}
           </div>
         </form>

@@ -1,4 +1,4 @@
-import { Signup } from "./features/Signup"
+import { Signup } from "./pages/Signup";
 
 function App() {
 
@@ -6,7 +6,7 @@ function App() {
     <>
       <Signup />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

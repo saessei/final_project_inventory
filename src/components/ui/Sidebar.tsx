@@ -10,7 +10,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { UserAuth } from "@/components/auth/AuthContext";
-import { AdminPinModal } from "./AdminPinModal";
+import { AdminPinModal } from "../admin/AdminPinModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "/src/assets/QueueTea.png";
 
@@ -67,7 +67,7 @@ export const Sidebar = () => {
       {/* Mobile overlay */}
       {isMobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setIsMobileOpen(false)}
         />
       )}

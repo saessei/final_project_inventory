@@ -1,3 +1,5 @@
+import { Button } from "./Button";
+
 type OrderStatus = "pending" | "preparing" | "completed";
 
 interface OrderButtonProps {
@@ -35,12 +37,13 @@ export const OrderStatusButton = ({ status, onClick }: OrderButtonProps) => {
 
   return (
     <div>
-      <button
-        className={`${color} ${text} cursor-pointer rounded-2xl font-quicksand font-bold px-4 py-2`}
+      <Button
+        variant="secondary"
+        className={`${color} ${text} rounded-2xl font-quicksand font-bold hover:scale-100`}
         onClick={onClick}
       >
         {label}
-      </button>
+      </Button>
     </div>
   );
 };

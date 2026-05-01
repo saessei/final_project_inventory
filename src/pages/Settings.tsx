@@ -1,7 +1,10 @@
 import { FormEvent, useState, useEffect } from "react";
 import { UserAuth } from "@/components/auth/AuthContext";
-import { profileService } from "@/services/ProfileService";
+import { profileService } from "@/services/profileService";
 import { Sidebar } from "@/components/ui/Sidebar";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/TextField";
 import supabase from "@/lib/supabaseClient";
 
 export const Settings = () => {
@@ -114,13 +117,13 @@ export const Settings = () => {
           {(statusMessage || formError) && (
             <div className="mb-6 rounded-2xl px-4 py-3 text-sm font-medium">
               {statusMessage ? (
-                <p className="text-emerald-700 bg-emerald-100 border border-emerald-200 rounded-xl px-4 py-3">
+                <Alert variant="success">
                   {statusMessage}
-                </p>
+                </Alert>
               ) : (
-                <p className="text-red-700 bg-red-100 border border-red-200 rounded-xl px-4 py-3">
+                <Alert variant="error">
                   {formError}
-                </p>
+                </Alert>
               )}
             </div>
           )}
@@ -141,23 +144,24 @@ export const Settings = () => {
                 }}
                 className="mt-6 space-y-4"
               >
-                <label className="text-xs uppercase ml-2 font-semibold text-brown-two">
-                  Full Name
-                </label>
-                <input
+                <TextField
+                  label="Full Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your full name"
-                  className="w-full p-3 rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all"
                   type="text"
                 />
-                <button
+                <Button
                   type="submit"
                   disabled={loading || savingName}
-                  className="w-full rounded-2xl bg-gradient-to-r from-brown-two to-dark-brown px-4 py-3 text-sm font-bold text-white transition hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  isLoading={savingName}
+                  loadingText="Saving..."
                 >
-                  {savingName ? "Saving..." : "Save Name"}
-                </button>
+                  Save Name
+                </Button>
               </form>
             </section>
 
@@ -171,37 +175,30 @@ export const Settings = () => {
                 Choose a new password to keep your account secure.
               </p>
               <form onSubmit={handleUpdatePassword} className="mt-6 space-y-4">
-                <div>
-                  <label className="text-xs uppercase ml-2 font-semibold text-brown-two">
-                    New Password
-                  </label>
-                  <input
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="New password"
-                    className="w-full p-3 rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all"
-                    type="password"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs uppercase ml-2 font-semibold text-brown-two">
-                    Confirm Password
-                  </label>
-                  <input
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm password"
-                    className="w-full p-3 rounded-2xl bg-gray-100 border border-transparent focus:border-brown outline-none transition-all"
-                    type="password"
-                  />
-                </div>
-                <button
+                <TextField
+                  label="New Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="New password"
+                  type="password"
+                />
+                <TextField
+                  label="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Confirm password"
+                  type="password"
+                />
+                <Button
                   type="submit"
-                  disabled={savingPassword}
-                  className="w-full rounded-2xl bg-gradient-to-r from-brown-two to-dark-brown px-4 py-3 text-sm font-bold text-white transition hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  isLoading={savingPassword}
+                  loadingText="Updating..."
                 >
-                  {savingPassword ? "Updating..." : "Update Password"}
-                </button>
+                  Update Password
+                </Button>
               </form>
             </section>
           </div>

@@ -4,8 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { Header } from "@/components/ui/Header";
 import { BobaFooter } from "@/components/ui/BobaFooter";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
+import { IconButton } from "@/components/ui/IconButton";
+import { TextField } from "@/components/ui/TextField";
 import * as React from "react";
-import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 
 export const Signin = () => {
   const [email, setEmail] = useState("");
@@ -68,64 +72,54 @@ export const Signin = () => {
           </div>
 
           <div className="flex flex-col font-quicksand text-brown-two">
-            <label className="text-xs ml-2 uppercase font-semibold">
-              Email
-            </label>
-            <div className="relative mb-4 mt-1">
-              <Mail
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
-              />
-              <input
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                className="w-full p-3 pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all"
-                type="email"
-                required
-              />
-            </div>
+            <TextField
+              label="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              type="email"
+              leftIcon={<Mail size={18} />}
+              required
+              className="mb-4"
+            />
 
-            <label className="text-xs ml-2 uppercase font-semibold">
-              Password
-            </label>
-            <div className="relative flex items-center mt-1">
-              <Lock
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
-              />
-              <input
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="p-3 pl-10 w-full rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all pr-12"
-                type={showPassword ? "text" : "password"}
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-[55%] -translate-y-1/2 text-gray-400 hover:text-brown-two transition-colors"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
+            <TextField
+              label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              type={showPassword ? "text" : "password"}
+              leftIcon={<Lock size={18} />}
+              rightElement={
+                <IconButton
+                  label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="h-auto w-auto p-0 text-gray-400 hover:bg-transparent hover:text-brown-two"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </IconButton>
+              }
+              required
+            />
 
             <div className="flex flex-row gap-3 mt-8 items-center justify-center">
-              <button
+              <Button
                 type="submit"
-                disabled={loading}
-                className="flex-1 rounded-2xl font-bold bg-gradient-to-r from-brown-two to-dark-brown px-4 py-3 text-white duration-300 hover:scale-[1.02] active:scale-95 shadow-md uppercase text-sm disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:scale-100"
+                variant="primary"
+                size="lg"
+                fullWidth
+                isLoading={loading}
+                loadingText="Logging in..."
+                className="uppercase"
               >
-                <span className="inline-flex items-center justify-center gap-2">
-                  {loading && <Loader2 size={16} className="animate-spin" />}
-                  {loading ? "Logging in..." : "Sign In"}
-                </span>
-              </button>
+                Sign In
+              </Button>
             </div>
 
             {error && (
-              <p className="text-red-600 pt-4 text-center text-sm font-semibold bg-red-50 border border-red-200 rounded-xl px-3 py-2 mt-4">
+              <Alert variant="error" className="mt-4 text-center">
                 {error}
-              </p>
+              </Alert>
             )}
           </div>
         </form>

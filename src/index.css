@@ -1,15 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&family=Quicksand:wght@300..700&display=swap");
 @import "tailwindcss";
 
-@theme {
+:root {
   /* --- Colors from your config --- */
-  --color-cream: #FFF8F0;
-  --color-dark-brown: #4B2E2B;
-  --color-brown-two: #8C5A3C;
-  --color-brown: #C08552;
-  --color-bg-lightgray: #F5F5F4;
+  --color-cream: #fff8f0;
+  --color-dark-brown: #4b2e2b;
+  --color-brown-two: #8c5a3c;
+  --color-brown: #c08552;
+  --color-bg-lightgray: #f5f5f4;
   --color-text-gray: #807975;
-  --color-button-gray: #ECE7E4;
+  --color-button-gray: #ece7e4;
 
   /* --- Fonts from your config --- */
   --font-fredoka: "Fredoka", sans-serif;
@@ -18,9 +18,21 @@
 
 /* --- Custom Utility Classes --- */
 .boba-pattern {
-  background-image: url('./assets/pearl.png'); 
+  background-image: url("./assets/pearl.png");
   background-repeat: repeat-x;
   background-position: bottom;
-  background-size: 80px; 
-  height: 200px; 
+  background-size: 80px;
+  height: 200px;
+}
+
+/* Keep scrolling enabled but hide scrollbar UI across browsers. */
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
