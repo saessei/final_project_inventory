@@ -5,7 +5,7 @@ import { Kiosk } from "@/pages/Kiosk";
 import { QueuedOrders } from "@/pages/QueuedOrders";
 import { Settings } from "@/pages/Settings";
 import { Reports } from "@/pages/Reports";
-import { MenuManager } from "@/features/Admin/MenuManager"; // Keep this
+import { MenuManager } from "@/components/admin/MenuManager"; // Keep this
 import { ProtectedRoute } from "@/pages/ProtectedRoute";
 
 // Remove these lines:

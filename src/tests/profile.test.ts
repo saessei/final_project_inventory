@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { profileService } from "@/services/profileService";
-import { supabaseAdmin } from "@/lib/supabaseTestClient";
+import { supabaseAdmin } from "@/tests/supabaseTestClient";
 import supabase from "@/lib/supabaseClient";
 
 describe("Profile & Password Service Integration", () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, afterAll } from "vitest";
-import { supabaseAdmin } from "@/lib/supabaseTestClient";
+import { supabaseAdmin } from "@/tests/supabaseTestClient";
 
 type CartRow = {
   id: string;

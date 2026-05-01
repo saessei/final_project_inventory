@@ -1,6 +1,6 @@
 // vitest.setup.ts
-import { beforeAll, afterAll } from 'vitest';
-import { supabaseAdmin } from '../lib/supabaseTestClient';
+import { beforeAll, afterAll } from "vitest";
+import { supabaseAdmin } from "@/tests/supabaseTestClient";
 
 beforeAll(async () => {
   // Example: Ensure the test database is reachable before starting
@@ -9,5 +9,5 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // Example: Wipe the 'orders' table after ALL test files finish
-  await supabaseAdmin.from('orders').delete().neq('id', '0000-0000...');
+  await supabaseAdmin.from("orders").delete().neq("id", "0000-0000...");
 });

@@ -2,7 +2,7 @@ import { describe, it, expect, afterAll } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { waitFor } from "@testing-library/dom";
 import { useOrders } from "@/hooks/useOrders";
-import { supabaseAdmin } from "@/lib/supabaseTestClient";
+import { supabaseAdmin } from "@/tests/supabaseTestClient";
 import { createOrder } from "@/services/orderService";
 
 describe("useOrders (integration, test DB)", () => {

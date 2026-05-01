@@ -12,7 +12,6 @@ const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storage: localStorage,
     storageKey: "queuetea-auth",
   },
 });
