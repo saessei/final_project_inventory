@@ -7,15 +7,15 @@ import { supabaseAdmin } from "@/tests/supabaseTestClient";
 describe("useCart (integration, real Supabase DB)", () => {
   const testRunId = `vitest-useCart-${Date.now()}`;
   const createdCartIds: string[] = [];
-  const createdBaristaUserIds: string[] = [];
+  const createdStaffUserIds: string[] = [];
 
   function trackCartId(id: string | null) {
     if (!id) return;
     if (!createdCartIds.includes(id)) createdCartIds.push(id);
   }
 
-  function trackBaristaUserId(id: string) {
-    if (!createdBaristaUserIds.includes(id)) createdBaristaUserIds.push(id);
+  function trackStaffUserId(id: string) {
+    if (!createdStaffUserIds.includes(id)) createdStaffUserIds.push(id);
   }
 
   function makeBaseItem(overrides?: Partial<Omit<CartItem, "id" | "cart_id">>) {
@@ -45,19 +45,19 @@ describe("useCart (integration, real Supabase DB)", () => {
         .in("cart_id", createdCartIds);
       await supabaseAdmin.from("carts").delete().in("id", createdCartIds);
     }
-    if (createdBaristaUserIds.length) {
+    if (createdStaffUserIds.length) {
       await supabaseAdmin
         .from("carts")
         .delete()
-        .in("barista_user_id", createdBaristaUserIds);
+        .in("barista_user_id", createdStaffUserIds);
     }
   });
 
   it("creates and mutates a real cart through the hook", async () => {
-    const baristaUserId = crypto.randomUUID();
-    trackBaristaUserId(baristaUserId);
+    const staffUserId = crypto.randomUUID();
+    trackStaffUserId(staffUserId);
 
-    const { result, unmount } = renderHook(() => useCart(baristaUserId));
+    const { result, unmount } = renderHook(() => useCart(staffUserId));
 
     await waitFor(() => expect(result.current.cartId).not.toBeNull(), {
       timeout: 10000,
@@ -105,9 +105,9 @@ describe("useCart (integration, real Supabase DB)", () => {
   }, 20000);
 
   it("computes cartTotal across multiple items", async () => {
-    const baristaUserId = crypto.randomUUID();
-    trackBaristaUserId(baristaUserId);
-    const { result, unmount } = renderHook(() => useCart(baristaUserId));
+    const staffUserId = crypto.randomUUID();
+    trackStaffUserId(staffUserId);
+    const { result, unmount } = renderHook(() => useCart(staffUserId));
 
     await waitFor(() => expect(result.current.cartId).not.toBeNull());
     trackCartId(result.current.cartId);
@@ -126,9 +126,9 @@ describe("useCart (integration, real Supabase DB)", () => {
   }, 20000);
 
   it("decrementItemAtIndex deletes the row when quantity is 1", async () => {
-    const baristaUserId = crypto.randomUUID();
-    trackBaristaUserId(baristaUserId);
-    const { result, unmount } = renderHook(() => useCart(baristaUserId));
+    const staffUserId = crypto.randomUUID();
+    trackStaffUserId(staffUserId);
+    const { result, unmount } = renderHook(() => useCart(staffUserId));
 
     await waitFor(() => expect(result.current.cartId).not.toBeNull());
     trackCartId(result.current.cartId);
@@ -147,25 +147,25 @@ describe("useCart (integration, real Supabase DB)", () => {
     unmount();
   }, 20000);
 
-  it("reuses the same active cart for the same baristaUserId", async () => {
-    const baristaUserId = crypto.randomUUID();
-    trackBaristaUserId(baristaUserId);
+  it("reuses the same active cart for the same staffUserId", async () => {
+    const staffUserId = crypto.randomUUID();
+    trackStaffUserId(staffUserId);
 
-    const first = renderHook(() => useCart(baristaUserId));
+    const first = renderHook(() => useCart(staffUserId));
     await waitFor(() => expect(first.result.current.cartId).not.toBeNull());
     trackCartId(first.result.current.cartId);
     first.unmount();
 
-    const second = renderHook(() => useCart(baristaUserId));
+    const second = renderHook(() => useCart(staffUserId));
     await waitFor(() => expect(second.result.current.cartId).not.toBeNull());
     expect(second.result.current.cartId).toBe(first.result.current.cartId);
     second.unmount();
   }, 20000);
 
-  it("throws when upsertItem is called without baristaUserId", async () => {
+  it("throws when upsertItem is called without staffUserId", async () => {
     const { result } = renderHook(() => useCart(undefined));
     await expect(result.current.upsertItem(makeBaseItem())).rejects.toThrow(
-      "Missing baristaUserId",
+      "Missing staffUserId",
     );
   });
 

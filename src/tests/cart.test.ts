@@ -21,7 +21,7 @@ type CartItemRow = {
 
 describe("Cart Integration Test", () => {
   const testRunId = `vitest-cart-api-${Date.now()}`;
-  const baristaUserId = crypto.randomUUID();
+  const staffUserId = crypto.randomUUID();
 
   const createdCartIds: string[] = [];
   const createdCartItemIds: string[] = [];
@@ -31,7 +31,7 @@ describe("Cart Integration Test", () => {
     const { data: existing, error: existingErr } = await supabaseAdmin
       .from("carts")
       .select("id, barista_user_id, status")
-      .eq("barista_user_id", baristaUserId)
+      .eq("barista_user_id", staffUserId)
       .eq("status", "active")
       .maybeSingle<CartRow>();
 
@@ -40,7 +40,7 @@ describe("Cart Integration Test", () => {
 
     const { data: created, error: createErr } = await supabaseAdmin
       .from("carts")
-      .insert([{ barista_user_id: baristaUserId, status: "active" }])
+      .insert([{ barista_user_id: staffUserId, status: "active" }])
       .select("id")
       .single();
 
@@ -71,13 +71,13 @@ describe("Cart Integration Test", () => {
       await supabaseAdmin
         .from("carts")
         .delete()
-        .eq("barista_user_id", baristaUserId);
+        .eq("barista_user_id", staffUserId);
     }
   });
 
   // Happy Path
 
-  it("creates an active cart for a barista user", async () => {
+  it("creates an active cart for a staff user", async () => {
     const cartId = await ensureActiveCart();
 
     const { data, error } = await supabaseAdmin
@@ -88,7 +88,7 @@ describe("Cart Integration Test", () => {
 
     expect(error).toBeNull();
     expect(data).toBeTruthy();
-    expect(data!.barista_user_id).toBe(baristaUserId);
+    expect(data!.barista_user_id).toBe(staffUserId);
     expect(data!.status).toBe("active");
   });
 
