@@ -17,12 +17,10 @@ export const Signup = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [adminPin, setAdminPin] = useState("");
-  const [confirmAdminPin, setConfirmAdminPin] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showAdminPin, setShowAdminPin] = useState(false);
-  const [showConfirmAdminPin, setShowConfirmAdminPin] = useState(false);
 
   const { signUpNewUser } = UserAuth()!;
   const navigate = useNavigate();
@@ -33,13 +31,13 @@ export const Signup = () => {
     setLoading(true);
     setError("");
 
-    if (adminPin !== confirmAdminPin) {
-      setError("Admin PINs do not match.");
+    if (!adminPin) {
+      setError("Admin PIN is required.");
       setLoading(false);
       return;
     }
 
-    if (adminPin && adminPin.length < 4) {
+    if (adminPin.length < 4) {
       setError("Admin PIN must be at least 4 digits.");
       setLoading(false);
       return;
@@ -76,7 +74,7 @@ export const Signup = () => {
       <main className="min-h-screen flex flex-col items-center justify-center relative z-10 px-4 py-8">
         <form
           onSubmit={handleSignUp}
-          className="max-w-4xl w-full p-6 md:p-8 rounded-3xl shadow-2xl bg-white/95 border border-white/70 backdrop-blur"
+          className="max-w-md w-full p-8 rounded-3xl shadow-2xl bg-white/95 border border-white/70 backdrop-blur"
         >
           <h2 className="text-brown-two text-3xl font-bold font-fredoka pb-2 text-center tracking-tight">
             Get Started
@@ -94,13 +92,13 @@ export const Signup = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 font-quicksand text-brown-two items-start">
+          <div className="flex flex-col font-quicksand text-brown-two">
             <section className="space-y-4">
               <TextField
                 label="Full Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Name"
+                placeholder="e.g. Boba Lover"
                 type="text"
                 leftIcon={<UserRound size={18} />}
                 required
@@ -110,7 +108,7 @@ export const Signup = () => {
                 label="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
+                placeholder="user@example.com"
                 type="email"
                 leftIcon={<Mail size={18} />}
                 required
@@ -133,17 +131,16 @@ export const Signup = () => {
                   </IconButton>
                 }
                 required
+                className="mb-4"
               />
-            </section>
-
-            <section className="space-y-4">
               <TextField
                 label="Admin PIN"
                 value={adminPin}
                 onChange={(e) => setAdminPin(e.target.value)}
-                placeholder="Enter admin PIN (4+ digits)"
+                placeholder="Enter admin PIN"
                 type={showAdminPin ? "text" : "password"}
                 leftIcon={<KeyRound size={18} />}
+                required
                 rightElement={
                   <IconButton
                     label={showAdminPin ? "Hide admin PIN" : "Show admin PIN"}
@@ -154,39 +151,9 @@ export const Signup = () => {
                   </IconButton>
                 }
               />
-
-              <TextField
-                label="Confirm Admin PIN"
-                value={confirmAdminPin}
-                onChange={(e) => setConfirmAdminPin(e.target.value)}
-                placeholder="Confirm admin PIN"
-                type={showConfirmAdminPin ? "text" : "password"}
-                leftIcon={<KeyRound size={18} />}
-                rightElement={
-                  <IconButton
-                    label={
-                      showConfirmAdminPin
-                        ? "Hide admin PIN confirmation"
-                        : "Show admin PIN confirmation"
-                    }
-                    onClick={() => setShowConfirmAdminPin(!showConfirmAdminPin)}
-                    className="h-auto w-auto p-0 text-gray-400 hover:bg-transparent hover:text-brown-two"
-                  >
-                    {showConfirmAdminPin ? (
-                      <EyeOff size={20} />
-                    ) : (
-                      <Eye size={20} />
-                    )}
-                  </IconButton>
-                }
-              />
-
-              <Alert variant="info" className="text-xs font-normal">
-                Add an admin PIN only if you need Menu Manager access.
-              </Alert>
             </section>
 
-            <div className="md:col-span-2 flex flex-row gap-3 mt-2 items-center justify-center">
+            <div className="flex flex-row gap-3 mt-8 items-center justify-center">
               <Button
                 type="submit"
                 variant="primary"
@@ -194,14 +161,14 @@ export const Signup = () => {
                 fullWidth
                 isLoading={loading}
                 loadingText="Creating..."
-                className="md:max-w-md uppercase"
+                className="uppercase"
               >
                 Create Account
               </Button>
             </div>
 
             {error && (
-              <Alert variant="error" className="md:col-span-2 text-center mt-2">
+              <Alert variant="error" className="mt-4 text-center">
                 {error}
               </Alert>
             )}

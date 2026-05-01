@@ -76,7 +76,7 @@ export const Signin = () => {
               label="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
+              placeholder="user@example.com"
               type="email"
               leftIcon={<Mail size={18} />}
               required
