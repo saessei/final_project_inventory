@@ -24,8 +24,8 @@ export const Sidebar = () => {
   const location = useLocation();
 
   const adminSidebarItems = [
-    { name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" },
-    { name: "Queued Orders", icon: <List size={20} />, path: "/queued-orders" },
+    { name: "Order Taking", icon: <Store size={20} />, path: "/kiosk" },
+    { name: "Order Queue", icon: <List size={20} />, path: "/queued-orders" },
     {
       name: "Menu Manager",
       icon: <ClipboardList size={20} />,
@@ -36,9 +36,8 @@ export const Sidebar = () => {
   ];
 
   const staffSidebarItems = [
-    { name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" },
-    { name: "Queued Orders", icon: <List size={20} />, path: "/queued-orders" },
-    { name: "Reports", icon: <BarChart2 size={20} />, path: "/reports" },
+    { name: "Order Taking", icon: <Store size={20} />, path: "/kiosk" },
+    { name: "Order Queue", icon: <List size={20} />, path: "/queued-orders" },
   ];
 
   const sidebarItems = mode === "staff" ? staffSidebarItems : adminSidebarItems;

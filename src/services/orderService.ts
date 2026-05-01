@@ -40,16 +40,16 @@ export const createOrder = async (
 export const updateOrderStatus = async (
   orderId: string,
   newStatus: "pending" | "preparing" | "completed",
-  options?: { claim?: boolean; baristaUserId?: string },
+  options?: { claim?: boolean; staffUserId?: string },
   client: SupabaseClient = supabase,
 ) => {
   const patch: Record<string, unknown> = { status: newStatus };
 
   if (options?.claim) {
-    if (!options.baristaUserId) {
-      throw new Error("baristaUserId is required when claim=true");
+    if (!options.staffUserId) {
+      throw new Error("staffUserId is required when claim=true");
     }
-    patch.claimed_by = options.baristaUserId;
+    patch.claimed_by = options.staffUserId;
     patch.claimed_at = new Date().toISOString();
   }
 

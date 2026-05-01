@@ -18,19 +18,19 @@ type Cart = {
   status: "active" | "checked_out" | "abandoned";
 };
 
-export function useCart(baristaUserId?: string) {
+export function useCart(staffUserId?: string) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartId, setCartId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const ensureActiveCart = useCallback(async () => {
-    if (!baristaUserId) return null;
+    if (!staffUserId) return null;
 
     // 1) find existing active cart
     const { data: existing, error: existingErr } = await supabase
       .from("carts")
       .select("id, barista_user_id, status")
-      .eq("barista_user_id", baristaUserId)
+      .eq("barista_user_id", staffUserId)
       .eq("status", "active")
       .maybeSingle<Cart>();
 
@@ -40,16 +40,16 @@ export function useCart(baristaUserId?: string) {
     // 2) create one if missing
     const { data: created, error: createErr } = await supabase
       .from("carts")
-      .insert([{ barista_user_id: baristaUserId, status: "active" }])
+      .insert([{ barista_user_id: staffUserId, status: "active" }])
       .select("id")
       .single();
 
     if (createErr) throw createErr;
     return created.id as string;
-  }, [baristaUserId]);
+  }, [staffUserId]);
 
   const refresh = useCallback(async () => {
-    if (!baristaUserId) return;
+    if (!staffUserId) return;
 
     setLoading(true);
     try {
@@ -69,7 +69,7 @@ export function useCart(baristaUserId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [baristaUserId, ensureActiveCart]);
+  }, [staffUserId, ensureActiveCart]);
 
   useEffect(() => {
     refresh();
@@ -100,7 +100,7 @@ export function useCart(baristaUserId?: string) {
 
   const upsertItem = useCallback(
     async (item: Omit<CartItem, "id" | "cart_id">) => {
-      if (!baristaUserId) throw new Error("Missing baristaUserId");
+      if (!staffUserId) throw new Error("Missing staffUserId");
       const id = cartId ?? (await ensureActiveCart());
       if (!id) return;
 
@@ -131,7 +131,7 @@ export function useCart(baristaUserId?: string) {
 
       await refresh();
     },
-    [baristaUserId, cartId, cart, ensureActiveCart, refresh],
+    [staffUserId, cartId, cart, ensureActiveCart, refresh],
   );
 
   const decrementItemAtIndex = useCallback(

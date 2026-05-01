@@ -9,9 +9,9 @@ export const QueuedOrders = () => {
   const { orders, fetchOrders } = useOrders();
   const [viewMode, setViewMode] = useState<"active" | "completed">("active");
 
-  // current logged-in barista
+  // current logged-in staff member
   const { session } = UserAuth();
-  const baristaUserId = session?.user?.id;
+  const staffUserId = session?.user?.id;
 
   const incomingOrders = orders.filter((order) => order.status === "pending");
   const preparingOrders = orders.filter(
@@ -40,11 +40,11 @@ export const QueuedOrders = () => {
 
   const handleStatusChange = async (order: Order) => {
     if (order.status === "pending") {
-      if (!baristaUserId) return;
+      if (!staffUserId) return;
 
       const updated = await updateOrderStatus(order.id, "preparing", {
         claim: true,
-        baristaUserId,
+        staffUserId,
       });
 
       if (!updated) {
@@ -73,9 +73,9 @@ export const QueuedOrders = () => {
 
       <main className="ml-0 lg:ml-64 mr-0 lg:mr-[12rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
         <div className="mb-6">
-          <h1 className="text-5xl font-black font-fredoka">Barista Station</h1>
+          <h1 className="text-5xl font-black font-fredoka">Staff Station</h1>
           <p className="text-lg text-gray-500">
-            Live queue orders for your team.
+            Take orders and move the queue from one shared station.
           </p>
         </div>
 

@@ -35,22 +35,22 @@ describe("Order Integration Test", () => {
       sharedOrderId = data![0].id;
     });
 
-    it('should update order to "preparing" when the barista starts (claim)', async () => {
-      const baristaUserId = crypto.randomUUID();
+    it('should update order to "preparing" when the staff member starts (claim)', async () => {
+      const staffUserId = crypto.randomUUID();
 
       const data = await updateOrderStatus(
         sharedOrderId,
         "preparing",
         {
           claim: true,
-          baristaUserId,
+          staffUserId,
         },
         supabaseAdmin, // Inject admin client
       );
 
       expect(data).not.toBeNull();
       expect(data![0].status).toBe("preparing");
-      expect(data![0].claimed_by).toBe(baristaUserId);
+      expect(data![0].claimed_by).toBe(staffUserId);
       expect(data![0].claimed_at).toBeTruthy();
     });
 
@@ -118,7 +118,7 @@ describe("Order Integration Test", () => {
       expect(result).toBeNull();
     });
 
-    it("should throw when claim=true but baristaUserId is missing", async () => {
+    it("should throw when claim=true but staffUserId is missing", async () => {
       await expect(
         updateOrderStatus(
           sharedOrderId,
@@ -126,7 +126,7 @@ describe("Order Integration Test", () => {
           { claim: true },
           supabaseAdmin,
         ),
-      ).rejects.toThrow(/baristaUserId is required/i);
+      ).rejects.toThrow(/staffUserId is required/i);
     });
 
     it('should allow updating to "preparing" without claiming (no claimed_by fields set)', async () => {

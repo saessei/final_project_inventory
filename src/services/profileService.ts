@@ -2,7 +2,7 @@ import defaultSupabase from "@/lib/supabaseClient.ts";
 import supabase from "@/lib/supabaseClient.ts";
 
 export const profileService = {
-  // Fetch current barista data
+  // Fetch current staff profile data
   async getProfile(userId: string, supabase = defaultSupabase) {
     const { data, error } = await supabase
       .from("profiles")
