@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { profileService } from "../services/profileService";
-import { supabaseAdmin } from "../lib/supabaseTestClient";
-import supabase from "../lib/supabaseClient"; 
+import { profileService } from "@/services/profileService";
+import { supabaseAdmin } from "@/lib/supabaseTestClient";
+import supabase from "@/lib/supabaseClient";
 
 describe("Profile & Password Service Integration", () => {
   const tempEmail = `test-user-${Date.now()}@example.com`;
@@ -36,7 +36,7 @@ describe("Profile & Password Service Integration", () => {
 
   describe("Profile Updates", () => {
     it("should update the name and then retrieve it", async () => {
-      const updated = await profileService.updateName(userId,"Updated Name");
+      const updated = await profileService.updateName(userId, "Updated Name");
       expect(updated).toBe(true);
 
       const profile = await profileService.getProfile(userId);
@@ -56,7 +56,7 @@ describe("Profile & Password Service Integration", () => {
       // 2. Attempt password update
       const result = await profileService.updatePassword(newPassword);
       expect(result.success).toBe(true);
-      
+
       await supabase.auth.signOut();
     });
 

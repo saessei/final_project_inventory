@@ -1,6 +1,6 @@
 import { describe, it, expect, afterAll } from "vitest";
-import { supabaseAdmin } from "../lib/supabaseTestClient";
-import { dynamicMenu } from "../services/DynamicMenuService";
+import { supabaseAdmin } from "@/lib/supabaseTestClient";
+import { dynamicMenu } from "@/services/DynamicMenuService";
 
 describe("DynamicMenuService (integration, real Supabase DB)", () => {
   const testRunId = `vitest-dynamicMenu-${Date.now()}`;
@@ -12,8 +12,14 @@ describe("DynamicMenuService (integration, real Supabase DB)", () => {
   afterAll(async () => {
     // Delete children first (if FK constraints exist)
     if (createdDrinkIds.length) {
-      await supabaseAdmin.from("drink_toppings").delete().in("drink_id", createdDrinkIds);
-      await supabaseAdmin.from("drink_sizes").delete().in("drink_id", createdDrinkIds);
+      await supabaseAdmin
+        .from("drink_toppings")
+        .delete()
+        .in("drink_id", createdDrinkIds);
+      await supabaseAdmin
+        .from("drink_sizes")
+        .delete()
+        .in("drink_id", createdDrinkIds);
       await supabaseAdmin.from("drinks").delete().in("id", createdDrinkIds);
     }
     if (createdToppingIds.length) {
@@ -54,7 +60,11 @@ describe("DynamicMenuService (integration, real Supabase DB)", () => {
     expect(found).toBeDefined();
     expect(found!.price).toBe(123);
 
-    const ok = await dynamicMenu.updateDrink(drink!.id, { isAvailable: false }, supabaseAdmin);
+    const ok = await dynamicMenu.updateDrink(
+      drink!.id,
+      { isAvailable: false },
+      supabaseAdmin,
+    );
     expect(ok).toBe(true);
 
     // getAllDrinks only returns is_available=true, so it should disappear
@@ -96,7 +106,10 @@ describe("DynamicMenuService (integration, real Supabase DB)", () => {
     );
     expect(updateOk).toBe(true);
 
-    const updatedPrice = await dynamicMenu.getToppingPrice(toppingName, supabaseAdmin);
+    const updatedPrice = await dynamicMenu.getToppingPrice(
+      toppingName,
+      supabaseAdmin,
+    );
     expect(updatedPrice).toBeCloseTo(12.75, 5);
 
     const deleted = await dynamicMenu.deleteTopping(topping!.id, supabaseAdmin);
@@ -139,7 +152,10 @@ describe("DynamicMenuService (integration, real Supabase DB)", () => {
     expect(updatedSugar).toBeDefined();
     expect(updatedSugar!.label).toContain("Updated");
 
-    const deleted = await dynamicMenu.deleteSugarLevel(sugar!.id, supabaseAdmin);
+    const deleted = await dynamicMenu.deleteSugarLevel(
+      sugar!.id,
+      supabaseAdmin,
+    );
     expect(deleted).toBe(true);
     createdSugarLevelIds.splice(createdSugarLevelIds.indexOf(sugar!.id), 1);
   }, 20000);

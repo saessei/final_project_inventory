@@ -1,13 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import type { ReactNode } from "react";
-import {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-} from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import type { Session } from "@supabase/supabase-js";
-import supabase from "../lib/supabaseClient.ts";
+import supabase from "@/lib/supabaseClient.ts";
 
 interface AuthContextType {
   session: Session | null;
@@ -54,14 +49,14 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     }
 
     setSession(updatedSession ?? null);
-    
+
     if (updatedSession?.user?.id) {
       const { data: profile } = await supabase
         .from("profiles")
         .select("admin_pin")
         .eq("id", updatedSession.user.id)
         .single();
-      
+
       setHasAdminPin(!!profile?.admin_pin);
     } else {
       setHasAdminPin(false);
@@ -99,18 +94,16 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
       console.log("User created:", data.user.id);
 
       // Wait a bit for the user to be fully registered
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Create the profile manually
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert({
-          id: data.user.id,
-          email: email,
-          full_name: displayName || "",
-          display_name: displayName || "",
-          admin_pin: adminPin && adminPin.length >= 4 ? adminPin : null,
-        });
+      const { error: profileError } = await supabase.from("profiles").insert({
+        id: data.user.id,
+        email: email,
+        full_name: displayName || "",
+        display_name: displayName || "",
+        admin_pin: adminPin && adminPin.length >= 4 ? adminPin : null,
+      });
 
       if (profileError) {
         console.error("Profile creation error:", profileError);
@@ -124,14 +117,17 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
             admin_pin: adminPin && adminPin.length >= 4 ? adminPin : null,
           })
           .eq("id", data.user.id);
-        
+
         if (updateError) {
           console.error("Profile update also failed:", updateError);
         } else {
           console.log("Profile updated successfully with admin PIN");
         }
       } else {
-        console.log("Profile created successfully with admin PIN:", adminPin ? "Yes" : "No");
+        console.log(
+          "Profile created successfully with admin PIN:",
+          adminPin ? "Yes" : "No",
+        );
       }
 
       return { success: true, data };

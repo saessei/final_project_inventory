@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Sidebar } from "../components/Sidebar";
-import { useOrders, type Order } from "../../hooks/useOrders";
-import { updateOrderStatus } from "../../services/orderService";
-import { OrderStatusButton } from "../components/OrderStatusButton";
-import { UserAuth } from "../../auth/AuthContext";
+import { Sidebar } from "@/components/ui/Sidebar";
+import { useOrders, type Order } from "@/hooks/useOrders";
+import { updateOrderStatus } from "@/services/OrderService";
+import { OrderStatusButton } from "@/components/ui/OrderStatusButton";
+import { UserAuth } from "@/components/auth/AuthContext";
 
 export const QueuedOrders = () => {
   const { orders, fetchOrders } = useOrders();
@@ -26,10 +26,16 @@ export const QueuedOrders = () => {
 
   const queueOrders =
     viewMode === "active"
-      ? orders.filter(
-          (order) => order.status === "pending" || order.status === "preparing",
-        )
-        .sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      ? orders
+          .filter(
+            (order) =>
+              order.status === "pending" || order.status === "preparing",
+          )
+          .sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
+          )
       : completedOrders;
 
   const handleStatusChange = async (order: Order) => {

@@ -1,12 +1,19 @@
 {
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "types": ["vite/client","@testing-library/jest-dom","node"],
+    "types": ["vite/client", "@testing-library/jest-dom", "node"],
     "skipLibCheck": true,
+
+    /* Path aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -24,10 +31,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "exclude": [
-    "node_modules",
-    "**/*.test.ts", 
-    "**/*.test.tsx",
-    "src/tests"],
+  "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx", "src/tests"],
   "include": ["src", "src/tests", "tests/kiosk.spec.ts", "tests/auth.spec.ts"]
 }
