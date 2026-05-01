@@ -1,12 +1,12 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { Signup } from "../components/Signup";
-import { Signin } from "../components/Signin";
-import { Kiosk } from "../components/Kiosk";
-import { QueuedOrders } from "../components/QueuedOrders";
-import { Settings } from "../components/Settings";
-import { Reports } from "../components/Reports";
-import { MenuManager } from "../components/Admin/MenuManager"; // Keep this
-import { ProtectedRoute } from "../components/ProtectedRoute";
+import { Signup } from "../features/Signup";
+import { Signin } from "../features/pages/Signin";
+import { Kiosk } from "../features/Kiosk";
+import { QueuedOrders } from "../features/pages/QueuedOrders";
+import { Settings } from "../features/Settings";
+import { Reports } from "../features/pages/Reports";
+import { MenuManager } from "../features/Admin/MenuManager"; // Keep this
+import { ProtectedRoute } from "../features/ProtectedRoute";
 
 // Remove these lines:
 // import { DrinkManager } from "../components/Admin/DrinkManager";

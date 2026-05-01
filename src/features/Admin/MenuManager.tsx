@@ -5,7 +5,7 @@ import { dynamicMenu, } from "../../services/DynamicMenuService";
 import { drinkService } from "../../services/DrinkService";
 import { Sidebar } from "../common/Sidebar";
 import { UserAuth } from "../../auth/AuthContext";
-import { AdminPinModal } from "../AdminPinModal";
+import { AdminPinModal } from "../components/AdminPinModal";
 import { useNavigate } from "react-router-dom";
 import supabase from "../../lib/supabaseClient";
 import placeholderImg from "../../assets/Placeholder.jpg";

@@ -1,8 +1,8 @@
 // src/components/AdminPinModal.tsx
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Key, Lock, X } from "lucide-react";
-import supabase from "../lib/supabaseClient";
-import { UserAuth } from "../auth/AuthContext";
+import supabase from "../../lib/supabaseClient";
+import { UserAuth } from "../../auth/AuthContext";
 
 interface AdminPinModalProps {
   onSuccess: () => void;

@@ -2,7 +2,7 @@
 import { useRef, useState } from "react";
 import { Store, List, BarChart2, Settings, LogOut, Menu, X, ClipboardList } from "lucide-react";
 import { UserAuth } from "../../auth/AuthContext";
-import { AdminPinModal } from "../AdminPinModal";
+import { AdminPinModal } from "./AdminPinModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "/src/assets/QueueTea.png";
 

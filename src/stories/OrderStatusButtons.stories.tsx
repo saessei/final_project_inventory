@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
-import { OrderStatusButton } from '../components/common/OrderStatusButton';
+import { OrderStatusButton } from '../features/common/OrderStatusButton';
 
 const meta = {
   title: 'Components/OrderStatusButton',

@@ -1,9 +1,9 @@
 // components/Signin.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserAuth } from "../auth/AuthContext";
-import { Header } from "./common/Header";
-import { BobaFooter } from "./common/BobaFooter";
+import { UserAuth } from "../../auth/AuthContext";
+import { Header } from "../components/Header";
+import { BobaFooter } from "../components/BobaFooter";
 import * as React from "react";
 import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 

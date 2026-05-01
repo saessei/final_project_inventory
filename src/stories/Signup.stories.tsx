@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { Signup } from "../components/Signup";
+import { Signup } from "../features/Signup";
 import { AuthContext } from "../auth/AuthContext";
 import { BrowserRouter } from "react-router-dom";
 import { userEvent, within, expect, waitFor } from "storybook/test";

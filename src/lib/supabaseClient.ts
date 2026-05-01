@@ -18,3 +18,7 @@ const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
 });
 
 export default supabase;
+
+// if u use vitest it reads the .env.test not .env 
+//  DELETE TEST CLIENT!!!
+// add name.integration.test.ts sa filename

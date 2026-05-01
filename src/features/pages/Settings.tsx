@@ -1,8 +1,8 @@
 import { FormEvent, useState, useEffect } from "react";
-import { UserAuth } from "../auth/AuthContext";
-import { profileService } from "../services/profileService";
+import { UserAuth } from "../../auth/AuthContext";
+import { profileService } from "../../services/profileService";
 import { Sidebar } from "./common/Sidebar";
-import supabase from "../lib/supabaseClient";
+import supabase from "../../lib/supabaseClient";
 
 export const Settings = () => {
   const [name, setName] = useState("");

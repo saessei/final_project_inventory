@@ -1,13 +1,13 @@
 // src/components/Kiosk.tsx
 import { useState, useEffect } from "react";
 import { Trash, CheckCircle2, Plus } from "lucide-react";
-import { UserAuth } from "../auth/AuthContext";
-import { Sidebar } from "./common/Sidebar";
+import { UserAuth } from "../../auth/AuthContext";
+import { Sidebar } from "../components/Sidebar";
 import placeholderImg from "../assets/Placeholder.jpg";
-import { createOrder } from "../services/orderService";
-import { useCart } from "../hooks/useCart";
+import { createOrder } from "../../services/orderService";
+import { useCart } from "../../hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { drinkService, type Drink, type Topping, type SugarLevel } from "../services/DrinkService";
+import { drinkService, type Drink, type Topping, type SugarLevel } from "../../services/DrinkService";
 
 // Image component with placeholder fallback
 const DrinkImage = ({ imageUrl, name }: { imageUrl: string; name: string }) => {

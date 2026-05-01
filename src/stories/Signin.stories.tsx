@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { BrowserRouter } from "react-router-dom";
-import { Signin } from "../components/Signin";
+import { Signin } from "../features/pages/Signin";
 import { AuthContext } from "../auth/AuthContext";
 import { userEvent, within, expect, waitFor } from "storybook/test";
 
