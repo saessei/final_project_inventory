@@ -1,6 +1,6 @@
 // vitest.setup.ts
 import { beforeAll, afterAll } from "vitest";
-import { supabaseAdmin } from "@/lib/supabaseTestClient";
+import { supabaseAdmin } from "@/tests/supabaseTestClient";
 
 beforeAll(async () => {
   // Example: Ensure the test database is reachable before starting

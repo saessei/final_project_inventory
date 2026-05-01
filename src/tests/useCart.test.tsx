@@ -2,7 +2,7 @@ import { beforeAll, afterAll, describe, expect, it } from "vitest";
 import { renderHook, act } from "@testing-library/react"; // Added act
 import { waitFor } from "@testing-library/dom";
 import { useCart, type CartItem } from "@/hooks/useCart";
-import { supabaseAdmin } from "@/lib/supabaseTestClient";
+import { supabaseAdmin } from "@/tests/supabaseTestClient";
 
 describe("useCart (integration, real Supabase DB)", () => {
   const testRunId = `vitest-useCart-${Date.now()}`;

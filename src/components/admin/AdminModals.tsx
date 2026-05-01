@@ -235,7 +235,7 @@ export const DrinkModal = ({
 
         <div>
           <label className="font-semibold text-sm">Available Toppings</label>
-          <div className="grid grid-cols-2 gap-2 mt-1 border rounded-lg p-2 max-h-40 overflow-y-auto">
+          <div className="grid grid-cols-2 gap-2 mt-1 border rounded-lg p-2 max-h-40 overflow-y-auto no-scrollbar">
             {allToppings.map((topping) => (
               <label
                 key={topping.id}

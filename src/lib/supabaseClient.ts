@@ -7,7 +7,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error("Missing VITE_SUPABASE_URL or Supabase anon key env var");
 }
 
-const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey)
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storageKey: "queuetea-auth",
+  },
+});
 
 export default supabase;
 

@@ -71,7 +71,7 @@ export const QueuedOrders = () => {
         <Sidebar />
       </div>
 
-      <main className="ml-0 lg:ml-64 mr-0 lg:mr-[12rem] h-screen overflow-y-auto p-4 lg:p-6 pt-28 lg:pt-6">
+      <main className="ml-0 lg:ml-64 mr-0 lg:mr-[12rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
         <div className="mb-6">
           <h1 className="text-5xl font-black font-fredoka">Barista Station</h1>
           <p className="text-lg text-gray-500">

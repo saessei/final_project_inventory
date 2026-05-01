@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { drinkService } from "@/services/drinkService";
-import { supabaseAdmin } from "@/lib/supabaseTestClient";
+import { drinkService } from "@/services/DrinkService";
+import { supabaseAdmin } from "@/tests/supabaseTestClient";
 
 describe("DrinkService Integration Test", () => {
   let testToppingId: string;

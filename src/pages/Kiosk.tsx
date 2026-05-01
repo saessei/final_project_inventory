@@ -15,7 +15,7 @@ import {
   type Drink,
   type Topping,
   type SugarLevel,
-} from "@/services/drinkService";
+} from "@/services/DrinkService";
 
 export const Kiosk = () => {
   const { session } = UserAuth();
@@ -192,7 +192,7 @@ export const Kiosk = () => {
       />
 
       {/* Main Content */}
-      <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto p-4 lg:p-6 pt-28 lg:pt-6">
+      <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
         <div className="mb-6">
           <h1 className="text-5xl font-black font-fredoka">Kiosk</h1>
           <p className="text-lg text-gray-500">Get ready to take orders!</p>

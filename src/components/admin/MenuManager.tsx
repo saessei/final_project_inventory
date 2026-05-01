@@ -1,7 +1,7 @@
 // src/components/Admin/MenuManager.tsx
 import { useState, useEffect, useRef, useCallback } from "react";
-import { dynamicMenu } from "@/services/dynamicMenuService";
-import { drinkService } from "@/services/drinkService";
+import { dynamicMenu } from "@/services/DynamicMenuService";
+import { drinkService } from "@/services/DrinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { AdminPinModal } from "@/components/admin/AdminPinModal";
@@ -254,7 +254,7 @@ export const MenuManager = () => {
           <Sidebar />
         </div>
 
-        <main className="ml-0 lg:ml-64 h-screen overflow-y-auto p-4 lg:p-6 pt-20 lg:pt-6">
+        <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-20 lg:pt-6">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
               <h1 className="text-4xl font-black font-fredoka">Menu Manager</h1>

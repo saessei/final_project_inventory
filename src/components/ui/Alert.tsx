@@ -14,7 +14,8 @@ const variants = {
 };
 
 export const Alert = ({ variant = "info", children, className }: AlertProps) => (
-  <p
+  <div
+    role="alert"
     className={cx(
       "rounded-xl border px-3 py-2 text-sm font-semibold",
       variants[variant],
@@ -22,5 +23,5 @@ export const Alert = ({ variant = "info", children, className }: AlertProps) => 
     )}
   >
     {children}
-  </p>
+  </div>
 );

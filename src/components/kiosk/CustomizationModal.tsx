@@ -1,6 +1,7 @@
 import placeholderImg from "@/assets/Placeholder.jpg";
 import { Button } from "@/components/ui/Button";
-import type { Drink, SugarLevel, Topping } from "@/services/drinkService";
+import { X } from "lucide-react";
+import type { Drink, SugarLevel, Topping } from "@/services/DrinkService";
 
 interface CustomizationModalProps {
   drink: Drink;
@@ -39,7 +40,7 @@ export const CustomizationModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-5 animate-in fade-in duration-200">
-      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto transform transition-all duration-300 animate-in zoom-in-95 slide-in-from-bottom-10 hover:scale-[1.02] hover:shadow-3xl">
+      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto no-scrollbar transform transition-all duration-300 animate-in zoom-in-95 slide-in-from-bottom-10 hover:scale-[1.02] hover:shadow-3xl">
         <div className="relative h-56 group overflow-hidden">
           <img
             src={drink.image_url || placeholderImg}
@@ -53,9 +54,10 @@ export const CustomizationModal = ({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close"
             className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-sm font-bold hover:bg-white hover:scale-110 hover:rotate-90 transition-all duration-200 cursor-pointer shadow-lg z-10"
           >
-            x
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
         <div className="p-5 transition-all duration-300 hover:translate-y-[-2px]">
@@ -118,7 +120,7 @@ export const CustomizationModal = ({
           {drink.available_toppings.length > 0 && (
             <div className="mb-6">
               <p className="text-lg font-semibold mb-2">Add Toppings</p>
-              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto no-scrollbar">
                 {drink.available_toppings.map((topping) => (
                   <Button
                     key={topping.id}

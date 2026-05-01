@@ -1,6 +1,6 @@
 import { it, expect, describe, afterAll } from "vitest";
 import { createOrder, updateOrderStatus } from "@/services/orderService";
-import { supabaseAdmin } from "@/lib/supabaseTestClient"; // Using admin client
+import { supabaseAdmin } from "@/tests/supabaseTestClient"; // Using admin client
 
 describe("Order Integration Test", () => {
   const testCustomer = "Robin";

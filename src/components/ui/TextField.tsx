@@ -1,4 +1,5 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
+import { useId } from "react";
 import { cx } from "./utils";
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -15,7 +16,8 @@ export const TextField = ({
   id,
   ...props
 }: TextFieldProps) => {
-  const inputId = id ?? props.name;
+  const generatedId = useId();
+  const inputId = id ?? props.name ?? generatedId;
 
   return (
     <div className="space-y-1">

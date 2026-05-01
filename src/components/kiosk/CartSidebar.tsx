@@ -35,7 +35,7 @@ export const CartSidebar = ({
   };
 
   const panelClassName =
-    "fixed bg-white border-slate-200 p-5 overflow-y-auto transition-transform duration-300 ease-in-out " +
+    "fixed bg-white border-slate-200 p-5 overflow-y-auto no-scrollbar transition-transform duration-300 ease-in-out " +
     "lg:top-0 lg:right-0 lg:left-auto lg:bottom-auto lg:h-screen lg:w-full lg:max-w-[22rem] lg:border-l lg:border-t-0 lg:rounded-none lg:z-10 " +
     "bottom-0 left-0 right-0 h-[85vh] rounded-t-3xl border-t z-50 " +
     (isMobileOpen ? "translate-y-0" : "translate-y-full lg:translate-y-0");
@@ -77,7 +77,7 @@ export const CartSidebar = ({
           </div>
         </div>
 
-        <div className="space-y-3 max-h-[45vh] lg:max-h-[60vh] overflow-y-auto pb-3">
+        <div className="space-y-3 max-h-[45vh] lg:max-h-[60vh] overflow-y-auto no-scrollbar pb-3">
           {cart.length === 0 ? (
             <p className="text-sm text-gray-500">Cart is empty.</p>
           ) : (
