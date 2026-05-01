@@ -6,7 +6,8 @@ import { QueuedOrders } from "@/pages/QueuedOrders";
 import { Settings } from "@/pages/Settings";
 import { Reports } from "@/pages/Reports";
 import { MenuManager } from "@/components/admin/MenuManager"; // Keep this
-import { ProtectedRoute } from "@/pages/ProtectedRoute";
+import { RoleSelect } from "@/pages/RoleSelect";
+import { AppProtectedRoute } from "@/pages/AppProtectedRoute";
 
 // Remove these lines:
 // import { DrinkManager } from "../components/Admin/DrinkManager";
@@ -16,43 +17,51 @@ export const router = createBrowserRouter([
   { path: "/signup", element: <Signup /> },
   { path: "/signin", element: <Signin /> },
   {
+    path: "/role-select",
+    element: (
+      <AppProtectedRoute requireMode={false} staffAllowed>
+        <RoleSelect />
+      </AppProtectedRoute>
+    ),
+  },
+  {
     path: "/kiosk",
     element: (
-      <ProtectedRoute>
+      <AppProtectedRoute staffAllowed>
         <Kiosk />
-      </ProtectedRoute>
+      </AppProtectedRoute>
     ),
   },
   {
     path: "/queued-orders",
     element: (
-      <ProtectedRoute>
+      <AppProtectedRoute staffAllowed>
         <QueuedOrders />
-      </ProtectedRoute>
+      </AppProtectedRoute>
     ),
   },
   {
     path: "/settings",
     element: (
-      <ProtectedRoute>
+      <AppProtectedRoute staffAllowed={false}>
         <Settings />
-      </ProtectedRoute>
+      </AppProtectedRoute>
     ),
   },
   {
     path: "/reports",
     element: (
-      <ProtectedRoute>
+      <AppProtectedRoute staffAllowed>
         <Reports />
-      </ProtectedRoute>
+      </AppProtectedRoute>
     ),
   },
   {
     path: "/admin/menu",
     element: (
-      <ProtectedRoute>
+      <AppProtectedRoute staffAllowed={false}>
         <MenuManager />
-      </ProtectedRoute>
+      </AppProtectedRoute>
     ),
   },
 ]);

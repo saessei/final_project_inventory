@@ -30,7 +30,7 @@ export const Signin = () => {
       const result = await signInUser(email, password);
 
       if (result.success) {
-        navigate("/kiosk");
+        navigate("/role-select", { replace: true });
       } else {
         setError(result.error || "Invalid email or password.");
       }

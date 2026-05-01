@@ -1,10 +1,9 @@
 // src/components/Admin/MenuManager.tsx
-import { useState, useEffect, useRef, useCallback } from "react";
-import { dynamicMenu } from "@/services/dynamicMenuService";
-import { drinkService } from "@/services/drinkService";
+import { useState, useEffect, useCallback } from "react";
+import { dynamicMenu } from "@/services/DynamicMenuService";
+import { drinkService } from "@/services/DrinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
-import { AdminPinModal } from "@/components/admin/AdminPinModal";
 import { useNavigate } from "react-router-dom";
 import supabase from "@/lib/supabaseClient";
 import { AdminTabs } from "@/components/admin/AdminTabs";
@@ -29,19 +28,14 @@ export const MenuManager = () => {
     null,
   );
   const [loading, setLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [showPinModal, setShowPinModal] = useState(false);
 
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [drinks, setDrinks] = useState<DrinkType[]>([]);
   const [toppings, setToppings] = useState<ToppingType[]>([]);
   const [sugarLevels, setSugarLevels] = useState<SugarLevel[]>([]);
 
-  const { session, loading: authLoading, refreshSession } = UserAuth();
+  const { session, loading: authLoading } = UserAuth();
   const navigate = useNavigate();
-
-  const pinVerifiedRef = useRef(false);
-  const modalShownRef = useRef(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -60,40 +54,14 @@ export const MenuManager = () => {
     setLoading(false);
   }, []);
 
-  const checkAccess = useCallback(async () => {
+  useEffect(() => {
     if (authLoading) return;
     if (!session?.user?.id) {
       navigate("/signin");
       return;
     }
-    if (pinVerifiedRef.current) {
-      setIsAuthorized(true);
-      loadData();
-      return;
-    }
-    if (modalShownRef.current) return;
-    modalShownRef.current = true;
-    setShowPinModal(true);
-  }, [authLoading, session, navigate, loadData]);
-
-  useEffect(() => {
-    if (!authLoading) {
-      checkAccess();
-    }
-  }, [authLoading, checkAccess]);
-
-  const handlePinSuccess = async () => {
-    pinVerifiedRef.current = true;
-    setShowPinModal(false);
-    await refreshSession();
-    setIsAuthorized(true);
-    loadData();
-  };
-
-  const handlePinCancel = () => {
-    setShowPinModal(false);
-    navigate("/kiosk");
-  };
+    void loadData();
+  }, [authLoading, session?.user?.id, navigate, loadData]);
 
   const handleSaveCategory = async (data: {
     label: string;
@@ -227,19 +195,7 @@ export const MenuManager = () => {
     );
   }
 
-  if (!isAuthorized && !showPinModal) {
-    return (
-      <div className="bg-cream min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-pulse">
-            <p className="text-gray-500">Verifying access...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading && isAuthorized) {
+  if (loading) {
     return (
       <div className="bg-cream min-h-screen flex items-center justify-center">
         <div className="text-center">Loading menu manager...</div>
@@ -249,19 +205,18 @@ export const MenuManager = () => {
 
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
-      <div className={showPinModal ? "pointer-events-none opacity-60" : ""}>
-        <div className="fixed top-0 left-0 h-screen w-64 z-10">
-          <Sidebar />
-        </div>
+      <div className="fixed top-0 left-0 h-screen w-64 z-10">
+        <Sidebar />
+      </div>
 
-        <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-20 lg:pt-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-4xl font-black font-fredoka">Menu Manager</h1>
-              <p className="text-gray-600 mt-1">
-                Manage categories, drinks, toppings, and sugar levels
-              </p>
-            </div>
+      <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-20 lg:pt-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-4xl font-black font-fredoka">Menu Manager</h1>
+            <p className="text-gray-600 mt-1">
+              Manage categories, drinks, toppings, and sugar levels
+            </p>
+          </div>
 
             <AdminTabs
               activeTab={activeTab}
@@ -293,50 +248,45 @@ export const MenuManager = () => {
               onDeleteTopping={handleDeleteTopping}
               onUpdateSugarLevel={handleUpdateSugarLevel}
             />
-          </div>
-        </main>
+        </div>
+      </main>
 
-        {/* Category Modal */}
-        {showModal && activeTab === "categories" && (
-          <CategoryModal
-            item={editingItem as CategoryType}
-            onSave={handleSaveCategory}
-            onClose={() => {
-              setShowModal(false);
-              setEditingItem(null);
-            }}
-          />
-        )}
+      {/* Category Modal */}
+      {showModal && activeTab === "categories" && (
+        <CategoryModal
+          item={editingItem as CategoryType}
+          onSave={handleSaveCategory}
+          onClose={() => {
+            setShowModal(false);
+            setEditingItem(null);
+          }}
+        />
+      )}
 
-        {/* Drink Modal */}
-        {showModal && activeTab === "drinks" && (
-          <DrinkModal
-            item={editingItem as DrinkType}
-            onSave={handleSaveDrink}
-            onClose={() => {
-              setShowModal(false);
-              setEditingItem(null);
-            }}
-            allToppings={toppings}
-            uploadImage={uploadImage}
-          />
-        )}
+      {/* Drink Modal */}
+      {showModal && activeTab === "drinks" && (
+        <DrinkModal
+          item={editingItem as DrinkType}
+          onSave={handleSaveDrink}
+          onClose={() => {
+            setShowModal(false);
+            setEditingItem(null);
+          }}
+          allToppings={toppings}
+          uploadImage={uploadImage}
+        />
+      )}
 
-        {/* Topping Modal */}
-        {showToppingModal && (
-          <ToppingModal
-            item={editingTopping}
-            onSave={handleSaveTopping}
-            onClose={() => {
-              setShowToppingModal(false);
-              setEditingTopping(null);
-            }}
-          />
-        )}
-      </div>
-
-      {showPinModal && session && (
-        <AdminPinModal onSuccess={handlePinSuccess} onClose={handlePinCancel} />
+      {/* Topping Modal */}
+      {showToppingModal && (
+        <ToppingModal
+          item={editingTopping}
+          onSave={handleSaveTopping}
+          onClose={() => {
+            setShowToppingModal(false);
+            setEditingTopping(null);
+          }}
+        />
       )}
     </div>
   );

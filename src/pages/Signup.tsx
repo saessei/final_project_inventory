@@ -52,7 +52,7 @@ export const Signup = () => {
       );
 
       if (result.success) {
-        navigate("/kiosk");
+        navigate("/role-select", { replace: true });
       } else {
         setError(String(result.error || "An error occurred."));
       }

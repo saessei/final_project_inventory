@@ -10,20 +10,20 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { UserAuth } from "@/components/auth/AuthContext";
-import { AdminPinModal } from "../admin/AdminPinModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "/src/assets/QueueTea.png";
+import { useDashboardMode } from "@/components/contexts/DashboardModeContext";
 
 export const Sidebar = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const { session, signOut } = UserAuth();
+  const { mode, clearMode } = useDashboardMode();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const sidebarItems = [
+  const adminSidebarItems = [
     { name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" },
     { name: "Queued Orders", icon: <List size={20} />, path: "/queued-orders" },
     {
@@ -35,22 +35,32 @@ export const Sidebar = () => {
     { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
   ];
 
+  const staffSidebarItems = [
+    { name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" },
+    { name: "Queued Orders", icon: <List size={20} />, path: "/queued-orders" },
+    { name: "Reports", icon: <BarChart2 size={20} />, path: "/reports" },
+  ];
+
+  const sidebarItems = mode === "staff" ? staffSidebarItems : adminSidebarItems;
+
   const activeItem =
     sidebarItems.find((item) => item.path === location.pathname)?.name ||
     sidebarItems[0]?.name ||
     "";
 
   const handleSignOutClick = () => {
-    setShowLogoutModal(true);
+    void handleSignOutConfirm();
   };
 
   const handleSignOutConfirm = async () => {
+    clearMode();
     await signOut();
     navigate("/signin");
   };
 
-  const handleSignOutCancel = () => {
-    setShowLogoutModal(false);
+  const handleReturnToRoleSelect = () => {
+    clearMode();
+    navigate("/role-select");
   };
 
   return (
@@ -130,23 +140,26 @@ export const Sidebar = () => {
             </div>
           </div>
 
-          <button
-            onClick={handleSignOutClick}
-            className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
-          >
-            <LogOut size={16} />
-            <span>Sign out</span>
-          </button>
+          {mode === "admin" && (
+            <>
+              <button
+                onClick={handleReturnToRoleSelect}
+                className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
+              >
+                <span>Return to Role Select</span>
+              </button>
+
+              <button
+                onClick={handleSignOutClick}
+                className="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
+              >
+                <LogOut size={16} />
+                <span>Sign out</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
-
-      {/* Reuse AdminPinModal for logout */}
-      {showLogoutModal && (
-        <AdminPinModal
-          onSuccess={handleSignOutConfirm}
-          onClose={handleSignOutCancel}
-        />
-      )}
     </>
   );
 };
