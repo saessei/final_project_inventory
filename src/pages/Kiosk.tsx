@@ -4,7 +4,7 @@ import { Trash, CheckCircle2, Plus } from "lucide-react";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { Sidebar } from "@/components/ui/Sidebar";
 import placeholderImg from "@/assets/Placeholder.jpg";
-import { createOrder } from "@/services/OrderService";
+import { createOrder } from "@/services/orderService";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
 import {
