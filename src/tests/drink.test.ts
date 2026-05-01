@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { drinkService } from "../services/drinkService";
-import { supabaseAdmin } from "../lib/supabaseTestClient";
+import { drinkService } from "@/services/drinkService";
+import { supabaseAdmin } from "@/lib/supabaseTestClient";
 
 describe("DrinkService Integration Test", () => {
   let testToppingId: string;
@@ -12,7 +12,10 @@ describe("DrinkService Integration Test", () => {
       await supabaseAdmin.from("drinks").delete().eq("id", testDrinkId);
     }
     if (testToppingId) {
-      await supabaseAdmin.from("default_toppings").delete().eq("id", testToppingId);
+      await supabaseAdmin
+        .from("default_toppings")
+        .delete()
+        .eq("id", testToppingId);
     }
   };
 
@@ -26,14 +29,18 @@ describe("DrinkService Integration Test", () => {
 
   it("creates a topping and lists it via getAllToppings", async () => {
     const toppingName = `Test Topping ${Date.now()}`;
-    
+
     // Inject supabaseAdmin to bypass RLS 42501
-    const created = await drinkService.addTopping(toppingName, 10, supabaseAdmin);
+    const created = await drinkService.addTopping(
+      toppingName,
+      10,
+      supabaseAdmin,
+    );
     expect(created).toBe(true);
 
     const toppings = await drinkService.getAllToppings(supabaseAdmin);
     const found = toppings.find((t) => t.name === toppingName);
-    
+
     expect(found).toBeDefined();
     if (found) testToppingId = found.id;
   });
@@ -52,7 +59,7 @@ describe("DrinkService Integration Test", () => {
       drinkData,
       sizes,
       [testToppingId],
-      supabaseAdmin // Bypass RLS
+      supabaseAdmin, // Bypass RLS
     );
     expect(created).toBe(true);
 
@@ -63,7 +70,9 @@ describe("DrinkService Integration Test", () => {
     testDrinkId = foundDrink!.id;
 
     expect(foundDrink?.sizes.medium).toBe(65);
-    expect(foundDrink?.available_toppings.some(t => t.id === testToppingId)).toBe(true);
+    expect(
+      foundDrink?.available_toppings.some((t) => t.id === testToppingId),
+    ).toBe(true);
 
     // 3. Update
     const updated = await drinkService.updateDrink(
@@ -71,7 +80,7 @@ describe("DrinkService Integration Test", () => {
       { name: drinkName + " Updated" },
       { regular: 55, medium: 70, large: 85 },
       [], // Remove toppings
-      supabaseAdmin
+      supabaseAdmin,
     );
     expect(updated).toBe(true);
 

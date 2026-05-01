@@ -1,35 +1,35 @@
-import supabase from "../lib/supabaseClient";
+import supabase from "@/lib/supabaseClient";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const createOrder = async (
   order: {
-  customer_name: string;
-  order_details: string;
-  status: string;
-  total_price?: number;
+    customer_name: string;
+    order_details: string;
+    status: string;
+    total_price?: number;
   },
   client: SupabaseClient = supabase,
 ) => {
   console.log("Received order object:", order);
   console.log("total_price value:", order.total_price);
-  
+
   const orderToSave = {
     customer_name: order.customer_name,
     order_details: order.order_details,
     status: order.status,
     total_price: order.total_price || 0,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
-  
+
   console.log("🔍 DEBUG - Saving this to database:", orderToSave);
 
   const { data, error } = await client
-    .from('orders')
+    .from("orders")
     .insert([orderToSave])
     .select();
 
   if (error) {
-    console.error('❌ Create order failed:', error);
+    console.error("❌ Create order failed:", error);
     throw new Error(error.message);
   }
 

@@ -1,24 +1,29 @@
 // src/components/Kiosk.tsx
 import { useState, useEffect } from "react";
 import { Trash, CheckCircle2, Plus } from "lucide-react";
-import { UserAuth } from "../../auth/AuthContext";
-import { Sidebar } from "../components/Sidebar";
-import placeholderImg from "../assets/Placeholder.jpg";
-import { createOrder } from "../../services/orderService";
-import { useCart } from "../../hooks/useCart";
+import { UserAuth } from "@/components/auth/AuthContext";
+import { Sidebar } from "@/components/ui/Sidebar";
+import placeholderImg from "@/assets/Placeholder.jpg";
+import { createOrder } from "@/services/OrderService";
+import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
-import { drinkService, type Drink, type Topping, type SugarLevel } from "../../services/DrinkService";
+import {
+  drinkService,
+  type Drink,
+  type Topping,
+  type SugarLevel,
+} from "@/services/DrinkService";
 
 // Image component with placeholder fallback
 const DrinkImage = ({ imageUrl, name }: { imageUrl: string; name: string }) => {
   const [imageError, setImageError] = useState(false);
-  
+
   const getImageSrc = () => {
     if (imageError) return placeholderImg;
     if (imageUrl && imageUrl.trim() !== "") return imageUrl;
     return placeholderImg;
   };
-  
+
   return (
     <img
       src={getImageSrc()}
@@ -66,9 +71,9 @@ export const Kiosk = () => {
         ]);
         setDrinks(drinksData);
         setSugarLevels(sugarData);
-        
+
         // Set default sugar level (50%)
-        const defaultSugar = sugarData.find(s => s.percentage === 50);
+        const defaultSugar = sugarData.find((s) => s.percentage === 50);
         if (defaultSugar) setSelectedSugar(defaultSugar);
       } catch (error) {
         console.error("Error loading data:", error);
@@ -80,7 +85,7 @@ export const Kiosk = () => {
   const openCustomization = (drink: Drink) => {
     setSelectedDrink(drink);
     setSelectedSize("regular");
-    const defaultSugar = sugarLevels.find(s => s.percentage === 50);
+    const defaultSugar = sugarLevels.find((s) => s.percentage === 50);
     if (defaultSugar) setSelectedSugar(defaultSugar);
     setSelectedToppings([]);
     setShowModal(true);
@@ -88,34 +93,39 @@ export const Kiosk = () => {
 
   const calculateTotalPrice = () => {
     if (!selectedDrink) return 0;
-    
+
     // Base price from size
-    const sizePrice = selectedDrink.sizes[selectedSize as keyof typeof selectedDrink.sizes];
-    
+    const sizePrice =
+      selectedDrink.sizes[selectedSize as keyof typeof selectedDrink.sizes];
+
     // Sugar addition price
     const sugarPrice = selectedSugar?.price_addition || 0;
-    
+
     // Toppings total price
-    const toppingsPrice = selectedToppings.reduce((total, topping) => total + topping.price, 0);
-    
+    const toppingsPrice = selectedToppings.reduce(
+      (total, topping) => total + topping.price,
+      0,
+    );
+
     return sizePrice + sugarPrice + toppingsPrice;
   };
 
   const addToCart = async () => {
     if (!selectedDrink || !selectedSugar) return;
-    
+
     const totalPrice = calculateTotalPrice();
-    const sizeLabel = selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1);
-    
+    const sizeLabel =
+      selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1);
+
     await upsertItem({
       drink_id: selectedDrink.id,
       drink_name: `${selectedDrink.name} (${sizeLabel})`,
       drink_price: totalPrice,
       sugar: selectedSugar.label,
-      toppings: selectedToppings.map(t => t.name),
+      toppings: selectedToppings.map((t) => t.name),
       quantity: 1,
     });
-    
+
     setShowModal(false);
   };
 
@@ -128,12 +138,12 @@ export const Kiosk = () => {
       setIsSubmitting(false);
     }
   };
-  
+
   const toggleTopping = (topping: Topping) => {
-    setSelectedToppings(prev =>
-      prev.some(t => t.id === topping.id)
-        ? prev.filter(t => t.id !== topping.id)
-        : [...prev, topping]
+    setSelectedToppings((prev) =>
+      prev.some((t) => t.id === topping.id)
+        ? prev.filter((t) => t.id !== topping.id)
+        : [...prev, topping],
     );
   };
 
@@ -142,7 +152,7 @@ export const Kiosk = () => {
     0,
   );
 
-      const handleCheckout = async () => {
+  const handleCheckout = async () => {
     if (cart.length === 0 || isSubmitting) return;
 
     console.log("🛒 Cart before checkout:", cart);
@@ -203,14 +213,20 @@ export const Kiosk = () => {
             cart.map((item, idx) => {
               const total = Number(item.drink_price) * item.quantity;
               return (
-                <div key={item.id} className="border rounded-xl p-3 bg-[#fcfcfc]">
+                <div
+                  key={item.id}
+                  className="border rounded-xl p-3 bg-[#fcfcfc]"
+                >
                   <div className="flex justify-between text-sm font-semibold">
                     <span>{item.drink_name}</span>
                     <span>₱{total.toFixed(2)}</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Sugar: {item.sugar}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Sugar: {item.sugar}
+                  </p>
                   <p className="text-xs text-gray-500">
-                    Toppings: {item.toppings?.length ? item.toppings.join(", ") : "None"}
+                    Toppings:{" "}
+                    {item.toppings?.length ? item.toppings.join(", ") : "None"}
                   </p>
                   <div className="mt-3 flex items-center justify-between gap-3">
                     <div className="inline-flex items-center rounded-full border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -248,7 +264,10 @@ export const Kiosk = () => {
         </div>
 
         <div className="mt-6 border-t pt-4">
-          <label htmlFor="customerName" className="block text-sm font-semibold text-slate-700">
+          <label
+            htmlFor="customerName"
+            className="block text-sm font-semibold text-slate-700"
+          >
             Customer name
           </label>
           <input
@@ -284,9 +303,12 @@ export const Kiosk = () => {
         {hasNoMenu ? (
           <div className="flex flex-col items-center justify-center min-h-[60vh]">
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-dark-brown mb-3">No Menu Available</h2>
+              <h2 className="text-3xl font-bold text-dark-brown mb-3">
+                No Menu Available
+              </h2>
               <p className="text-gray-500 mb-8 max-w-md">
-                The menu is currently empty. Please add some drinks to start taking orders.
+                The menu is currently empty. Please add some drinks to start
+                taking orders.
               </p>
               <button
                 onClick={() => navigate("/admin/menu")}
@@ -316,7 +338,9 @@ export const Kiosk = () => {
                       {drink.description}
                     </p>
                     <div className="mt-auto">
-                      <p className="mt-3 text-3xl font-bold">₱{drink.sizes.regular}</p>
+                      <p className="mt-3 text-3xl font-bold">
+                        ₱{drink.sizes.regular}
+                      </p>
                       <button
                         type="button"
                         disabled={isSubmitting}
@@ -347,7 +371,9 @@ export const Kiosk = () => {
                 src={selectedDrink.image_url || placeholderImg}
                 alt={selectedDrink.name}
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                onError={(e) => ((e.target as HTMLImageElement).src = placeholderImg)}
+                onError={(e) =>
+                  ((e.target as HTMLImageElement).src = placeholderImg)
+                }
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <button
@@ -362,9 +388,13 @@ export const Kiosk = () => {
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="text-3xl font-bold">{selectedDrink.name}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{selectedDrink.description}</p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {selectedDrink.description}
+                  </p>
                 </div>
-                <span className="text-2xl font-black text-dark-brown">₱{calculateTotalPrice().toFixed(2)}</span>
+                <span className="text-2xl font-black text-dark-brown">
+                  ₱{calculateTotalPrice().toFixed(2)}
+                </span>
               </div>
 
               {/* Size Selection */}
@@ -375,31 +405,34 @@ export const Kiosk = () => {
                     onClick={() => setSelectedSize("regular")}
                     className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
                       selectedSize === "regular"
-                        ? 'bg-dark-brown text-white border-dark-brown'
-                        : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                        ? "bg-dark-brown text-white border-dark-brown"
+                        : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
                     }`}
                   >
-                    Regular<br/>₱{selectedDrink.sizes.regular}
+                    Regular
+                    <br />₱{selectedDrink.sizes.regular}
                   </button>
                   <button
                     onClick={() => setSelectedSize("medium")}
                     className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
                       selectedSize === "medium"
-                        ? 'bg-dark-brown text-white border-dark-brown'
-                        : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                        ? "bg-dark-brown text-white border-dark-brown"
+                        : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
                     }`}
                   >
-                    Medium<br/>₱{selectedDrink.sizes.medium}
+                    Medium
+                    <br />₱{selectedDrink.sizes.medium}
                   </button>
                   <button
                     onClick={() => setSelectedSize("large")}
                     className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
                       selectedSize === "large"
-                        ? 'bg-dark-brown text-white border-dark-brown'
-                        : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                        ? "bg-dark-brown text-white border-dark-brown"
+                        : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
                     }`}
                   >
-                    Large<br/>₱{selectedDrink.sizes.large}
+                    Large
+                    <br />₱{selectedDrink.sizes.large}
                   </button>
                 </div>
               </div>
@@ -414,13 +447,15 @@ export const Kiosk = () => {
                       onClick={() => setSelectedSugar(level)}
                       className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
                         selectedSugar?.id === level.id
-                          ? 'bg-dark-brown text-white border-dark-brown'
-                          : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                          ? "bg-dark-brown text-white border-dark-brown"
+                          : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
                       }`}
                     >
                       {level.label}
                       {level.price_addition > 0 && (
-                        <span className="text-xs block">+₱{level.price_addition}</span>
+                        <span className="text-xs block">
+                          +₱{level.price_addition}
+                        </span>
                       )}
                     </button>
                   ))}
@@ -437,12 +472,14 @@ export const Kiosk = () => {
                         key={topping.id}
                         onClick={() => toggleTopping(topping)}
                         className={`rounded-xl px-3 py-2 text-sm border font-semibold cursor-pointer transition-all duration-200 hover:scale-105 ${
-                          selectedToppings.some(t => t.id === topping.id)
-                            ? 'bg-dark-brown text-white border-dark-brown'
-                            : 'bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20'
+                          selectedToppings.some((t) => t.id === topping.id)
+                            ? "bg-dark-brown text-white border-dark-brown"
+                            : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
                         }`}
                       >
-                        {topping.name}<br/>+₱{topping.price}
+                        {topping.name}
+                        <br />
+                        +₱{topping.price}
                       </button>
                     ))}
                   </div>
@@ -454,7 +491,7 @@ export const Kiosk = () => {
                 <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                   <p className="text-sm font-semibold">Selected Toppings:</p>
                   <p className="text-sm text-gray-600">
-                    {selectedToppings.map(t => t.name).join(", ")}
+                    {selectedToppings.map((t) => t.name).join(", ")}
                   </p>
                 </div>
               )}
@@ -491,14 +528,22 @@ export const Kiosk = () => {
                   <CheckCircle2 size={28} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black font-fredoka text-dark-brown">Order successful</h3>
-                  <p className="mt-1 text-sm text-gray-600">Your order has been sent to the queue.</p>
+                  <h3 className="text-2xl font-black font-fredoka text-dark-brown">
+                    Order successful
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Your order has been sent to the queue.
+                  </p>
                 </div>
               </div>
               {lastOrderSummary && (
                 <div className="mt-4 rounded-2xl bg-[#f8f7f1] p-4">
-                  <p className="text-xs uppercase tracking-[0.25em] text-gray-500">Order details</p>
-                  <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap">{lastOrderSummary}</p>
+                  <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
+                    Order details
+                  </p>
+                  <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap">
+                    {lastOrderSummary}
+                  </p>
                 </div>
               )}
               <div className="mt-5 flex justify-end gap-3">

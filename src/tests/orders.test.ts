@@ -1,6 +1,6 @@
 import { it, expect, describe, afterAll } from "vitest";
-import { createOrder, updateOrderStatus } from "../services/orderService";
-import { supabaseAdmin } from "../lib/supabaseTestClient"; // Using admin client
+import { createOrder, updateOrderStatus } from "@/services/orderService";
+import { supabaseAdmin } from "@/lib/supabaseTestClient"; // Using admin client
 
 describe("Order Integration Test", () => {
   const testCustomer = "Robin";
@@ -118,7 +118,7 @@ describe("Order Integration Test", () => {
       expect(result).toBeNull();
     });
 
-    it('should throw when claim=true but baristaUserId is missing', async () => {
+    it("should throw when claim=true but baristaUserId is missing", async () => {
       await expect(
         updateOrderStatus(
           sharedOrderId,

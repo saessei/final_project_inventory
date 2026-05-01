@@ -1,5 +1,5 @@
-import defaultSupabase from "../lib/supabaseClient.ts";
-import supabase from "../lib/supabaseClient.ts";
+import defaultSupabase from "@/lib/supabaseClient.ts";
+import supabase from "@/lib/supabaseClient.ts";
 
 export const profileService = {
   // Fetch current barista data
@@ -20,16 +20,16 @@ export const profileService = {
   // Update name
   async updateName(userId: string, name: string, supabase = defaultSupabase) {
     const db = supabase;
-  const { error } = await db
-    .from("profiles")
-    .update({ full_name: name })
-    .eq("id", userId);
+    const { error } = await db
+      .from("profiles")
+      .update({ full_name: name })
+      .eq("id", userId);
 
-  if (error) {
-    console.error("Error updating profile:", error);
-    return false; 
-  }
-  return true;
+    if (error) {
+      console.error("Error updating profile:", error);
+      return false;
+    }
+    return true;
   },
 
   // Change password

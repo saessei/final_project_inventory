@@ -1,18 +1,18 @@
-import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
-import { OrderStatusButton } from '../features/common/OrderStatusButton';
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { fn } from "storybook/test";
+import { OrderStatusButton } from "@/components/ui/OrderStatusButton";
 
 const meta = {
-  title: 'Components/OrderStatusButton',
+  title: "Components/OrderStatusButton",
   component: OrderStatusButton,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
   args: { onClick: fn() },
   argTypes: {
     status: {
-      control: 'select',
-      options: ['pending', 'preparing', 'completed'],
+      control: "select",
+      options: ["pending", "preparing", "completed"],
     },
   },
 } satisfies Meta<typeof OrderStatusButton>;
@@ -23,20 +23,20 @@ type Story = StoryObj<typeof meta>;
 // Pending State
 export const Pending: Story = {
   args: {
-    status: 'pending',
+    status: "pending",
   },
 };
 
 // Preparing State
 export const Preparing: Story = {
   args: {
-    status: 'preparing',
+    status: "preparing",
   },
 };
 
 // Completed State
 export const Completed: Story = {
   args: {
-    status: 'completed',
+    status: "completed",
   },
 };

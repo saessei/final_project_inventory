@@ -1,8 +1,8 @@
 import { FormEvent, useState, useEffect } from "react";
-import { UserAuth } from "../../auth/AuthContext";
-import { profileService } from "../../services/profileService";
-import { Sidebar } from "./common/Sidebar";
-import supabase from "../../lib/supabaseClient";
+import { UserAuth } from "@/components/auth/AuthContext";
+import { profileService } from "@/services/ProfileService";
+import { Sidebar } from "@/components/ui/Sidebar";
+import supabase from "@/lib/supabaseClient";
 
 export const Settings = () => {
   const [name, setName] = useState("");
@@ -35,27 +35,27 @@ export const Settings = () => {
   }, [session]);
 
   const handleUpdateName = async () => {
-  if (!session?.user?.id) return;
+    if (!session?.user?.id) return;
 
-  setSavingName(true);
-  try {
-    await profileService.updateName(session.user.id, name);
+    setSavingName(true);
+    try {
+      await profileService.updateName(session.user.id, name);
 
-    const { error: authError } = await supabase.auth.updateUser({
-      data: { display_name: name } 
-    });
+      const { error: authError } = await supabase.auth.updateUser({
+        data: { display_name: name },
+      });
 
-    if (authError) throw authError;
+      if (authError) throw authError;
 
-    await refreshSession();
+      await refreshSession();
 
-    setStatusMessage("Name updated successfully.");
-  } catch {
-    setFormError("Failed to update name.");
-  } finally {
-    setSavingName(false);
-  }
-};
+      setStatusMessage("Name updated successfully.");
+    } catch {
+      setFormError("Failed to update name.");
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   const handleUpdatePassword = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

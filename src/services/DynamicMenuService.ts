@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import supabase from "../lib/supabaseClient";
+import supabase from "@/lib/supabaseClient";
 
 export interface Topping {
   id: string;
@@ -56,14 +56,17 @@ class DynamicMenuService {
   }
 
   private notify(): void {
-    this.listeners.forEach(callback => callback());
+    this.listeners.forEach((callback) => callback());
   }
 
   private getClient(client?: SupabaseClient) {
     return client || supabase;
   }
 
-  private async getRegularPrice(drinkId: string, client?: SupabaseClient): Promise<number> {
+  private async getRegularPrice(
+    drinkId: string,
+    client?: SupabaseClient,
+  ): Promise<number> {
     const { data, error } = await this.getClient(client)
       .from("drink_sizes")
       .select("price")
@@ -97,7 +100,10 @@ class DynamicMenuService {
     return false;
   }
 
-  async deleteCategory(_id: string, _client?: SupabaseClient): Promise<boolean> {
+  async deleteCategory(
+    _id: string,
+    _client?: SupabaseClient,
+  ): Promise<boolean> {
     return false;
   }
 
@@ -184,7 +190,10 @@ class DynamicMenuService {
     }
 
     // Optional: if caller passed topping IDs, create join rows.
-    if (Array.isArray(drink.availableToppings) && drink.availableToppings.length) {
+    if (
+      Array.isArray(drink.availableToppings) &&
+      drink.availableToppings.length
+    ) {
       const joins = drink.availableToppings.map((toppingId) => ({
         drink_id: drinkId,
         topping_id: toppingId,
@@ -219,9 +228,11 @@ class DynamicMenuService {
     };
 
     if (data.name !== undefined) updateRow.name = data.name;
-    if (data.description !== undefined) updateRow.description = data.description;
+    if (data.description !== undefined)
+      updateRow.description = data.description;
     if (data.image !== undefined) updateRow.image_url = data.image;
-    if (data.isAvailable !== undefined) updateRow.is_available = data.isAvailable;
+    if (data.isAvailable !== undefined)
+      updateRow.is_available = data.isAvailable;
 
     const { error } = await db.from("drinks").update(updateRow).eq("id", id);
     if (error) {
@@ -283,7 +294,10 @@ class DynamicMenuService {
     }));
   }
 
-  async getToppingPrice(toppingName: string, client?: SupabaseClient): Promise<number> {
+  async getToppingPrice(
+    toppingName: string,
+    client?: SupabaseClient,
+  ): Promise<number> {
     const toppings = await this.getToppings(client);
     const topping = toppings.find((t) => t.name === toppingName);
     return topping?.price || 0;
@@ -323,7 +337,8 @@ class DynamicMenuService {
     };
     if (data.name !== undefined) updateRow.name = data.name;
     if (data.price !== undefined) updateRow.price = data.price;
-    if (data.isAvailable !== undefined) updateRow.is_available = data.isAvailable;
+    if (data.isAvailable !== undefined)
+      updateRow.is_available = data.isAvailable;
 
     const { error } = await this.getClient(client)
       .from("default_toppings")
@@ -423,7 +438,10 @@ class DynamicMenuService {
     return true;
   }
 
-  async deleteSugarLevel(id: string, client?: SupabaseClient): Promise<boolean> {
+  async deleteSugarLevel(
+    id: string,
+    client?: SupabaseClient,
+  ): Promise<boolean> {
     const { error } = await this.getClient(client)
       .from("sugar_levels")
       .delete()

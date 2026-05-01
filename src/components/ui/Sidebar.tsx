@@ -1,7 +1,15 @@
-// src/components/common/Sidebar.tsx
 import { useRef, useState } from "react";
-import { Store, List, BarChart2, Settings, LogOut, Menu, X, ClipboardList } from "lucide-react";
-import { UserAuth } from "../../auth/AuthContext";
+import {
+  Store,
+  List,
+  BarChart2,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  ClipboardList,
+} from "lucide-react";
+import { UserAuth } from "@/components/auth/AuthContext";
 import { AdminPinModal } from "./AdminPinModal";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "/src/assets/QueueTea.png";
@@ -18,7 +26,11 @@ export const Sidebar = () => {
   const sidebarItems = [
     { name: "Kiosk Mode", icon: <Store size={20} />, path: "/kiosk" },
     { name: "Queued Orders", icon: <List size={20} />, path: "/queued-orders" },
-    { name: "Menu Manager", icon: <ClipboardList size={20} />, path: "/admin/menu" },
+    {
+      name: "Menu Manager",
+      icon: <ClipboardList size={20} />,
+      path: "/admin/menu",
+    },
     { name: "Reports", icon: <BarChart2 size={20} />, path: "/reports" },
     { name: "Settings", icon: <Settings size={20} />, path: "/settings" },
   ];
@@ -63,7 +75,7 @@ export const Sidebar = () => {
       <div
         ref={sidebarRef}
         className={`bg-bg-lightgray fixed top-0 left-0 h-screen min-h-screen p-5 pt-8 flex flex-col justify-between shadow-lg font-quicksand z-50 transition-transform duration-300 ease-in-out ${
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         } w-64`}
       >
         <div>
@@ -130,9 +142,9 @@ export const Sidebar = () => {
 
       {/* Reuse AdminPinModal for logout */}
       {showLogoutModal && (
-        <AdminPinModal 
-          onSuccess={handleSignOutConfirm} 
-          onClose={handleSignOutCancel} 
+        <AdminPinModal
+          onSuccess={handleSignOutConfirm}
+          onClose={handleSignOutCancel}
         />
       )}
     </>

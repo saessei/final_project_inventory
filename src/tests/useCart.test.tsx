@@ -1,8 +1,8 @@
 import { beforeAll, afterAll, describe, expect, it } from "vitest";
 import { renderHook, act } from "@testing-library/react"; // Added act
 import { waitFor } from "@testing-library/dom";
-import { useCart, type CartItem } from "../hooks/useCart";
-import { supabaseAdmin } from "../lib/supabaseTestClient";
+import { useCart, type CartItem } from "@/hooks/useCart";
+import { supabaseAdmin } from "@/lib/supabaseTestClient";
 
 describe("useCart (integration, real Supabase DB)", () => {
   const testRunId = `vitest-useCart-${Date.now()}`;
@@ -30,13 +30,13 @@ describe("useCart (integration, real Supabase DB)", () => {
     } satisfies Omit<CartItem, "id" | "cart_id">;
   }
 
-    beforeAll(async () => {
+  beforeAll(async () => {
     await supabaseAdmin.auth.signInWithPassword({
       email: "test@example.com",
       password: "password123",
     });
   });
-  
+
   afterAll(async () => {
     if (createdCartIds.length) {
       await supabaseAdmin

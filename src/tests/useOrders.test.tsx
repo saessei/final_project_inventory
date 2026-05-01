@@ -1,9 +1,9 @@
 import { describe, it, expect, afterAll } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { waitFor } from "@testing-library/dom";
-import { useOrders } from "../hooks/useOrders";
-import { supabaseAdmin } from "../lib/supabaseTestClient";
-import { createOrder } from "../services/orderService";
+import { useOrders } from "@/hooks/useOrders";
+import { supabaseAdmin } from "@/lib/supabaseTestClient";
+import { createOrder } from "@/services/orderService";
 
 describe("useOrders (integration, test DB)", () => {
   const testRunId = `vitest-useOrders-${Date.now()}`;
@@ -29,7 +29,7 @@ describe("useOrders (integration, test DB)", () => {
         order_details: `A (${testRunId})`,
         status: "pending",
       },
-      supabaseAdmin 
+      supabaseAdmin,
     );
     const b = await createOrder(
       {
@@ -37,7 +37,7 @@ describe("useOrders (integration, test DB)", () => {
         order_details: `B (${testRunId})`,
         status: "pending",
       },
-      supabaseAdmin 
+      supabaseAdmin,
     );
 
     if (a?.[0]?.id && b?.[0]?.id) {
@@ -51,17 +51,20 @@ describe("useOrders (integration, test DB)", () => {
     });
 
     // 3. Verify state updates
-    await waitFor(() => {
-      const mine = result.current.orders.filter(
-        (o) => o.customer_name === testCustomer
-      );
-      expect(mine.length).toBeGreaterThanOrEqual(2);
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        const mine = result.current.orders.filter(
+          (o) => o.customer_name === testCustomer,
+        );
+        expect(mine.length).toBeGreaterThanOrEqual(2);
+      },
+      { timeout: 5000 },
+    );
 
     const mine = result.current.orders.filter(
-      (o) => o.customer_name === testCustomer
+      (o) => o.customer_name === testCustomer,
     );
-    
+
     const times = mine.map((o) => new Date(o.created_at).getTime());
     // Verify sorting logic (ascending by created_at)
     expect(times).toEqual([...times].sort((x, y) => x - y));

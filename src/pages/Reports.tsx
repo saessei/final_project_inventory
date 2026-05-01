@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Sidebar } from "../common/Sidebar";
-import supabase from "../../lib/supabaseClient";
+import { Sidebar } from "@/components/ui/Sidebar";
+import supabase from "@/lib/supabaseClient";
 import {
   ShoppingBag,
   PhilippinePeso,
