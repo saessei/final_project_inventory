@@ -1,6 +1,6 @@
 import { Drink } from "./DrinkFactory";
 import { DrinkFactory } from "./DrinkFactory";
-import { dynamicMenu } from "../services/DynamicMenuService";
+import { dynamicMenu } from "@/services/DynamicMenuService";
 
 export type DrinkCategoryId = string;
 

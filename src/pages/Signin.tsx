@@ -1,9 +1,9 @@
 // components/Signin.tsx
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { UserAuth } from "../../auth/AuthContext";
-import { Header } from "../components/Header";
-import { BobaFooter } from "../components/BobaFooter";
+import { UserAuth } from "@/components/auth/AuthContext";
+import { Header } from "@/components/ui/Header";
+import { BobaFooter } from "@/components/ui/BobaFooter";
 import * as React from "react";
 import { Eye, EyeOff, Mail, Lock, Loader2 } from "lucide-react";
 
@@ -72,7 +72,10 @@ export const Signin = () => {
               Email
             </label>
             <div className="relative mb-4 mt-1">
-              <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
+              <Mail
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
+              />
               <input
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
@@ -86,7 +89,10 @@ export const Signin = () => {
               Password
             </label>
             <div className="relative flex items-center mt-1">
-              <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
+              <Lock
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
+              />
               <input
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"

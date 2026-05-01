@@ -1,9 +1,9 @@
 import { Navigate } from "react-router-dom";
-import { UserAuth } from "../../auth/AuthContext";
+import { UserAuth } from "@/components/auth/AuthContext";
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { session, loading } = UserAuth();
-  
+
   if (loading) {
     return (
       <div className="bg-cream min-h-screen flex items-center justify-center">
@@ -14,10 +14,10 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       </div>
     );
   }
-  
+
   if (!session) {
     return <Navigate to="/signin" replace />;
   }
-  
+
   return <>{children}</>;
 };

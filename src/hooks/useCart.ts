@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import supabase from "../lib/supabaseClient";
+import supabase from "@/lib/supabaseClient";
 
 export type CartItem = {
   id: string;
@@ -18,7 +18,7 @@ type Cart = {
   status: "active" | "checked_out" | "abandoned";
 };
 
-export function useCart(baristaUserId?: string, ) {
+export function useCart(baristaUserId?: string) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartId, setCartId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -83,7 +83,12 @@ export function useCart(baristaUserId?: string, ) {
       .channel(`cart-items-${cartId}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "cart_items", filter: `cart_id=eq.${cartId}` },
+        {
+          event: "*",
+          schema: "public",
+          table: "cart_items",
+          filter: `cart_id=eq.${cartId}`,
+        },
         () => refresh(),
       )
       .subscribe();
@@ -141,7 +146,10 @@ export function useCart(baristaUserId?: string, ) {
           .eq("id", item.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("cart_items").delete().eq("id", item.id);
+        const { error } = await supabase
+          .from("cart_items")
+          .delete()
+          .eq("id", item.id);
         if (error) throw error;
       }
       await refresh();
@@ -167,7 +175,10 @@ export function useCart(baristaUserId?: string, ) {
 
   const clearCart = useCallback(async () => {
     if (!cartId) return;
-    const { error } = await supabase.from("cart_items").delete().eq("cart_id", cartId);
+    const { error } = await supabase
+      .from("cart_items")
+      .delete()
+      .eq("cart_id", cartId);
     if (error) throw error;
     await refresh();
   }, [cartId, refresh]);
@@ -177,12 +188,15 @@ export function useCart(baristaUserId?: string, ) {
     [cart],
   );
 
-    const removeItemAtIndex = useCallback(
+  const removeItemAtIndex = useCallback(
     async (index: number) => {
       const item = cart[index];
       if (!item) return;
 
-      const { error } = await supabase.from("cart_items").delete().eq("id", item.id);
+      const { error } = await supabase
+        .from("cart_items")
+        .delete()
+        .eq("id", item.id);
       if (error) throw error;
 
       await refresh();
@@ -198,7 +212,7 @@ export function useCart(baristaUserId?: string, ) {
     upsertItem,
     decrementItemAtIndex,
     incrementItemAtIndex,
-    removeItemAtIndex,   
+    removeItemAtIndex,
     clearCart,
     cartTotal,
   };

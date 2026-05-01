@@ -1,5 +1,5 @@
 // src/factories/DrinkFactory.ts
-import placeholderImg from "../assets/Placeholder.jpg";
+import placeholderImg from "@/assets/Placeholder.jpg";
 
 export type DrinkType = "BrownSugar" | "Matcha" | "Taro" | "PassionFruit";
 
@@ -23,7 +23,10 @@ class MilkTea implements Drink {
 
 export class DrinkFactory {
   static createDrink(type: DrinkType): Drink {
-    const common: Record<DrinkType, { name: string; description: string; image: string, price: number }> = {
+    const common: Record<
+      DrinkType,
+      { name: string; description: string; image: string; price: number }
+    > = {
       BrownSugar: {
         name: "Brown Sugar Boba",
         description: "Classic favorite with caramelized sugar and pearls.",
@@ -44,10 +47,11 @@ export class DrinkFactory {
       },
       PassionFruit: {
         name: "Passion Fruit Green Tea",
-        description: "A refreshing, tart, and sweet beverage combining brewed green tea with passion fruit puree or syrup.",
+        description:
+          "A refreshing, tart, and sweet beverage combining brewed green tea with passion fruit puree or syrup.",
         image: placeholderImg,
         price: 90,
-      }
+      },
     };
 
     const d = common[type];

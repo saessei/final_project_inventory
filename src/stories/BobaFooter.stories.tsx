@@ -1,12 +1,11 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { BobaFooter } from '../features/common/BobaFooter';
-
+import type { Meta, StoryObj } from "@storybook/react";
+import { BobaFooter } from "@/components/ui/BobaFooter";
 
 const meta: Meta<typeof BobaFooter> = {
-  title: 'Components/BobaFooter',
+  title: "Components/BobaFooter",
   component: BobaFooter,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
 };
 
@@ -29,7 +28,7 @@ export const PageLayout: Story = {
 export const Mobile: Story = {
   parameters: {
     viewport: {
-      defaultViewport: 'mobile1',
+      defaultViewport: "mobile1",
     },
   },
 };

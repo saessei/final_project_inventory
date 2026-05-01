@@ -1,8 +1,8 @@
 // src/components/AdminPinModal.tsx
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Key, Lock, X } from "lucide-react";
-import supabase from "../../lib/supabaseClient";
-import { UserAuth } from "../../auth/AuthContext";
+import supabase from "@/lib/supabaseClient";
+import { UserAuth } from "@/components/auth/AuthContext";
 
 interface AdminPinModalProps {
   onSuccess: () => void;
@@ -11,14 +11,19 @@ interface AdminPinModalProps {
   description?: string;
 }
 
-export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminPinModalProps) => {
+export const AdminPinModal = ({
+  onSuccess,
+  onClose,
+  title,
+  description,
+}: AdminPinModalProps) => {
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasExistingPin, setHasExistingPin] = useState<boolean | null>(null);
   const { session, refreshSession } = UserAuth();
-  
+
   const hasVerifiedRef = useRef(false);
   const isVerifyingRef = useRef(false);
 
@@ -49,17 +54,17 @@ export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminP
 
   useEffect(() => {
     const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose();
       }
     };
-    document.addEventListener('keydown', handleEscapeKey);
-    return () => document.removeEventListener('keydown', handleEscapeKey);
+    document.addEventListener("keydown", handleEscapeKey);
+    return () => document.removeEventListener("keydown", handleEscapeKey);
   }, [onClose]);
 
   const handleCreatePin = async () => {
     if (!session?.user?.id) return;
-    
+
     setLoading(true);
     setError("");
 
@@ -101,9 +106,9 @@ export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminP
       console.log("Already verified or verifying, skipping...");
       return;
     }
-    
+
     if (!session?.user?.id) return;
-    
+
     isVerifyingRef.current = true;
     setLoading(true);
     setError("");
@@ -163,7 +168,7 @@ export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminP
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
-      <div 
+      <div
         className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl relative mx-4"
         onClick={(e) => e.stopPropagation()}
       >
@@ -184,9 +189,10 @@ export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminP
           {title || (hasExistingPin ? "Verify Admin PIN" : "Setup Admin PIN")}
         </h2>
         <p className="text-gray-600 text-center mb-6">
-          {description || (hasExistingPin 
-            ? "Enter your admin PIN to access this feature." 
-            : "Create a PIN to access admin features.")}
+          {description ||
+            (hasExistingPin
+              ? "Enter your admin PIN to access this feature."
+              : "Create a PIN to access admin features.")}
         </p>
 
         {!hasExistingPin ? (
@@ -196,7 +202,10 @@ export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminP
                 Create Admin PIN
               </label>
               <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
                 <input
                   type="password"
                   value={pin}
@@ -212,7 +221,10 @@ export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminP
                 Confirm Admin PIN
               </label>
               <div className="relative">
-                <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Lock
+                  size={18}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
                 <input
                   type="password"
                   value={confirmPin}
@@ -229,14 +241,17 @@ export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminP
               Enter Admin PIN
             </label>
             <div className="relative">
-              <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Lock
+                size={18}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
               <input
                 type="password"
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 placeholder="Enter your PIN"
                 className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20 transition-all"
-                onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+                onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
                 autoFocus
               />
             </div>
@@ -254,7 +269,11 @@ export const AdminPinModal = ({ onSuccess, onClose, title, description }: AdminP
           disabled={loading}
           className="w-full py-3 bg-dark-brown text-white rounded-xl font-semibold hover:bg-brown-dark transition-colors mb-3 disabled:opacity-50"
         >
-          {loading ? "Processing..." : (!hasExistingPin ? "Create PIN & Save" : "Verify Access")}
+          {loading
+            ? "Processing..."
+            : !hasExistingPin
+              ? "Create PIN & Save"
+              : "Verify Access"}
         </button>
 
         <button

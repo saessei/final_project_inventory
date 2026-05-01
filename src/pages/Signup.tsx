@@ -1,12 +1,20 @@
 // components/Signup.tsx
 import { useState } from "react";
-import { Header } from "./common/Header";
-import { BobaFooter } from "./common/BobaFooter";
+import { Header } from "@/components/ui/Header";
+import { BobaFooter } from "@/components/ui/BobaFooter";
 import { Link, useNavigate } from "react-router-dom";
-import { UserAuth } from "../../auth/AuthContext";
+import { UserAuth } from "@/components/auth/AuthContext";
 import * as React from "react";
 import "../index.css";
-import { Eye, EyeOff, Mail, Lock, UserRound, KeyRound, Loader2 } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  UserRound,
+  KeyRound,
+  Loader2,
+} from "lucide-react";
 
 export const Signup = () => {
   const [email, setEmail] = useState("");
@@ -42,7 +50,12 @@ export const Signup = () => {
     }
 
     try {
-      const result = await signUpNewUser(email, password, name, adminPin || undefined);
+      const result = await signUpNewUser(
+        email,
+        password,
+        name,
+        adminPin || undefined,
+      );
 
       if (result.success) {
         navigate("/kiosk");
@@ -84,7 +97,7 @@ export const Signup = () => {
               </Link>
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 gap-6 md:gap-8 font-quicksand text-brown-two items-start">
             <section className="space-y-4">
               <div className="space-y-1">
@@ -92,7 +105,10 @@ export const Signup = () => {
                   Full Name
                 </label>
                 <div className="relative">
-                  <UserRound size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
+                  <UserRound
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
+                  />
                   <input
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Name"
@@ -108,7 +124,10 @@ export const Signup = () => {
                   Email
                 </label>
                 <div className="relative">
-                  <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
+                  <Mail
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
+                  />
                   <input
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
@@ -124,12 +143,15 @@ export const Signup = () => {
                   Password
                 </label>
                 <div className="relative flex items-center">
-                  <Lock size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
+                  <Lock
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
+                  />
                   <input
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                     className="p-3 w-full pl-10 rounded-2xl bg-gray-100/85 border border-transparent focus:border-brown focus:ring-2 focus:ring-brown/20 outline-none transition-all pr-12"
-                     type={showPassword ? "text" : "password"}
+                    type={showPassword ? "text" : "password"}
                     required
                   />
                   <button
@@ -149,7 +171,10 @@ export const Signup = () => {
                   Admin PIN
                 </label>
                 <div className="relative flex items-center">
-                  <KeyRound size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
+                  <KeyRound
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
+                  />
                   <input
                     onChange={(e) => setAdminPin(e.target.value)}
                     placeholder="Enter admin PIN (4+ digits)"
@@ -171,7 +196,10 @@ export const Signup = () => {
                   Confirm Admin PIN
                 </label>
                 <div className="relative flex items-center">
-                  <KeyRound size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60" />
+                  <KeyRound
+                    size={18}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-brown-two/60"
+                  />
                   <input
                     onChange={(e) => setConfirmAdminPin(e.target.value)}
                     placeholder="Confirm admin PIN"
@@ -183,7 +211,11 @@ export const Signup = () => {
                     onClick={() => setShowConfirmAdminPin(!showConfirmAdminPin)}
                     className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brown-two transition-colors"
                   >
-                    {showConfirmAdminPin ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {showConfirmAdminPin ? (
+                      <EyeOff size={20} />
+                    ) : (
+                      <Eye size={20} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -205,7 +237,7 @@ export const Signup = () => {
                 </span>
               </button>
             </div>
-            
+
             {error && (
               <p className="md:col-span-2 text-red-600 text-center text-sm font-semibold bg-red-50 border border-red-200 rounded-xl px-3 py-2 mt-2">
                 {error}

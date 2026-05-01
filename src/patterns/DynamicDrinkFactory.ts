@@ -1,5 +1,5 @@
-import supabase from "../lib/supabaseClient";
-import { DrinkType } from "../patterns/DrinkFactory";
+import supabase from "@/lib/supabaseClient";
+import { DrinkType } from "@/patterns/DrinkFactory";
 
 export interface Topping {
   id: string;
@@ -56,25 +56,27 @@ class DynamicMenuService {
   }
 
   private notify(): void {
-    this.listeners.forEach(callback => callback());
+    this.listeners.forEach((callback) => callback());
   }
 
   // Category Management
   async getCategories(): Promise<DynamicCategory[]> {
     const { data, error } = await supabase
-      .from('menu_categories')
-      .select('*')
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
-    
+      .from("menu_categories")
+      .select("*")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true });
+
     if (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
       return [];
     }
     return data || [];
   }
 
-  async addCategory(category: Omit<DynamicCategory, 'id' | 'drinkIds' | 'displayOrder'>): Promise<DynamicCategory | null> {
+  async addCategory(
+    category: Omit<DynamicCategory, "id" | "drinkIds" | "displayOrder">,
+  ): Promise<DynamicCategory | null> {
     const categories = await this.getCategories();
     const newCategory: DynamicCategory = {
       ...category,
@@ -83,29 +85,32 @@ class DynamicMenuService {
       displayOrder: categories.length + 1,
       isActive: true,
     };
-    
+
     const { data, error } = await supabase
-      .from('menu_categories')
+      .from("menu_categories")
       .insert([newCategory])
       .select()
       .single();
-    
+
     if (error) {
-      console.error('Error adding category:', error);
+      console.error("Error adding category:", error);
       return null;
     }
     this.notify();
     return data;
   }
 
-  async updateCategory(id: string, updates: Partial<DynamicCategory>): Promise<boolean> {
+  async updateCategory(
+    id: string,
+    updates: Partial<DynamicCategory>,
+  ): Promise<boolean> {
     const { error } = await supabase
-      .from('menu_categories')
+      .from("menu_categories")
       .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id);
-    
+      .eq("id", id);
+
     if (error) {
-      console.error('Error updating category:', error);
+      console.error("Error updating category:", error);
       return false;
     }
     this.notify();
@@ -114,12 +119,12 @@ class DynamicMenuService {
 
   async deleteCategory(id: string): Promise<boolean> {
     const { error } = await supabase
-      .from('menu_categories')
+      .from("menu_categories")
       .delete()
-      .eq('id', id);
-    
+      .eq("id", id);
+
     if (error) {
-      console.error('Error deleting category:', error);
+      console.error("Error deleting category:", error);
       return false;
     }
     this.notify();
@@ -129,13 +134,13 @@ class DynamicMenuService {
   // Drink Management
   async getDrinksByCategory(categoryId: string): Promise<DynamicDrink[]> {
     const { data, error } = await supabase
-      .from('menu_drinks')
-      .select('*')
-      .eq('category_id', categoryId)
-      .eq('is_available', true);
-    
+      .from("menu_drinks")
+      .select("*")
+      .eq("category_id", categoryId)
+      .eq("is_available", true);
+
     if (error) {
-      console.error('Error fetching drinks:', error);
+      console.error("Error fetching drinks:", error);
       return [];
     }
     return data || [];
@@ -143,46 +148,51 @@ class DynamicMenuService {
 
   async getAllDrinks(): Promise<DynamicDrink[]> {
     const { data, error } = await supabase
-      .from('menu_drinks')
-      .select('*')
-      .eq('is_available', true);
-    
+      .from("menu_drinks")
+      .select("*")
+      .eq("is_available", true);
+
     if (error) {
-      console.error('Error fetching drinks:', error);
+      console.error("Error fetching drinks:", error);
       return [];
     }
     return data || [];
   }
 
-  async addDrink(drink: Omit<DynamicDrink, 'id'>): Promise<DynamicDrink | null> {
+  async addDrink(
+    drink: Omit<DynamicDrink, "id">,
+  ): Promise<DynamicDrink | null> {
     const newDrink: DynamicDrink = {
       ...drink,
       id: `drink_${Date.now()}`,
       isAvailable: true,
     };
-    
+
     const { data, error } = await supabase
-      .from('menu_drinks')
+      .from("menu_drinks")
       .insert([newDrink])
       .select()
       .single();
-    
+
     if (error) {
-      console.error('Error adding drink:', error);
+      console.error("Error adding drink:", error);
       return null;
     }
     this.notify();
     return data;
   }
 
-  async updateDrink(id: string, updates: Partial<DynamicDrink>): Promise<boolean> {
+  async updateDrink(
+    id: string,
+    updates: Partial<DynamicDrink>,
+  ): Promise<boolean> {
     const { error } = await supabase
-      .from('menu_drinks')
+      .from("menu_drinks")
       .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id);
-    
+      .eq("id", id);
+
     if (error) {
-      console.error('Error updating drink:', error);
+      console.error("Error updating drink:", error);
       return false;
     }
     this.notify();
@@ -190,13 +200,10 @@ class DynamicMenuService {
   }
 
   async deleteDrink(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from('menu_drinks')
-      .delete()
-      .eq('id', id);
-    
+    const { error } = await supabase.from("menu_drinks").delete().eq("id", id);
+
     if (error) {
-      console.error('Error deleting drink:', error);
+      console.error("Error deleting drink:", error);
       return false;
     }
     this.notify();
@@ -206,12 +213,12 @@ class DynamicMenuService {
   // Topping Management
   async getToppings(): Promise<Topping[]> {
     const { data, error } = await supabase
-      .from('menu_toppings')
-      .select('*')
-      .eq('is_available', true);
-    
+      .from("menu_toppings")
+      .select("*")
+      .eq("is_available", true);
+
     if (error) {
-      console.error('Error fetching toppings:', error);
+      console.error("Error fetching toppings:", error);
       return [];
     }
     return data || [];
@@ -219,25 +226,25 @@ class DynamicMenuService {
 
   async getToppingPrice(toppingName: string): Promise<number> {
     const toppings = await this.getToppings();
-    const topping = toppings.find(t => t.name === toppingName);
+    const topping = toppings.find((t) => t.name === toppingName);
     return topping?.price || 0;
   }
 
-  async addTopping(topping: Omit<Topping, 'id'>): Promise<Topping | null> {
+  async addTopping(topping: Omit<Topping, "id">): Promise<Topping | null> {
     const newTopping: Topping = {
       ...topping,
       id: `top_${Date.now()}`,
       isAvailable: true,
     };
-    
+
     const { data, error } = await supabase
-      .from('menu_toppings')
+      .from("menu_toppings")
       .insert([newTopping])
       .select()
       .single();
-    
+
     if (error) {
-      console.error('Error adding topping:', error);
+      console.error("Error adding topping:", error);
       return null;
     }
     this.notify();
@@ -246,12 +253,12 @@ class DynamicMenuService {
 
   async updateTopping(id: string, updates: Partial<Topping>): Promise<boolean> {
     const { error } = await supabase
-      .from('menu_toppings')
+      .from("menu_toppings")
       .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id);
-    
+      .eq("id", id);
+
     if (error) {
-      console.error('Error updating topping:', error);
+      console.error("Error updating topping:", error);
       return false;
     }
     this.notify();
@@ -260,12 +267,12 @@ class DynamicMenuService {
 
   async deleteTopping(id: string): Promise<boolean> {
     const { error } = await supabase
-      .from('menu_toppings')
+      .from("menu_toppings")
       .delete()
-      .eq('id', id);
-    
+      .eq("id", id);
+
     if (error) {
-      console.error('Error deleting topping:', error);
+      console.error("Error deleting topping:", error);
       return false;
     }
     this.notify();
@@ -275,46 +282,51 @@ class DynamicMenuService {
   // Sugar Level Management
   async getSugarLevels(): Promise<SugarLevel[]> {
     const { data, error } = await supabase
-      .from('menu_sugar_levels')
-      .select('*')
-      .eq('is_available', true);
-    
+      .from("menu_sugar_levels")
+      .select("*")
+      .eq("is_available", true);
+
     if (error) {
-      console.error('Error fetching sugar levels:', error);
+      console.error("Error fetching sugar levels:", error);
       return [];
     }
     return data || [];
   }
 
-  async addSugarLevel(level: Omit<SugarLevel, 'id'>): Promise<SugarLevel | null> {
+  async addSugarLevel(
+    level: Omit<SugarLevel, "id">,
+  ): Promise<SugarLevel | null> {
     const newLevel: SugarLevel = {
       ...level,
       id: `sugar_${Date.now()}`,
       isAvailable: true,
     };
-    
+
     const { data, error } = await supabase
-      .from('menu_sugar_levels')
+      .from("menu_sugar_levels")
       .insert([newLevel])
       .select()
       .single();
-    
+
     if (error) {
-      console.error('Error adding sugar level:', error);
+      console.error("Error adding sugar level:", error);
       return null;
     }
     this.notify();
     return data;
   }
 
-  async updateSugarLevel(id: string, updates: Partial<SugarLevel>): Promise<boolean> {
+  async updateSugarLevel(
+    id: string,
+    updates: Partial<SugarLevel>,
+  ): Promise<boolean> {
     const { error } = await supabase
-      .from('menu_sugar_levels')
+      .from("menu_sugar_levels")
       .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id', id);
-    
+      .eq("id", id);
+
     if (error) {
-      console.error('Error updating sugar level:', error);
+      console.error("Error updating sugar level:", error);
       return false;
     }
     this.notify();
@@ -323,12 +335,12 @@ class DynamicMenuService {
 
   async deleteSugarLevel(id: string): Promise<boolean> {
     const { error } = await supabase
-      .from('menu_sugar_levels')
+      .from("menu_sugar_levels")
       .delete()
-      .eq('id', id);
-    
+      .eq("id", id);
+
     if (error) {
-      console.error('Error deleting sugar level:', error);
+      console.error("Error deleting sugar level:", error);
       return false;
     }
     this.notify();
