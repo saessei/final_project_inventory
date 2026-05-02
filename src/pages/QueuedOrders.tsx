@@ -103,7 +103,7 @@ export const QueuedOrders = () => {
 
       <main className="ml-0 lg:ml-64 mr-0 lg:mr-[12rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
         <div className="mb-6">
-          <h1 className="text-5xl font-black font-fredoka">Staff Station</h1>
+          <h1 className="text-4xl font-black font-fredoka">Staff Station</h1>
           <p className="text-lg text-gray-500">
             Take orders and move the queue from one shared station.
           </p>
@@ -176,7 +176,7 @@ export const QueuedOrders = () => {
                 return (
                   <article
                     key={order.id}
-                    className="rounded-xl bg-white p-4 shadow-sm border border-slate-200"
+                    className="flex h-full flex-col rounded-xl bg-white p-4 shadow-sm border border-slate-200"
                   >
                     <div className="flex justify-between items-start mb-3">
                       <div>
@@ -216,7 +216,7 @@ export const QueuedOrders = () => {
                       {order.customer_name}
                     </h3>
 
-                    <div className="mb-4 rounded-xl bg-[#f8f7f1] p-3">
+                    <div className="mb-4 rounded-xl bg-[#f8f7f1] p-3 flex-1">
                       {items.map((item, idx) => (
                         <p
                           key={idx}
@@ -229,12 +229,14 @@ export const QueuedOrders = () => {
                       ))}
                     </div>
 
-                    {order.status !== "cancelled" && (
-                      <OrderStatusButton
-                        status={order.status}
-                        onClick={() => handleStatusChange(order)}
-                      />
-                    )}
+                    <div className="mt-auto pt-2">
+                      {order.status !== "cancelled" && (
+                        <OrderStatusButton
+                          status={order.status}
+                          onClick={() => handleStatusChange(order)}
+                        />
+                      )}
+                    </div>
                   </article>
                 );
               })
