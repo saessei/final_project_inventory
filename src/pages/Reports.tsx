@@ -8,6 +8,7 @@ import { StatsCards } from "@/components/reports/StatsCards";
 import { TopDrinksPanel } from "@/components/reports/TopDrinksPanel";
 import { TopToppingsPanel } from "@/components/reports/TopToppingsPanel";
 import { useReportMetrics } from "@/hooks/useReportMetrics";
+import { ReportsSkeleton } from "@/components/ui/LoadingSkeletons";
 import type { ReportOrder } from "@/types/reportTypes";
 
 export const Reports = () => {
@@ -82,39 +83,41 @@ export const Reports = () => {
   };
 
   return (
-    <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
-      <div className="fixed top-0 left-0 h-screen w-64 z-10">
-        <Sidebar />
-      </div>
-
-      <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
-        <div className="max-w-7xl mx-auto">
-          <ReportsHeader
-            dateRange={dateRange}
-            loading={loading}
-            showDatePicker={showDatePicker}
-            onToggleDatePicker={() => setShowDatePicker(!showDatePicker)}
-            onSetDatePreset={setDatePreset}
-            onExport={handleExport}
-            onRefresh={loadOrders}
-          />
-
-          <StatsCards
-            totalOrders={totalOrders}
-            totalRevenue={totalRevenue}
-            todayCount={todayCount}
-            todayRevenue={todayRevenue}
-          />
-
-          <div className="grid lg:grid-cols-2 gap-6 mb-6">
-            <TopDrinksPanel topDrinks={topDrinks} />
-            <TopToppingsPanel topToppings={topToppings} />
-          </div>
-
-          <BusyHoursPanel busyHours={busyHours} />
-          <RecentOrdersTable loading={loading} orders={orders} />
+    <ReportsSkeleton loading={loading}>
+      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+        <div className="fixed top-0 left-0 h-screen w-64 z-10">
+          <Sidebar />
         </div>
-      </main>
-    </div>
+
+        <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+          <div className="max-w-7xl mx-auto">
+            <ReportsHeader
+              dateRange={dateRange}
+              loading={loading}
+              showDatePicker={showDatePicker}
+              onToggleDatePicker={() => setShowDatePicker(!showDatePicker)}
+              onSetDatePreset={setDatePreset}
+              onExport={handleExport}
+              onRefresh={loadOrders}
+            />
+
+            <StatsCards
+              totalOrders={totalOrders}
+              totalRevenue={totalRevenue}
+              todayCount={todayCount}
+              todayRevenue={todayRevenue}
+            />
+
+            <div className="grid lg:grid-cols-2 gap-6 mb-6">
+              <TopDrinksPanel topDrinks={topDrinks} />
+              <TopToppingsPanel topToppings={topToppings} />
+            </div>
+
+            <BusyHoursPanel busyHours={busyHours} />
+            <RecentOrdersTable loading={loading} orders={orders} />
+          </div>
+        </main>
+      </div>
+    </ReportsSkeleton>
   );
 };
