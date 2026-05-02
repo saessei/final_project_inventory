@@ -2,20 +2,17 @@ import {
   Candy,
   CirclePlus,
   CupSoda,
-  FolderOpen,
   Plus,
   TrendingUp,
 } from "lucide-react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import {
-  CategoryCard,
   DrinkCard,
   SugarLevelCard,
   ToppingCard,
 } from "./AdminCards";
 import type {
-  CategoryType,
   DrinkType,
   SugarLevel,
   TabType,
@@ -24,14 +21,10 @@ import type {
 
 interface AdminTabsProps {
   activeTab: TabType;
-  categories: CategoryType[];
   drinks: DrinkType[];
   toppings: ToppingType[];
   sugarLevels: SugarLevel[];
   onTabChange: (tab: TabType) => void;
-  onAddCategory: () => void;
-  onEditCategory: (category: CategoryType) => void;
-  onDeleteCategory: (id: string, label: string) => void;
   onAddDrink: () => void;
   onEditDrink: (drink: DrinkType) => void;
   onDeleteDrink: (id: string, name: string) => void;
@@ -43,14 +36,10 @@ interface AdminTabsProps {
 
 export const AdminTabs = ({
   activeTab,
-  categories,
   drinks,
   toppings,
   sugarLevels,
   onTabChange,
-  onAddCategory,
-  onEditCategory,
-  onDeleteCategory,
   onAddDrink,
   onEditDrink,
   onDeleteDrink,
@@ -60,11 +49,6 @@ export const AdminTabs = ({
   onUpdateSugarLevel,
 }: AdminTabsProps) => {
   const tabs = [
-    {
-      type: "categories" as const,
-      label: `Categories (${categories.length})`,
-      icon: <FolderOpen size={18} />,
-    },
     {
       type: "drinks" as const,
       label: `Drinks (${drinks.length})`,
@@ -103,29 +87,6 @@ export const AdminTabs = ({
           </Button>
         ))}
       </div>
-
-      {activeTab === "categories" && (
-        <div>
-          <Button
-            onClick={onAddCategory}
-            variant="solid"
-            leftIcon={<Plus size={18} />}
-            className="mb-4 rounded-lg hover:opacity-90"
-          >
-            Add Category
-          </Button>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {categories.map((category) => (
-              <CategoryCard
-                key={category.id}
-                category={category}
-                onEdit={() => onEditCategory(category)}
-                onDelete={() => onDeleteCategory(category.id, category.label)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
 
       {activeTab === "drinks" && (
         <div>

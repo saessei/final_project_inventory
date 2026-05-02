@@ -7,6 +7,7 @@ export interface Drink {
   name: string;
   description: string;
   image_url: string;
+  category?: string | null;
   is_available: boolean;
   sizes: {
     regular: number;
@@ -246,7 +247,7 @@ class DrinkService {
   }
 
   async createDrink(
-    drink: { name: string; description: string; image_url: string },
+    drink: { name: string; description: string; image_url: string; category?: string },
     sizes: { regular: number; medium: number; large: number },
     toppingIds: string[],
     client?: SupabaseClient,
@@ -260,6 +261,7 @@ class DrinkService {
         name: drink.name,
         description: drink.description,
         image_url: drink.image_url,
+        category: drink.category || null,
         is_available: true,
       })
       .select()
@@ -305,7 +307,7 @@ class DrinkService {
 
   async updateDrink(
     drinkId: string,
-    updates: { name?: string; description?: string; image_url?: string },
+    updates: { name?: string; description?: string; image_url?: string; category?: string | null },
     sizes?: { regular: number; medium: number; large: number },
     toppingIds?: string[],
     client?: SupabaseClient,

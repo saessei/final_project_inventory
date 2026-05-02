@@ -1,4 +1,4 @@
-export type TabType = "categories" | "drinks" | "toppings" | "sugar-levels";
+export type TabType = "drinks" | "toppings" | "sugar-levels";
 
 export interface SugarLevel {
   id: string;
@@ -12,6 +12,7 @@ export interface DrinkType {
   name: string;
   description: string;
   image_url: string;
+  category?: string | null;
   sizes: {
     regular: number;
     medium: number;
@@ -38,6 +39,7 @@ export interface DrinkModalData {
   name: string;
   description: string;
   image_url: string;
+  category: string;
   regular_price: string;
   medium_price: string;
   large_price: string;

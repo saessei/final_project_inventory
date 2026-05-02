@@ -1,6 +1,5 @@
 // src/components/Admin/MenuManager.tsx
 import { useState, useEffect, useCallback } from "react";
-import { dynamicMenu } from "@/services/dynamicMenuService";
 import { drinkService } from "@/services/drinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
@@ -8,9 +7,8 @@ import { useNavigate } from "react-router-dom";
 import supabase from "@/lib/supabaseClient";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { MenuManagerSkeleton } from "@/components/ui/LoadingSkeletons";
-import { CategoryModal, DrinkModal, ToppingModal } from "./AdminModals";
+import { DrinkModal, ToppingModal } from "./AdminModals";
 import type {
-  CategoryType,
   DrinkModalData,
   DrinkType,
   SugarLevel,
@@ -22,27 +20,28 @@ export const MenuManager = () => {
   const [activeTab, setActiveTab] = useState<TabType>("drinks");
   const [showModal, setShowModal] = useState(false);
   const [showToppingModal, setShowToppingModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<
-    DrinkType | CategoryType | null
-  >(null);
+  const [editingItem, setEditingItem] = useState<DrinkType | null>(null);
   const [editingTopping, setEditingTopping] = useState<ToppingType | null>(
     null,
   );
   const [loading, setLoading] = useState(true);
 
-  const [categories, setCategories] = useState<CategoryType[]>([]);
   const [drinks, setDrinks] = useState<DrinkType[]>([]);
   const [toppings, setToppings] = useState<ToppingType[]>([]);
   const [sugarLevels, setSugarLevels] = useState<SugarLevel[]>([]);
+  const categories = Array.from(
+    new Set(
+      drinks
+        .map((drink) => drink.category?.trim())
+        .filter((category): category is string => Boolean(category)),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
 
   const { session, loading: authLoading } = UserAuth();
   const navigate = useNavigate();
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const cats = await dynamicMenu.getCategories();
-    setCategories(cats);
-
     const [drinksData, toppingsData, sugarData] = await Promise.all([
       drinkService.getAllDrinks(),
       drinkService.getAllToppings(),
@@ -64,28 +63,8 @@ export const MenuManager = () => {
     void loadData();
   }, [authLoading, session?.user?.id, navigate, loadData]);
 
-  const handleSaveCategory = async (data: {
-    label: string;
-    description: string;
-  }) => {
-    if (editingItem && "id" in editingItem) {
-      await dynamicMenu.updateCategory(editingItem.id, data);
-    } else {
-      await dynamicMenu.addCategory(data);
-    }
-    setShowModal(false);
-    setEditingItem(null);
-    await loadData();
-  };
-
-  const handleDeleteCategory = async (id: string, label: string) => {
-    if (confirm(`Delete category "${label}"?`)) {
-      await dynamicMenu.deleteCategory(id);
-      await loadData();
-    }
-  };
-
   const handleSaveDrink = async (data: DrinkModalData) => {
+    const category = data.category.trim();
     if (editingItem && "id" in editingItem) {
       await drinkService.updateDrink(
         editingItem.id,
@@ -93,6 +72,7 @@ export const MenuManager = () => {
           name: data.name,
           description: data.description,
           image_url: data.image_url,
+          category,
         },
         {
           regular: parseFloat(data.regular_price) || 0,
@@ -107,6 +87,7 @@ export const MenuManager = () => {
           name: data.name,
           description: data.description,
           image_url: data.image_url,
+          category,
         },
         {
           regular: parseFloat(data.regular_price) || 0,
@@ -210,20 +191,10 @@ export const MenuManager = () => {
 
           <AdminTabs
             activeTab={activeTab}
-            categories={categories}
             drinks={drinks}
             toppings={toppings}
             sugarLevels={sugarLevels}
             onTabChange={setActiveTab}
-            onAddCategory={() => {
-              setEditingItem(null);
-              setShowModal(true);
-            }}
-            onEditCategory={(category: CategoryType) => {
-              setEditingItem(category);
-              setShowModal(true);
-            }}
-            onDeleteCategory={handleDeleteCategory}
             onAddDrink={() => {
               setEditingItem(null);
               setShowModal(true);
@@ -263,6 +234,7 @@ export const MenuManager = () => {
             setEditingItem(null);
           }}
           allToppings={toppings}
+            categories={categories}
           uploadImage={uploadImage}
         />
       )}

@@ -70,6 +70,7 @@ interface DrinkModalProps {
   onSave: (data: DrinkModalData) => void;
   onClose: () => void;
   allToppings: ToppingType[];
+  categories: string[];
   uploadImage: (file: File) => Promise<string>;
 }
 
@@ -78,17 +79,29 @@ export const DrinkModal = ({
   onSave,
   onClose,
   allToppings,
+  categories,
   uploadImage,
 }: DrinkModalProps) => {
+  const initialCategory = item?.category || "";
+  const initialCategoryExists = initialCategory
+    ? categories.includes(initialCategory)
+    : false;
   const [formData, setFormData] = useState<DrinkModalData>({
     name: item?.name || "",
     description: item?.description || "",
     image_url: item?.image_url || "",
+    category: initialCategory,
     regular_price: item?.sizes?.regular?.toString() || "",
     medium_price: item?.sizes?.medium?.toString() || "",
     large_price: item?.sizes?.large?.toString() || "",
     selected_toppings: item?.available_toppings?.map((t) => t.id) || [],
   });
+  const [categorySelection, setCategorySelection] = useState(
+    initialCategoryExists ? initialCategory : "__new__",
+  );
+  const [customCategory, setCustomCategory] = useState(
+    initialCategoryExists ? "" : initialCategory,
+  );
   const [imagePreview, setImagePreview] = useState(item?.image_url || "");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -133,6 +146,27 @@ export const DrinkModal = ({
     if (value === "" || value === undefined) {
       setFormData({ ...formData, [field]: "0" });
     }
+  };
+
+  const categoryOptions = categories.length > 0 ? categories : [];
+  const showCustomCategory = categorySelection === "__new__";
+
+  const handleCategorySelection = (value: string) => {
+    setCategorySelection(value);
+    if (value !== "__new__") {
+      setCustomCategory("");
+      setFormData({ ...formData, category: value });
+    } else {
+      setFormData({ ...formData, category: customCategory.trim() });
+    }
+  };
+
+  const handleCustomCategoryChange = (value: string) => {
+    setCustomCategory(value);
+    setFormData({
+      ...formData,
+      category: value.trim(),
+    });
   };
 
   return (
@@ -200,6 +234,36 @@ export const DrinkModal = ({
           rows={3}
           placeholder="Describe the drink..."
         />
+
+        <div>
+          <label className="font-semibold text-sm">Category</label>
+          <div className="mt-1 space-y-2">
+            <select
+              value={categorySelection}
+              onChange={(e) => handleCategorySelection(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-dark-brown"
+            >
+              <option value="">Select a category</option>
+              {categoryOptions.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+              <option value="__new__">Add new category</option>
+            </select>
+
+            {showCustomCategory && (
+              <TextField
+                label="New Category Name"
+                type="text"
+                value={customCategory}
+                onChange={(e) => handleCustomCategoryChange(e.target.value)}
+                placeholder="e.g., Fruit Tea"
+                className="rounded-lg py-2"
+              />
+            )}
+          </div>
+        </div>
 
         <div className="grid grid-cols-3 gap-4">
           <TextField
