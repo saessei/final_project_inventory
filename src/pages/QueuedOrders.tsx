@@ -6,9 +6,12 @@ import { OrderStatusButton } from "@/components/ui/OrderStatusButton";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { QueueSkeleton } from "@/components/ui/LoadingSkeletons";
 
+const ITEMS_PER_PAGE = 6;
+
 export const QueuedOrders = () => {
   const { orders, fetchOrders, loading } = useOrders();
   const [viewMode, setViewMode] = useState<"active" | "completed">("active");
+  const [completedPage, setCompletedPage] = useState(1);
 
   // current logged-in staff member
   const { session } = UserAuth();
@@ -25,19 +28,24 @@ export const QueuedOrders = () => {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
 
-  const queueOrders =
-    viewMode === "active"
-      ? orders
-          .filter(
-            (order) =>
-              order.status === "pending" || order.status === "preparing",
-          )
-          .sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime(),
-          )
-      : completedOrders;
+  const activeOrders = orders
+    .filter(
+      (order) =>
+        order.status === "pending" || order.status === "preparing",
+    )
+    .sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime(),
+    );
+
+  const paginatedCompleted = completedOrders.slice(
+    (completedPage - 1) * ITEMS_PER_PAGE,
+    completedPage * ITEMS_PER_PAGE,
+  );
+
+  const queueOrders = viewMode === "active" ? activeOrders : paginatedCompleted;
+  const totalPages = Math.ceil(completedOrders.length / ITEMS_PER_PAGE);
 
   const handleStatusChange = async (order: Order) => {
     if (order.status === "pending") {
@@ -131,7 +139,7 @@ export const QueuedOrders = () => {
             </button>
           </div>
 
-          <div className="grid gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {queueOrders.length === 0 ? (
               <div className="rounded-[2rem] bg-white p-10 text-center text-gray-500 shadow-sm border border-slate-200">
                 {viewMode === "active"
@@ -139,57 +147,51 @@ export const QueuedOrders = () => {
                   : "No completed orders yet."}
               </div>
             ) : (
-              queueOrders.map((order) => (
-                <article
-                  key={order.id}
-                  className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                      <p className="text-[0.7rem] uppercase tracking-[0.3em] text-gray-400">
-                        ORDER #{order.id.substring(0, 8)}
-                      </p>
-                      <h2 className="mt-3 text-3xl font-bold">
-                        {order.customer_name}
-                      </h2>
-                    </div>
-                    <div
-                      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${
-                        order.status === "pending"
-                          ? "bg-orange-50 text-orange-700"
+              queueOrders.map((order) => {
+                const items = order.order_details.split("\n").filter((line) => line.trim());
+                return (
+                  <article
+                    key={order.id}
+                    className="rounded-xl bg-white p-4 shadow-sm border border-slate-200"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                          Order #{order.id.substring(0, 8)}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          • {items.length} item{items.length !== 1 ? "s" : ""}
+                        </p>
+                      </div>
+                      <div
+                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                          order.status === "pending"
+                            ? "bg-orange-50 text-orange-700 border-orange-200"
+                            : order.status === "preparing"
+                              ? "bg-brown/10 text-brown border-brown/20"
+                              : "bg-emerald-100 text-emerald-700 border-emerald-200"
+                        }`}
+                      >
+                        {order.status === "pending"
+                          ? "Incoming"
                           : order.status === "preparing"
-                            ? "bg-brown/10 text-brown"
-                            : "bg-emerald-100 text-emerald-700"
-                      }`}
-                    >
-                      {order.status === "pending"
-                        ? "Incoming"
-                        : order.status === "preparing"
-                          ? "In queue"
-                          : "Completed"}
+                            ? "Preparing"
+                            : "Completed"}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-3xl bg-[#f8f7f1] p-4">
-                      <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
-                        Order details
-                      </p>
-                      <p className="mt-3 text-sm text-gray-600 whitespace-pre-wrap">
-                        {order.order_details}
-                      </p>
-                    </div>
-                    <div className="rounded-3xl bg-[#f8f7f1] p-4">
-                      <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
-                        Received
-                      </p>
-                      <p className="mt-3 text-sm text-gray-600">
-                        {new Date(order.created_at).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
+                    <h3 className="text-sm font-bold text-dark-brown mb-3">
+                      {order.customer_name}
+                    </h3>
 
-                  <div className="mt-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <div className="space-y-2 mb-4">
+                      {items.map((item, idx) => (
+                        <p key={idx} className="text-xs text-gray-600 leading-relaxed">
+                          {item}
+                        </p>
+                      ))}
+                    </div>
+
                     {(order.status === "pending" ||
                       order.status === "preparing" ||
                       order.status === "completed") && (
@@ -198,12 +200,32 @@ export const QueuedOrders = () => {
                         onClick={() => handleStatusChange(order)}
                       />
                     )}
-                  </div>
-                </article>
-              ))
+                  </article>
+                );
+              })
             )}
           </div>
-        </QueueSkeleton>
+          {viewMode === "completed" && totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <button
+                onClick={() => setCompletedPage(Math.max(1, completedPage - 1))}
+                disabled={completedPage === 1}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {completedPage} of {totalPages}
+              </span>
+              <button
+                onClick={() => setCompletedPage(Math.min(totalPages, completedPage + 1))}
+                disabled={completedPage === totalPages}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50"
+              >
+                Next
+              </button>
+            </div>
+          )}        </QueueSkeleton>
       </main>
     </div>
   );
