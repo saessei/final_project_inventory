@@ -1,6 +1,6 @@
 // src/components/Admin/MenuManager.tsx
 import { useState, useEffect, useCallback } from "react";
-import { drinkService } from "@/services/DrinkService";
+import { drinkService } from "@/services/drinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
