@@ -1,6 +1,6 @@
 // src/components/Admin/MenuManager.tsx
 import { useState, useEffect, useCallback } from "react";
-import { drinkService } from "@/services/drinkService";
+import { drinkService } from "@/services/DrinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -60,6 +60,10 @@ export const MenuManager = () => {
 
   const handleSaveDrink = async (data: DrinkModalData) => {
     const category = data.category.trim();
+    if (!category) {
+      alert("Category is required. Please select or create a category.");
+      return;
+    }
     if (editingItem && "id" in editingItem) {
       await drinkService.updateDrink(
         editingItem.id,

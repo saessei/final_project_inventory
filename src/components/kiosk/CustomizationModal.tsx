@@ -1,4 +1,3 @@
-import placeholderImg from "@/assets/Placeholder.jpg";
 import { Button } from "@/components/ui/Button";
 import { X } from "lucide-react";
 import type { Drink, SugarLevel, Topping } from "@/services/DrinkService";
@@ -40,33 +39,21 @@ export const CustomizationModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-5 animate-in fade-in duration-200">
-      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto no-scrollbar transform transition-all duration-300 animate-in zoom-in-95 slide-in-from-bottom-10 hover:scale-[1.02] hover:shadow-3xl">
-        <div className="relative h-56 group overflow-hidden">
-          <img
-            src={drink.image_url || placeholderImg}
-            alt={drink.name}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-            onError={(e) =>
-              ((e.target as HTMLImageElement).src = placeholderImg)
-            }
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto no-scrollbar transform transition-all duration-300 animate-in zoom-in-95 slide-in-from-bottom-10">
+        <div className="flex items-center justify-between p-5 border-b border-slate-200">
+          <h3 className="text-2xl font-bold">{drink.name}</h3>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-sm font-bold hover:bg-white hover:scale-110 hover:rotate-90 transition-all duration-200 cursor-pointer shadow-lg z-10"
+            className="rounded-full bg-gray-100 p-2 text-sm font-bold transition-colors duration-200 cursor-pointer z-10 hover:bg-gray-200"
           >
             <X size={16} aria-hidden="true" />
           </button>
         </div>
-        <div className="p-5 transition-all duration-300 hover:translate-y-[-2px]">
-          <div className="flex justify-between items-start mb-3">
-            <div>
-              <h3 className="text-3xl font-bold">{drink.name}</h3>
-              <p className="text-sm text-gray-500 mt-1">{drink.description}</p>
-            </div>
-            <span className="text-2xl font-black text-dark-brown">
+        <div className="p-5">
+          <div className="flex justify-between items-center mb-6">
+            <span className="text-2xl font-bold text-dark-brown">
               ₱{totalPrice.toFixed(2)}
             </span>
           </div>
@@ -79,10 +66,10 @@ export const CustomizationModal = ({
                   key={option.key}
                   onClick={() => onSizeChange(option.key)}
                   variant="outline"
-                  className={`px-3 py-2 hover:scale-105 ${
+                  className={`px-3 py-2 transition-colors ${
                     selectedSize === option.key
                       ? "bg-dark-brown text-cream border-dark-brown"
-                      : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
+                      : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"
                   }`}
                 >
                   {option.label}
@@ -100,10 +87,10 @@ export const CustomizationModal = ({
                   key={level.id}
                   onClick={() => onSugarChange(level)}
                   variant="outline"
-                  className={`px-3 py-2 hover:scale-105 ${
+                  className={`px-3 py-2 transition-colors ${
                     selectedSugar?.id === level.id
                       ? "bg-dark-brown text-cream border-dark-brown"
-                      : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
+                      : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"
                   }`}
                 >
                   {level.label}
@@ -126,10 +113,10 @@ export const CustomizationModal = ({
                     key={topping.id}
                     onClick={() => onToggleTopping(topping)}
                     variant="outline"
-                    className={`px-3 py-2 hover:scale-105 ${
+                    className={`px-3 py-2 transition-colors ${
                       selectedToppings.some((t) => t.id === topping.id)
                         ? "bg-dark-brown text-cream border-dark-brown"
-                        : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
+                        : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent"
                     }`}
                   >
                     {topping.name}
@@ -154,7 +141,7 @@ export const CustomizationModal = ({
             <Button
               onClick={onClose}
               variant="outline"
-              className="px-5 hover:scale-105"
+              className="px-5"
             >
               Cancel
             </Button>
@@ -163,7 +150,7 @@ export const CustomizationModal = ({
               variant="solid"
               isLoading={isSubmitting}
               loadingText="Adding..."
-              className="px-5 hover:scale-105"
+              className="px-5"
             >
               Add to Cart - ₱{totalPrice.toFixed(2)}
             </Button>

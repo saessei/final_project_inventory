@@ -36,6 +36,8 @@ export const Kiosk = () => {
   const [drinks, setDrinks] = useState<Drink[]>([]);
   const [sugarLevels, setSugarLevels] = useState<SugarLevel[]>([]);
   const [menuLoading, setMenuLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   // Customization state
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
@@ -97,6 +99,17 @@ export const Kiosk = () => {
 
     return sizePrice + sugarPrice + toppingsPrice;
   };
+
+  const categories = Array.from(new Set(drinks.map((d) => d.category))).sort();
+
+  const filteredDrinks = drinks.filter((drink) => {
+    const matchesSearch = drink.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "all" || drink.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const addToCart = async () => {
     if (!selectedDrink || !selectedSugar) return;
@@ -205,15 +218,45 @@ export const Kiosk = () => {
           </p>
         </div>
 
+        <div className="mb-6 flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            placeholder="Search drinks..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 px-4 py-2 rounded-lg border border-slate-200 text-dark-brown placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dark-brown/30"
+          />
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="px-4 py-2 rounded-lg border border-slate-200 text-dark-brown focus:outline-none focus:ring-2 focus:ring-dark-brown/30 bg-white"
+          >
+            <option value="all">All Categories</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <KioskSkeleton loading={menuLoading || cartLoading}>
           {hasNoMenu ? (
             <EmptyMenuState onAddMenuItems={() => navigate("/admin/menu")} />
           ) : (
-            <DrinkGrid
-              drinks={drinks}
-              isSubmitting={isSubmitting}
-              onCustomize={openCustomization}
-            />
+            <>
+              {filteredDrinks.length === 0 ? (
+                <div className="rounded-lg bg-white p-8 text-center text-gray-500 border border-slate-200">
+                  No drinks found matching your search.
+                </div>
+              ) : (
+                <DrinkGrid
+                  drinks={filteredDrinks}
+                  isSubmitting={isSubmitting}
+                  onCustomize={openCustomization}
+                />
+              )}
+            </>
           )}
         </KioskSkeleton>
       </main>
