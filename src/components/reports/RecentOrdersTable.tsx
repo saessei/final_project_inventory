@@ -1,5 +1,6 @@
 import { ListTodo } from "lucide-react";
 import type { ReportOrder } from "@/types/reportTypes";
+import { Skeleton } from "boneyard-js/react";
 
 interface RecentOrdersTableProps {
   loading: boolean;
@@ -16,7 +17,28 @@ export const RecentOrdersTable = ({
       <h3 className="font-bold text-lg">Recent Orders</h3>
     </div>
     {loading ? (
-      <div className="text-center py-8">Loading...</div>
+      <Skeleton
+        name="recent-orders-table"
+        loading={loading}
+        fallback={
+          <div className="space-y-3 py-2">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div
+                key={index}
+                className="grid grid-cols-5 gap-4 rounded-xl border border-slate-100 p-3"
+              >
+                <div className="h-4 w-24 rounded-full bg-slate-200/80 animate-pulse" />
+                <div className="h-4 w-full rounded-full bg-slate-200/80 animate-pulse" />
+                <div className="h-4 w-20 rounded-full bg-slate-200/80 animate-pulse" />
+                <div className="h-4 w-16 rounded-full bg-slate-200/80 animate-pulse" />
+                <div className="h-4 w-16 rounded-full bg-slate-200/80 animate-pulse" />
+              </div>
+            ))}
+          </div>
+        }
+      >
+        <div />
+      </Skeleton>
     ) : orders.length === 0 ? (
       <div className="text-center py-8 text-gray-400">
         No orders in this period
