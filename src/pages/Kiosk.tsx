@@ -10,6 +10,7 @@ import { CheckoutSuccessModal } from "@/components/kiosk/CheckoutSuccessModal";
 import { CustomizationModal } from "@/components/kiosk/CustomizationModal";
 import { DrinkGrid } from "@/components/kiosk/DrinkGrid";
 import { EmptyMenuState } from "@/components/kiosk/EmptyMenuState";
+import { KioskSkeleton } from "@/components/ui/LoadingSkeletons";
 import {
   drinkService,
   type Drink,
@@ -23,6 +24,7 @@ export const Kiosk = () => {
   const staffUserId = session?.user?.id;
   const {
     cart,
+    loading: cartLoading,
     upsertItem,
     decrementItemAtIndex,
     incrementItemAtIndex,
@@ -33,6 +35,7 @@ export const Kiosk = () => {
   const [customerName, setCustomerName] = useState("");
   const [drinks, setDrinks] = useState<Drink[]>([]);
   const [sugarLevels, setSugarLevels] = useState<SugarLevel[]>([]);
+  const [menuLoading, setMenuLoading] = useState(true);
 
   // Customization state
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
@@ -60,6 +63,8 @@ export const Kiosk = () => {
         if (defaultSugar) setSelectedSugar(defaultSugar);
       } catch (error) {
         console.error("Error loading data:", error);
+      } finally {
+        setMenuLoading(false);
       }
     };
     loadData();
@@ -173,70 +178,73 @@ export const Kiosk = () => {
   };
 
   const hasNoMenu = drinks.length === 0;
+  const loading = menuLoading || cartLoading;
 
   return (
-    <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
-      <div className="fixed top-0 left-0 h-screen w-64 z-10">
-        <Sidebar />
-      </div>
-
-      <CartSidebar
-        cart={cart}
-        cartTotal={cartTotal}
-        customerName={customerName}
-        onCustomerNameChange={setCustomerName}
-        onCheckout={handleCheckout}
-        onDecrementItem={decrementItemAtIndex}
-        onIncrementItem={incrementItemAtIndex}
-        onRemoveItem={removeItemAtIndex}
-      />
-
-      {/* Main Content */}
-      <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
-        <div className="mb-6">
-          <h1 className="text-5xl font-black font-fredoka">Order Taking</h1>
-          <p className="text-lg text-gray-500">
-            Build customer orders and send them to the queue.
-          </p>
+    <KioskSkeleton loading={loading}>
+      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+        <div className="fixed top-0 left-0 h-screen w-64 z-10">
+          <Sidebar />
         </div>
 
-        {hasNoMenu ? (
-          <EmptyMenuState onAddMenuItems={() => navigate("/admin/menu")} />
-        ) : (
-          <DrinkGrid
-            drinks={drinks}
+        <CartSidebar
+          cart={cart}
+          cartTotal={cartTotal}
+          customerName={customerName}
+          onCustomerNameChange={setCustomerName}
+          onCheckout={handleCheckout}
+          onDecrementItem={decrementItemAtIndex}
+          onIncrementItem={incrementItemAtIndex}
+          onRemoveItem={removeItemAtIndex}
+        />
+
+        {/* Main Content */}
+        <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+          <div className="mb-6">
+            <h1 className="text-5xl font-black font-fredoka">Order Taking</h1>
+            <p className="text-lg text-gray-500">
+              Build customer orders and send them to the queue.
+            </p>
+          </div>
+
+          {hasNoMenu ? (
+            <EmptyMenuState onAddMenuItems={() => navigate("/admin/menu")} />
+          ) : (
+            <DrinkGrid
+              drinks={drinks}
+              isSubmitting={isSubmitting}
+              onCustomize={openCustomization}
+            />
+          )}
+        </main>
+
+        {showModal && selectedDrink && (
+          <CustomizationModal
+            drink={selectedDrink}
+            sugarLevels={sugarLevels}
+            selectedSize={selectedSize}
+            selectedSugar={selectedSugar}
+            selectedToppings={selectedToppings}
             isSubmitting={isSubmitting}
-            onCustomize={openCustomization}
+            totalPrice={calculateTotalPrice()}
+            onClose={() => setShowModal(false)}
+            onSizeChange={setSelectedSize}
+            onSugarChange={setSelectedSugar}
+            onToggleTopping={toggleTopping}
+            onAddToOrder={handleAddToOrder}
           />
         )}
-      </main>
 
-      {showModal && selectedDrink && (
-        <CustomizationModal
-          drink={selectedDrink}
-          sugarLevels={sugarLevels}
-          selectedSize={selectedSize}
-          selectedSugar={selectedSugar}
-          selectedToppings={selectedToppings}
-          isSubmitting={isSubmitting}
-          totalPrice={calculateTotalPrice()}
-          onClose={() => setShowModal(false)}
-          onSizeChange={setSelectedSize}
-          onSugarChange={setSelectedSugar}
-          onToggleTopping={toggleTopping}
-          onAddToOrder={handleAddToOrder}
-        />
-      )}
-
-      {checkoutSuccessOpen && (
-        <CheckoutSuccessModal
-          orderSummary={lastOrderSummary}
-          onNewOrder={() => {
-            setCheckoutSuccessOpen(false);
-            setLastOrderSummary("");
-          }}
-        />
-      )}
-    </div>
+        {checkoutSuccessOpen && (
+          <CheckoutSuccessModal
+            orderSummary={lastOrderSummary}
+            onNewOrder={() => {
+              setCheckoutSuccessOpen(false);
+              setLastOrderSummary("");
+            }}
+          />
+        )}
+      </div>
+    </KioskSkeleton>
   );
 };

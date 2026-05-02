@@ -7,6 +7,7 @@ import { UserAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import supabase from "@/lib/supabaseClient";
 import { AdminTabs } from "@/components/admin/AdminTabs";
+import { MenuManagerSkeleton } from "@/components/ui/LoadingSkeletons";
 import { CategoryModal, DrinkModal, ToppingModal } from "./AdminModals";
 import type {
   CategoryType,
@@ -185,22 +186,11 @@ export const MenuManager = () => {
   };
 
   if (authLoading) {
-    return (
-      <div className="bg-cream min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-dark-brown mx-auto mb-4"></div>
-          <p className="text-gray-500">Loading...</p>
-        </div>
-      </div>
-    );
+    return <MenuManagerSkeleton loading>{null}</MenuManagerSkeleton>;
   }
 
   if (loading) {
-    return (
-      <div className="bg-cream min-h-screen flex items-center justify-center">
-        <div className="text-center">Loading menu manager...</div>
-      </div>
-    );
+    return <MenuManagerSkeleton loading>{null}</MenuManagerSkeleton>;
   }
 
   return (

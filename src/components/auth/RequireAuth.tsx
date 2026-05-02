@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { UserAuth } from "./AuthContext";
+import { AuthRouteSkeleton } from "@/components/ui/LoadingSkeletons";
 
 export function RequireAuth({
   children,
@@ -10,7 +11,7 @@ export function RequireAuth({
   const { session, loading } = UserAuth();
   const location = useLocation();
 
-  if (loading) return null;
+  if (loading) return <AuthRouteSkeleton loading>{children}</AuthRouteSkeleton>;
 
   if (!session) {
     return (

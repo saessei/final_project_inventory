@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/ui/Sidebar";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/TextField";
+import { SettingsSkeleton } from "@/components/ui/LoadingSkeletons";
 import supabase from "@/lib/supabaseClient";
 
 export const Settings = () => {
@@ -98,112 +99,110 @@ export const Settings = () => {
   };
 
   return (
-    <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
-      <div className="fixed top-0 left-0 h-screen w-64 z-10">
-        <Sidebar />
-      </div>
-
-      <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-16 lg:pt-10">
-        <div className="max-w-5xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-4xl font-black font-fredoka">
-              Account Settings
-            </h1>
-            <p className="text-gray-500 mt-2">
-              Edit your display name or choose a new account password.
-            </p>
-          </div>
-
-          {(statusMessage || formError) && (
-            <div className="mb-6 rounded-2xl px-4 py-3 text-sm font-medium">
-              {statusMessage ? (
-                <Alert variant="success">
-                  {statusMessage}
-                </Alert>
-              ) : (
-                <Alert variant="error">
-                  {formError}
-                </Alert>
-              )}
-            </div>
-          )}
-
-          {/* Name modal */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-dark-brown">
-                Display Name
-              </h2>
-              <p className="text-sm text-gray-500 mt-2">
-                This name appears across your dashboard experience.
-              </p>
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  handleUpdateName();
-                }}
-                className="mt-6 space-y-4"
-              >
-                <TextField
-                  label="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your full name"
-                  type="text"
-                />
-                <Button
-                  type="submit"
-                  disabled={loading || savingName}
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  isLoading={savingName}
-                  loadingText="Saving..."
-                >
-                  Save Name
-                </Button>
-              </form>
-            </section>
-
-            {/* Password modal */}
-
-            <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-dark-brown">
-                Change Password
-              </h2>
-              <p className="text-sm text-gray-500 mt-2">
-                Choose a new password to keep your account secure.
-              </p>
-              <form onSubmit={handleUpdatePassword} className="mt-6 space-y-4">
-                <TextField
-                  label="New Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="New password"
-                  type="password"
-                />
-                <TextField
-                  label="Confirm Password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm password"
-                  type="password"
-                />
-                <Button
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  isLoading={savingPassword}
-                  loadingText="Updating..."
-                >
-                  Update Password
-                </Button>
-              </form>
-            </section>
-          </div>
+    <SettingsSkeleton loading={loading}>
+      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+        <div className="fixed top-0 left-0 h-screen w-64 z-10">
+          <Sidebar />
         </div>
-      </main>
-    </div>
+
+        <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-16 lg:pt-10">
+          <div className="max-w-5xl mx-auto">
+            <div className="mb-6">
+              <h1 className="text-4xl font-black font-fredoka">
+                Account Settings
+              </h1>
+              <p className="text-gray-500 mt-2">
+                Edit your display name or choose a new account password.
+              </p>
+            </div>
+
+            {(statusMessage || formError) && (
+              <div className="mb-6 rounded-2xl px-4 py-3 text-sm font-medium">
+                {statusMessage ? (
+                  <Alert variant="success">{statusMessage}</Alert>
+                ) : (
+                  <Alert variant="error">{formError}</Alert>
+                )}
+              </div>
+            )}
+
+            {/* Name modal */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 className="text-xl font-semibold text-dark-brown">
+                  Display Name
+                </h2>
+                <p className="text-sm text-gray-500 mt-2">
+                  This name appears across your dashboard experience.
+                </p>
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    handleUpdateName();
+                  }}
+                  className="mt-6 space-y-4"
+                >
+                  <TextField
+                    label="Full Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your full name"
+                    type="text"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={loading || savingName}
+                    variant="primary"
+                    size="lg"
+                    fullWidth
+                    isLoading={savingName}
+                    loadingText="Saving..."
+                  >
+                    Save Name
+                  </Button>
+                </form>
+              </section>
+
+              {/* Password modal */}
+
+              <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 className="text-xl font-semibold text-dark-brown">
+                  Change Password
+                </h2>
+                <p className="text-sm text-gray-500 mt-2">
+                  Choose a new password to keep your account secure.
+                </p>
+                <form onSubmit={handleUpdatePassword} className="mt-6 space-y-4">
+                  <TextField
+                    label="New Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="New password"
+                    type="password"
+                  />
+                  <TextField
+                    label="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm password"
+                    type="password"
+                  />
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    fullWidth
+                    isLoading={savingPassword}
+                    loadingText="Updating..."
+                  >
+                    Update Password
+                  </Button>
+                </form>
+              </section>
+            </div>
+          </div>
+        </main>
+      </div>
+    </SettingsSkeleton>
   );
 };
