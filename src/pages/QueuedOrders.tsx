@@ -67,20 +67,20 @@ export const QueuedOrders = () => {
   };
 
   return (
-    <QueueSkeleton loading={loading}>
-      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
-        <div className="fixed top-0 left-0 h-screen w-64 z-10">
-          <Sidebar />
+    <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+      <div className="fixed top-0 left-0 h-screen w-64 z-10">
+        <Sidebar />
+      </div>
+
+      <main className="ml-0 lg:ml-64 mr-0 lg:mr-[12rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+        <div className="mb-6">
+          <h1 className="text-5xl font-black font-fredoka">Staff Station</h1>
+          <p className="text-lg text-gray-500">
+            Take orders and move the queue from one shared station.
+          </p>
         </div>
 
-        <main className="ml-0 lg:ml-64 mr-0 lg:mr-[12rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
-          <div className="mb-6">
-            <h1 className="text-5xl font-black font-fredoka">Staff Station</h1>
-            <p className="text-lg text-gray-500">
-              Take orders and move the queue from one shared station.
-            </p>
-          </div>
-
+        <QueueSkeleton loading={loading}>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200">
               <p className="text-xs uppercase tracking-[0.24em] text-gray-400">
@@ -203,8 +203,8 @@ export const QueuedOrders = () => {
               ))
             )}
           </div>
-        </main>
-      </div>
-    </QueueSkeleton>
+        </QueueSkeleton>
+      </main>
+    </div>
   );
 };

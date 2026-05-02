@@ -178,35 +178,34 @@ export const Kiosk = () => {
   };
 
   const hasNoMenu = drinks.length === 0;
-  const loading = menuLoading || cartLoading;
 
   return (
-    <KioskSkeleton loading={loading}>
-      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
-        <div className="fixed top-0 left-0 h-screen w-64 z-10">
-          <Sidebar />
+    <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+      <div className="fixed top-0 left-0 h-screen w-64 z-10">
+        <Sidebar />
+      </div>
+
+      <CartSidebar
+        cart={cart}
+        cartTotal={cartTotal}
+        customerName={customerName}
+        onCustomerNameChange={setCustomerName}
+        onCheckout={handleCheckout}
+        onDecrementItem={decrementItemAtIndex}
+        onIncrementItem={incrementItemAtIndex}
+        onRemoveItem={removeItemAtIndex}
+      />
+
+      {/* Main Content */}
+      <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+        <div className="mb-6">
+          <h1 className="text-5xl font-black font-fredoka">Order Taking</h1>
+          <p className="text-lg text-gray-500">
+            Build customer orders and send them to the queue.
+          </p>
         </div>
 
-        <CartSidebar
-          cart={cart}
-          cartTotal={cartTotal}
-          customerName={customerName}
-          onCustomerNameChange={setCustomerName}
-          onCheckout={handleCheckout}
-          onDecrementItem={decrementItemAtIndex}
-          onIncrementItem={incrementItemAtIndex}
-          onRemoveItem={removeItemAtIndex}
-        />
-
-        {/* Main Content */}
-        <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
-          <div className="mb-6">
-            <h1 className="text-5xl font-black font-fredoka">Order Taking</h1>
-            <p className="text-lg text-gray-500">
-              Build customer orders and send them to the queue.
-            </p>
-          </div>
-
+        <KioskSkeleton loading={menuLoading || cartLoading}>
           {hasNoMenu ? (
             <EmptyMenuState onAddMenuItems={() => navigate("/admin/menu")} />
           ) : (
@@ -216,35 +215,35 @@ export const Kiosk = () => {
               onCustomize={openCustomization}
             />
           )}
-        </main>
+        </KioskSkeleton>
+      </main>
 
-        {showModal && selectedDrink && (
-          <CustomizationModal
-            drink={selectedDrink}
-            sugarLevels={sugarLevels}
-            selectedSize={selectedSize}
-            selectedSugar={selectedSugar}
-            selectedToppings={selectedToppings}
-            isSubmitting={isSubmitting}
-            totalPrice={calculateTotalPrice()}
-            onClose={() => setShowModal(false)}
-            onSizeChange={setSelectedSize}
-            onSugarChange={setSelectedSugar}
-            onToggleTopping={toggleTopping}
-            onAddToOrder={handleAddToOrder}
-          />
-        )}
+      {showModal && selectedDrink && (
+        <CustomizationModal
+          drink={selectedDrink}
+          sugarLevels={sugarLevels}
+          selectedSize={selectedSize}
+          selectedSugar={selectedSugar}
+          selectedToppings={selectedToppings}
+          isSubmitting={isSubmitting}
+          totalPrice={calculateTotalPrice()}
+          onClose={() => setShowModal(false)}
+          onSizeChange={setSelectedSize}
+          onSugarChange={setSelectedSugar}
+          onToggleTopping={toggleTopping}
+          onAddToOrder={handleAddToOrder}
+        />
+      )}
 
-        {checkoutSuccessOpen && (
-          <CheckoutSuccessModal
-            orderSummary={lastOrderSummary}
-            onNewOrder={() => {
-              setCheckoutSuccessOpen(false);
-              setLastOrderSummary("");
-            }}
-          />
-        )}
-      </div>
-    </KioskSkeleton>
+      {checkoutSuccessOpen && (
+        <CheckoutSuccessModal
+          orderSummary={lastOrderSummary}
+          onNewOrder={() => {
+            setCheckoutSuccessOpen(false);
+            setLastOrderSummary("");
+          }}
+        />
+      )}
+    </div>
   );
 };
