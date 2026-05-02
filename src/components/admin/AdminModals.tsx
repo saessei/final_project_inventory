@@ -126,6 +126,8 @@ export const DrinkModal = ({
 
   const categoryOptions = categories.length > 0 ? categories : [];
   const showCustomCategory = categorySelection === "__new__";
+  const categorySelectClassName =
+    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-dark-brown outline-none transition-all focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20";
 
   const handleCategorySelection = (value: string) => {
     setCategorySelection(value);
@@ -172,12 +174,14 @@ export const DrinkModal = ({
         />
 
         <div>
-          <label className="font-semibold text-sm">Category</label>
+          <label className="ml-2 text-xs uppercase font-semibold text-brown-two">
+            Category
+          </label>
           <div className="mt-1 space-y-2">
             <select
               value={categorySelection}
               onChange={(e) => handleCategorySelection(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-dark-brown"
+              className={categorySelectClassName}
             >
               <option value="">Select a category</option>
               {categoryOptions.map((category) => (
@@ -195,7 +199,7 @@ export const DrinkModal = ({
                 value={customCategory}
                 onChange={(e) => handleCustomCategoryChange(e.target.value)}
                 placeholder="e.g., Fruit Tea"
-                className="rounded-lg py-2"
+                className="rounded-2xl py-3"
               />
             )}
           </div>

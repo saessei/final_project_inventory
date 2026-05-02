@@ -102,7 +102,14 @@ export const Kiosk = () => {
     return sizePrice + sugarPrice + toppingsPrice;
   };
 
-  const categories = Array.from(new Set(drinks.map((d) => d.category))).sort();
+  const categories = Array.from(
+    new Set(
+      drinks
+        .map((drink) => drink.category?.trim())
+        .filter((category): category is string => Boolean(category))
+        .filter((category) => category.toLowerCase() !== "beverages"),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
 
   const filteredDrinks = drinks.filter((drink) => {
     const matchesSearch = drink.name
@@ -233,7 +240,7 @@ export const Kiosk = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-slate-200 text-dark-brown focus:outline-none focus:ring-2 focus:ring-dark-brown/30 bg-white"
+            className="w-full sm:w-64 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-dark-brown outline-none transition-all focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20"
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (

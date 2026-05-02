@@ -49,10 +49,11 @@ export function useCart(staffUserId?: string) {
     return created.id as string;
   }, [staffUserId]);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (options?: { silent?: boolean }) => {
     if (!staffUserId) return;
 
-    if (!hasLoadedOnce.current) {
+    const shouldShowLoading = !hasLoadedOnce.current && !options?.silent;
+    if (shouldShowLoading) {
       setLoading(true);
     }
     try {
@@ -71,9 +72,7 @@ export function useCart(staffUserId?: string) {
       setCart((data ?? []) as CartItem[]);
     } finally {
       hasLoadedOnce.current = true;
-      if (!hasLoadedOnce.current) {
-        setLoading(false);
-      } else {
+      if (shouldShowLoading) {
         setLoading(false);
       }
     }
@@ -97,7 +96,7 @@ export function useCart(staffUserId?: string) {
           table: "cart_items",
           filter: `cart_id=eq.${cartId}`,
         },
-        () => refresh(),
+        () => refresh({ silent: true }),
       )
       .subscribe();
 
@@ -137,7 +136,7 @@ export function useCart(staffUserId?: string) {
         if (error) throw error;
       }
 
-      await refresh();
+      await refresh({ silent: true });
     },
     [staffUserId, cartId, cart, ensureActiveCart, refresh],
   );
@@ -160,7 +159,7 @@ export function useCart(staffUserId?: string) {
           .eq("id", item.id);
         if (error) throw error;
       }
-      await refresh();
+      await refresh({ silent: true });
     },
     [cart, refresh],
   );
@@ -176,7 +175,7 @@ export function useCart(staffUserId?: string) {
         .eq("id", item.id);
 
       if (error) throw error;
-      await refresh();
+      await refresh({ silent: true });
     },
     [cart, refresh],
   );
@@ -188,7 +187,7 @@ export function useCart(staffUserId?: string) {
       .delete()
       .eq("cart_id", cartId);
     if (error) throw error;
-    await refresh();
+    await refresh({ silent: true });
   }, [cartId, refresh]);
 
   const cartTotal = useMemo(
@@ -207,7 +206,7 @@ export function useCart(staffUserId?: string) {
         .eq("id", item.id);
       if (error) throw error;
 
-      await refresh();
+      await refresh({ silent: true });
     },
     [cart, refresh],
   );

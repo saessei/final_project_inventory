@@ -30,7 +30,8 @@ export const MenuManager = () => {
     new Set(
       drinks
         .map((drink) => drink.category?.trim())
-        .filter((category): category is string => Boolean(category)),
+        .filter((category): category is string => Boolean(category))
+        .filter((category) => category.toLowerCase() !== "beverages"),
     ),
   ).sort((a, b) => a.localeCompare(b));
 
