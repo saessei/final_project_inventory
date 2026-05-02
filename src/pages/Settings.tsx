@@ -105,17 +105,17 @@ export const Settings = () => {
       </div>
 
       <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-16 lg:pt-10">
+        <div className="mb-6">
+          <h1 className="text-4xl font-black font-fredoka">
+            Account Settings
+          </h1>
+          <p className="text-gray-500 mt-2">
+            Edit your display name or choose a new account password.
+          </p>
+        </div>
+
         <SettingsSkeleton loading={loading}>
           <div>
-            <div className="mb-6">
-              <h1 className="text-4xl font-black font-fredoka">
-                Account Settings
-              </h1>
-              <p className="text-gray-500 mt-2">
-                Edit your display name or choose a new account password.
-              </p>
-            </div>
-
             {(statusMessage || formError) && (
               <div className="mb-6 rounded-2xl px-4 py-3 text-sm font-medium">
                 {statusMessage ? (

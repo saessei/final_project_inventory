@@ -11,6 +11,8 @@ import { CustomizationModal } from "@/components/kiosk/CustomizationModal";
 import { DrinkGrid } from "@/components/kiosk/DrinkGrid";
 import { EmptyMenuState } from "@/components/kiosk/EmptyMenuState";
 import { KioskSkeleton } from "@/components/ui/LoadingSkeletons";
+import { TextField } from "@/components/ui/TextField";
+import { Search } from "lucide-react";
 import {
   drinkService,
   type Drink,
@@ -218,13 +220,16 @@ export const Kiosk = () => {
         </div>
 
         <div className="mb-6 flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            placeholder="Search drinks..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 px-4 py-2 rounded-lg border border-slate-200 text-dark-brown placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-dark-brown/30"
-          />
+          <div className="flex-1">
+            <TextField
+              type="text"
+              placeholder="Search drinks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              leftIcon={<Search size={16} />}
+              className="border-slate-200 bg-white text-dark-brown placeholder-gray-400 focus:border-dark-brown focus:ring-dark-brown/20"
+            />
+          </div>
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}

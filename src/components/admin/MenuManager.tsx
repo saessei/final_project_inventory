@@ -155,7 +155,18 @@ export const MenuManager = () => {
         </div>
 
         <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-20 lg:pt-6">
-          <MenuManagerSkeleton loading>{null}</MenuManagerSkeleton>
+          <div className="max-w-7xl mx-auto mb-8">
+            <div className="mb-8">
+              <h1 className="text-4xl font-black font-fredoka">Menu Manager</h1>
+              <p className="text-gray-600 mt-1">
+                Manage categories, drinks, toppings, and sugar levels
+              </p>
+            </div>
+          </div>
+
+          <MenuManagerSkeleton loading>
+            <div className="max-w-7xl mx-auto" />
+          </MenuManagerSkeleton>
         </main>
       </div>
     );
@@ -176,24 +187,26 @@ export const MenuManager = () => {
             </p>
           </div>
 
-          <AdminTabs
-            activeTab={activeTab}
-            drinks={drinks}
-            toppings={toppings}
-            onTabChange={setActiveTab}
-            onAddDrink={() => {
-              setEditingItem(null);
-              setShowModal(true);
-            }}
-            onEditDrink={(drink: DrinkType) => {
-              setEditingItem(drink);
-              setShowModal(true);
-            }}
-            onDeleteDrink={handleDeleteDrink}
-            onAddTopping={handleAddTopping}
-            onEditTopping={handleEditTopping}
-            onDeleteTopping={handleDeleteTopping}
-          />
+          <MenuManagerSkeleton loading={loading}>
+            <AdminTabs
+              activeTab={activeTab}
+              drinks={drinks}
+              toppings={toppings}
+              onTabChange={setActiveTab}
+              onAddDrink={() => {
+                setEditingItem(null);
+                setShowModal(true);
+              }}
+              onEditDrink={(drink: DrinkType) => {
+                setEditingItem(drink);
+                setShowModal(true);
+              }}
+              onDeleteDrink={handleDeleteDrink}
+              onAddTopping={handleAddTopping}
+              onEditTopping={handleEditTopping}
+              onDeleteTopping={handleDeleteTopping}
+            />
+          </MenuManagerSkeleton>
         </div>
       </main>
 

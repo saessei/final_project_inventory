@@ -22,11 +22,6 @@ const AuthFallback = () => (
 
 const SettingsFallback = () => (
   <div className="max-w-5xl mx-auto">
-    <div className="mb-6 space-y-3">
-      <div className={`${bone} h-10 w-80`} />
-      <div className={`${bone} h-5 w-96`} />
-    </div>
-
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
         <div className={`${bone} h-6 w-44`} />
@@ -52,11 +47,6 @@ const SettingsFallback = () => (
 
 const MenuManagerFallback = () => (
   <div className="max-w-7xl mx-auto space-y-8">
-    <div className="space-y-3">
-      <div className={`${bone} h-10 w-72`} />
-      <div className={`${bone} h-5 w-96`} />
-    </div>
-
     <div className="flex gap-2 border-b flex-wrap pb-4">
       <div className={`${bone} h-12 w-32 rounded-xl`} />
       <div className={`${bone} h-12 w-28 rounded-xl`} />
@@ -84,18 +74,6 @@ const MenuManagerFallback = () => (
 
 const ReportsFallback = () => (
   <div className="max-w-7xl mx-auto space-y-6">
-    <div className="flex flex-wrap justify-between items-center gap-4">
-      <div className="space-y-3">
-        <div className={`${bone} h-10 w-56`} />
-        <div className={`${bone} h-5 w-72`} />
-      </div>
-      <div className="flex flex-wrap gap-3">
-        <div className={`${bone} h-12 w-56 rounded-xl`} />
-        <div className={`${bone} h-12 w-32 rounded-xl`} />
-        <div className={`${bone} h-12 w-12 rounded-xl`} />
-      </div>
-    </div>
-
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {Array.from({ length: 3 }).map((_, index) => (
         <div key={index} className="bg-white rounded-2xl p-6 shadow-sm border space-y-4">

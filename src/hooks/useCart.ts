@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import supabase from "@/lib/supabaseClient";
 
 export type CartItem = {
@@ -22,6 +22,7 @@ export function useCart(staffUserId?: string) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [cartId, setCartId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const hasLoadedOnce = useRef(false);
 
   const ensureActiveCart = useCallback(async () => {
     if (!staffUserId) return null;
@@ -51,7 +52,9 @@ export function useCart(staffUserId?: string) {
   const refresh = useCallback(async () => {
     if (!staffUserId) return;
 
-    setLoading(true);
+    if (!hasLoadedOnce.current) {
+      setLoading(true);
+    }
     try {
       const id = await ensureActiveCart();
       if (!id) return;
@@ -67,7 +70,12 @@ export function useCart(staffUserId?: string) {
       if (error) throw error;
       setCart((data ?? []) as CartItem[]);
     } finally {
-      setLoading(false);
+      hasLoadedOnce.current = true;
+      if (!hasLoadedOnce.current) {
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
     }
   }, [staffUserId, ensureActiveCart]);
 

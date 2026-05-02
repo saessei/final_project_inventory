@@ -89,18 +89,20 @@ export const Reports = () => {
       </div>
 
       <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+        <div className="max-w-7xl mx-auto mb-6">
+          <ReportsHeader
+            dateRange={dateRange}
+            loading={loading}
+            showDatePicker={showDatePicker}
+            onToggleDatePicker={() => setShowDatePicker(!showDatePicker)}
+            onSetDatePreset={setDatePreset}
+            onExport={handleExport}
+            onRefresh={loadOrders}
+          />
+        </div>
+
         <ReportsSkeleton loading={loading}>
           <div className="max-w-7xl mx-auto">
-            <ReportsHeader
-              dateRange={dateRange}
-              loading={loading}
-              showDatePicker={showDatePicker}
-              onToggleDatePicker={() => setShowDatePicker(!showDatePicker)}
-              onSetDatePreset={setDatePreset}
-              onExport={handleExport}
-              onRefresh={loadOrders}
-            />
-
             <StatsCards
               totalOrders={totalOrders}
               totalRevenue={totalRevenue}
