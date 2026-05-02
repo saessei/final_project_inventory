@@ -209,7 +209,6 @@ export const Kiosk = () => {
         onRemoveItem={removeItemAtIndex}
       />
 
-      {/* Main Content */}
       <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
         <div className="mb-6">
           <h1 className="text-5xl font-black font-fredoka">Order Taking</h1>

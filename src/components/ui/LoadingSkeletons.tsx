@@ -175,24 +175,18 @@ export const ReportsSkeleton = ({ loading, children }: SkeletonShellProps) => (
 
 const KioskFallback = () => (
   <div className="space-y-6">
-    <div className="space-y-3">
-      <div className={`${bone} h-12 w-72`} />
-      <div className={`${bone} h-5 w-96`} />
-    </div>
-
-    <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-2 auto-rows-fr">
-      {Array.from({ length: 6 }).map((_, index) => (
+    <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, index) => (
         <div
           key={index}
-          className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-4 shadow-sm space-y-4"
+          className="flex flex-col items-start justify-between gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
         >
-          <div className={`${bone} h-48 w-full rounded-2xl`} />
-          <div className={`${bone} h-8 w-2/3`} />
-          <div className={`${bone} h-4 w-11/12`} />
-          <div className={`${bone} h-4 w-5/6`} />
-          <div className="mt-auto space-y-3">
-            <div className={`${bone} h-8 w-32`} />
-            <div className={`${bone} h-12 w-full rounded-xl`} />
+          <div className="w-full space-y-2">
+            <div className={`${bone} h-5 w-3/4 rounded-md`} />
+            <div className={`${bone} h-4 w-1/2 rounded-md`} />
+          </div>
+          <div className="w-full flex justify-end">
+            <div className={`${bone} h-8 w-16 rounded-md`} />
           </div>
         </div>
       ))}
