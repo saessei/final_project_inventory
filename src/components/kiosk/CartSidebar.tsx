@@ -95,6 +95,9 @@ export const CartSidebar = ({
                   <p className="text-xs text-gray-500 mt-1">
                     Sugar: {item.sugar}
                   </p>
+                  {item.ice && (
+                    <p className="text-xs text-gray-500">Ice: {item.ice}</p>
+                  )}
                   <p className="text-xs text-gray-500">
                     Toppings:{" "}
                     {item.toppings?.length ? item.toppings.join(", ") : "None"}

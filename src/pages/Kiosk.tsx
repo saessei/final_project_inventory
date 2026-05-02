@@ -39,6 +39,7 @@ export const Kiosk = () => {
 
   // Customization state
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
+  const [selectedIce, setSelectedIce] = useState<string>("Regular Ice");
   const [selectedSize, setSelectedSize] = useState<string>("regular");
   const [selectedSugar, setSelectedSugar] = useState<SugarLevel | null>(null);
   const [selectedToppings, setSelectedToppings] = useState<Topping[]>([]);
@@ -72,6 +73,7 @@ export const Kiosk = () => {
 
   const openCustomization = (drink: Drink) => {
     setSelectedDrink(drink);
+    setSelectedIce("Regular Ice");
     setSelectedSize("regular");
     const defaultSugar = sugarLevels.find((s) => s.percentage === 50);
     if (defaultSugar) setSelectedSugar(defaultSugar);
@@ -107,7 +109,7 @@ export const Kiosk = () => {
 
     await upsertItem({
       drink_id: selectedDrink.id,
-      drink_name: `${selectedDrink.name} (${sizeLabel})`,
+      drink_name: `${selectedDrink.name} (${sizeLabel}, ${selectedIce})`,
       drink_price: totalPrice,
       sugar: selectedSugar.label,
       toppings: selectedToppings.map((t) => t.name),
@@ -152,7 +154,8 @@ export const Kiosk = () => {
         const toppings = item.toppings?.length
           ? `, ${item.toppings.join(", ")}`
           : "";
-        return `${item.quantity}x ${item.drink_name} (${item.sugar}${toppings})`;
+        const ice = item.ice ? `, ${item.ice}` : "";
+        return `${item.quantity}x ${item.drink_name} (${item.sugar}${ice}${toppings})`;
       })
       .join(" • ");
 
@@ -222,12 +225,14 @@ export const Kiosk = () => {
         <CustomizationModal
           drink={selectedDrink}
           sugarLevels={sugarLevels}
+          selectedIce={selectedIce}
           selectedSize={selectedSize}
           selectedSugar={selectedSugar}
           selectedToppings={selectedToppings}
           isSubmitting={isSubmitting}
           totalPrice={calculateTotalPrice()}
           onClose={() => setShowModal(false)}
+          onIceChange={setSelectedIce}
           onSizeChange={setSelectedSize}
           onSugarChange={setSelectedSugar}
           onToggleTopping={toggleTopping}

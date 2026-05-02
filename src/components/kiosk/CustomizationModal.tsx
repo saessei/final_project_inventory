@@ -1,4 +1,3 @@
-import placeholderImg from "@/assets/Placeholder.jpg";
 import { Button } from "@/components/ui/Button";
 import { X } from "lucide-react";
 import type { Drink, SugarLevel, Topping } from "@/services/DrinkService";
@@ -6,12 +5,14 @@ import type { Drink, SugarLevel, Topping } from "@/services/DrinkService";
 interface CustomizationModalProps {
   drink: Drink;
   sugarLevels: SugarLevel[];
+  selectedIce: string;
   selectedSize: string;
   selectedSugar: SugarLevel | null;
   selectedToppings: Topping[];
   isSubmitting: boolean;
   totalPrice: number;
   onClose: () => void;
+  onIceChange: (ice: string) => void;
   onSizeChange: (size: string) => void;
   onSugarChange: (sugar: SugarLevel) => void;
   onToggleTopping: (topping: Topping) => void;
@@ -21,17 +22,20 @@ interface CustomizationModalProps {
 export const CustomizationModal = ({
   drink,
   sugarLevels,
+  selectedIce,
   selectedSize,
   selectedSugar,
   selectedToppings,
   isSubmitting,
   totalPrice,
   onClose,
+  onIceChange,
   onSizeChange,
   onSugarChange,
   onToggleTopping,
   onAddToOrder,
 }: CustomizationModalProps) => {
+  const iceOptions = ["No Ice", "Less Ice", "Regular Ice", "Extra Ice"];
   const sizeOptions = [
     { key: "regular", label: "Regular", price: drink.sizes.regular },
     { key: "medium", label: "Medium", price: drink.sizes.medium },
@@ -40,35 +44,49 @@ export const CustomizationModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-5 animate-in fade-in duration-200">
-      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto no-scrollbar transform transition-all duration-300 animate-in zoom-in-95 slide-in-from-bottom-10 hover:scale-[1.02] hover:shadow-3xl">
-        <div className="relative h-56 group overflow-hidden">
-          <img
-            src={drink.image_url || placeholderImg}
-            alt={drink.name}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-            onError={(e) =>
-              ((e.target as HTMLImageElement).src = placeholderImg)
-            }
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto no-scrollbar animate-in zoom-in-95 slide-in-from-bottom-10">
+        <div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5">
+          <div>
+            <h3 className="text-3xl font-bold">{drink.name}</h3>
+            <p className="text-sm text-gray-500 mt-1">Customize your drink</p>
+          </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="absolute right-3 top-3 rounded-full bg-white/90 p-2 text-sm font-bold hover:bg-white hover:scale-110 hover:rotate-90 transition-all duration-200 cursor-pointer shadow-lg z-10"
+            className="rounded-full bg-white p-2 text-sm font-bold hover:bg-slate-50 transition-colors duration-200 cursor-pointer shadow-sm border border-slate-200"
           >
             <X size={16} aria-hidden="true" />
           </button>
         </div>
-        <div className="p-5 transition-all duration-300 hover:translate-y-[-2px]">
-          <div className="flex justify-between items-start mb-3">
+        <div className="p-5">
+          <div className="mb-3 flex items-start justify-between gap-3">
             <div>
-              <h3 className="text-3xl font-bold">{drink.name}</h3>
-              <p className="text-sm text-gray-500 mt-1">{drink.description}</p>
+              <p className="text-sm font-semibold text-gray-500">Total</p>
+              <span className="text-2xl font-black text-dark-brown">
+                ₱{totalPrice.toFixed(2)}
+              </span>
             </div>
-            <span className="text-2xl font-black text-dark-brown">
-              ₱{totalPrice.toFixed(2)}
-            </span>
+          </div>
+
+          <div className="mb-4">
+            <p className="text-lg font-semibold mb-2">Ice Level</p>
+            <div className="grid grid-cols-2 gap-2">
+              {iceOptions.map((ice) => (
+                <Button
+                  key={ice}
+                  onClick={() => onIceChange(ice)}
+                  variant="outline"
+                  className={`px-3 py-2 transition-colors ${
+                    selectedIce === ice
+                      ? "bg-dark-brown text-cream border-dark-brown"
+                      : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
+                  }`}
+                >
+                  {ice}
+                </Button>
+              ))}
+            </div>
           </div>
 
           <div className="mb-4">
@@ -79,7 +97,7 @@ export const CustomizationModal = ({
                   key={option.key}
                   onClick={() => onSizeChange(option.key)}
                   variant="outline"
-                  className={`px-3 py-2 hover:scale-105 ${
+                  className={`px-3 py-2 transition-colors ${
                     selectedSize === option.key
                       ? "bg-dark-brown text-cream border-dark-brown"
                       : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
@@ -100,7 +118,7 @@ export const CustomizationModal = ({
                   key={level.id}
                   onClick={() => onSugarChange(level)}
                   variant="outline"
-                  className={`px-3 py-2 hover:scale-105 ${
+                  className={`px-3 py-2 transition-colors ${
                     selectedSugar?.id === level.id
                       ? "bg-dark-brown text-cream border-dark-brown"
                       : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
@@ -126,9 +144,9 @@ export const CustomizationModal = ({
                     key={topping.id}
                     onClick={() => onToggleTopping(topping)}
                     variant="outline"
-                    className={`px-3 py-2 hover:scale-105 ${
+                    className={`px-3 py-2 transition-colors ${
                       selectedToppings.some((t) => t.id === topping.id)
-                        ? "bg-dark-brown text-cream border-dark-brown"
+                        ? "bg-brown text-cream border-brown"
                         : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
                     }`}
                   >
@@ -141,21 +159,8 @@ export const CustomizationModal = ({
             </div>
           )}
 
-          {selectedToppings.length > 0 && (
-            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm font-semibold">Selected Toppings:</p>
-              <p className="text-sm text-gray-600">
-                {selectedToppings.map((t) => t.name).join(", ")}
-              </p>
-            </div>
-          )}
-
           <div className="flex justify-end gap-3">
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="px-5 hover:scale-105"
-            >
+            <Button onClick={onClose} variant="outline" className="px-5">
               Cancel
             </Button>
             <Button
@@ -163,7 +168,7 @@ export const CustomizationModal = ({
               variant="solid"
               isLoading={isSubmitting}
               loadingText="Adding..."
-              className="px-5 hover:scale-105"
+              className="px-5"
             >
               Add to Cart - ₱{totalPrice.toFixed(2)}
             </Button>

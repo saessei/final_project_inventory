@@ -39,6 +39,9 @@ export const QueuedOrders = () => {
           )
       : completedOrders;
 
+  const getItemCount = (orderDetails: string) =>
+    orderDetails.split(" • ").filter((item) => item.trim().length > 0).length;
+
   const handleStatusChange = async (order: Order) => {
     if (order.status === "pending") {
       if (!staffUserId) return;
@@ -142,62 +145,58 @@ export const QueuedOrders = () => {
               queueOrders.map((order) => (
                 <article
                   key={order.id}
-                  className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200"
+                  className="rounded-2xl bg-white p-4 shadow-sm border border-slate-200"
                 >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                      <p className="text-[0.7rem] uppercase tracking-[0.3em] text-gray-400">
-                        ORDER #{order.id.substring(0, 8)}
-                      </p>
-                      <h2 className="mt-3 text-3xl font-bold">
-                        {order.customer_name}
-                      </h2>
-                    </div>
-                    <div
-                      className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold ${
-                        order.status === "pending"
-                          ? "bg-orange-50 text-orange-700"
-                          : order.status === "preparing"
-                            ? "bg-brown/10 text-brown"
-                            : "bg-emerald-100 text-emerald-700"
-                      }`}
-                    >
-                      {order.status === "pending"
-                        ? "Incoming"
-                        : order.status === "preparing"
-                          ? "In queue"
-                          : "Completed"}
-                    </div>
-                  </div>
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0 flex-1 space-y-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-[0.65rem] uppercase tracking-[0.28em] text-gray-400">
+                          Order #{order.id.substring(0, 8)}
+                        </p>
+                        <span
+                          className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${
+                            order.status === "pending"
+                              ? "bg-orange-50 text-orange-700 border-orange-100"
+                              : order.status === "preparing"
+                                ? "bg-brown/10 text-brown border-brown/20"
+                                : "bg-emerald-100 text-emerald-700 border-emerald-200"
+                          }`}
+                        >
+                          {order.status === "pending"
+                            ? "Incoming"
+                            : order.status === "preparing"
+                              ? "In queue"
+                              : "Completed"}
+                        </span>
+                      </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-3xl bg-[#f8f7f1] p-4">
-                      <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
-                        Order details
-                      </p>
-                      <p className="mt-3 text-sm text-gray-600 whitespace-pre-wrap">
+                      <div className="flex flex-wrap items-center gap-3 text-sm text-gray-500">
+                        <span className="font-semibold text-dark-brown text-lg">
+                          {order.customer_name}
+                        </span>
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                          {getItemCount(order.order_details)} items
+                        </span>
+                      </div>
+
+                      <p className="text-sm text-gray-600 line-clamp-2">
                         {order.order_details}
                       </p>
                     </div>
-                    <div className="rounded-3xl bg-[#f8f7f1] p-4">
-                      <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
-                        Received
-                      </p>
-                      <p className="mt-3 text-sm text-gray-600">
-                        {new Date(order.created_at).toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
 
-                  <div className="mt-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-                    {(order.status === "pending" ||
-                      order.status === "preparing" ||
-                      order.status === "completed") && (
-                      <OrderStatusButton
-                        status={order.status}
-                        onClick={() => handleStatusChange(order)}
-                      />
-                    )}
+                    <div className="flex flex-col items-start gap-2 lg:items-end lg:shrink-0">
+                      <p className="text-xs uppercase tracking-[0.22em] text-gray-400">
+                        Queue action
+                      </p>
+                      {(order.status === "pending" ||
+                        order.status === "preparing" ||
+                        order.status === "completed") && (
+                        <OrderStatusButton
+                          status={order.status}
+                          onClick={() => handleStatusChange(order)}
+                        />
+                      )}
+                    </div>
                   </div>
                 </article>
               ))
