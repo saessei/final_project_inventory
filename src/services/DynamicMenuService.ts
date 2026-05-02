@@ -37,6 +37,28 @@ export interface DynamicCategory {
   displayOrder: number;
 }
 
+type DrinkRow = {
+  id: string;
+  type?: string | null;
+  name: string;
+  description?: string | null;
+  image_url?: string | null;
+  is_available?: boolean | null;
+};
+
+type ToppingRow = {
+  id: string;
+  name: string;
+  price?: number | null;
+  is_available?: boolean | null;
+};
+
+type SugarLevelRow = {
+  id: string;
+  label: string;
+  percentage?: number | null;
+};
+
 class DynamicMenuService {
   private static instance: DynamicMenuService;
   private listeners: Set<() => void> = new Set();
@@ -79,31 +101,39 @@ class DynamicMenuService {
   }
 
   // Category Management
-  async getCategories(_client?: SupabaseClient): Promise<DynamicCategory[]> {
+  async getCategories(client?: SupabaseClient): Promise<DynamicCategory[]> {
+    void client;
     // This codebase’s current Supabase schema doesn’t include a categories table.
     // Return empty rather than throwing so callers can degrade gracefully.
     return [];
   }
 
   async addCategory(
-    _category: { label: string; description: string },
-    _client?: SupabaseClient,
+    category: { label: string; description: string },
+    client?: SupabaseClient,
   ): Promise<DynamicCategory | null> {
+    void category;
+    void client;
     return null;
   }
 
   async updateCategory(
-    _id: string,
-    _data: Partial<DynamicCategory>,
-    _client?: SupabaseClient,
+    id: string,
+    data: Partial<DynamicCategory>,
+    client?: SupabaseClient,
   ): Promise<boolean> {
+    void id;
+    void data;
+    void client;
     return false;
   }
 
   async deleteCategory(
-    _id: string,
-    _client?: SupabaseClient,
+    id: string,
+    client?: SupabaseClient,
   ): Promise<boolean> {
+    void id;
+    void client;
     return false;
   }
 
@@ -130,7 +160,7 @@ class DynamicMenuService {
 
     const rows = data || [];
     const mapped = await Promise.all(
-      rows.map(async (row: any) => {
+      (rows as DrinkRow[]).map(async (row) => {
         const regularPrice = await this.getRegularPrice(row.id, client);
         return {
           id: row.id,
@@ -276,7 +306,7 @@ class DynamicMenuService {
   // Topping Management
   async getToppings(client?: SupabaseClient): Promise<Topping[]> {
     const { data, error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .select("*")
       .eq("is_available", true)
       .order("name");
@@ -286,7 +316,7 @@ class DynamicMenuService {
       return [];
     }
 
-    return (data || []).map((row: any) => ({
+    return ((data || []) as ToppingRow[]).map((row) => ({
       id: row.id,
       name: row.name,
       price: row.price ?? 0,
@@ -308,7 +338,7 @@ class DynamicMenuService {
     client?: SupabaseClient,
   ): Promise<Topping | null> {
     const { data, error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .insert({ name: topping.name, price: topping.price })
       .select("*")
       .single();
@@ -341,7 +371,7 @@ class DynamicMenuService {
       updateRow.is_available = data.isAvailable;
 
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .update(updateRow)
       .eq("id", id);
 
@@ -355,7 +385,7 @@ class DynamicMenuService {
 
   async deleteTopping(id: string, client?: SupabaseClient): Promise<boolean> {
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .delete()
       .eq("id", id);
 
@@ -379,7 +409,7 @@ class DynamicMenuService {
       return [];
     }
 
-    return (data || []).map((row: any) => ({
+    return ((data || []) as SugarLevelRow[]).map((row) => ({
       id: row.id,
       label: row.label,
       percentage: row.percentage ?? 0,

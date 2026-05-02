@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { BobaFooter } from "@/components/ui/BobaFooter";
 
 const meta: Meta<typeof BobaFooter> = {

@@ -13,7 +13,7 @@ describe("DrinkService Integration Test", () => {
     }
     if (testToppingId) {
       await supabaseAdmin
-        .from("default_toppings")
+        .from("toppings")
         .delete()
         .eq("id", testToppingId);
     }

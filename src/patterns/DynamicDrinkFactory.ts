@@ -37,6 +37,15 @@ export interface DynamicCategory {
   displayOrder: number;
 }
 
+type DrinkRow = {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  category: string | null;
+  is_available: boolean | null;
+};
+
 class DynamicMenuService {
   private static instance: DynamicMenuService;
   private listeners: Set<() => void> = new Set();
@@ -59,96 +68,94 @@ class DynamicMenuService {
     this.listeners.forEach((callback) => callback());
   }
 
+  private async getRegularPrice(drinkId: string): Promise<number> {
+    const { data, error } = await supabase
+      .from("drink_sizes")
+      .select("price")
+      .eq("drink_id", drinkId)
+      .eq("size", "regular")
+      .maybeSingle();
+
+    if (error) return 0;
+    return (data?.price as number | null) ?? 0;
+  }
+
+  private async mapDrink(row: DrinkRow): Promise<DynamicDrink> {
+    const price = await this.getRegularPrice(row.id);
+    return {
+      id: row.id,
+      type: "BrownSugar",
+      name: row.name,
+      description: row.description ?? "",
+      price,
+      image: row.image_url ?? "",
+      categoryId: row.category ?? "",
+      availableToppings: [],
+      availableSugarLevels: [],
+      isAvailable: row.is_available ?? true,
+    };
+  }
+
   // Category Management
   async getCategories(): Promise<DynamicCategory[]> {
     const { data, error } = await supabase
-      .from("menu_categories")
-      .select("*")
-      .eq("is_active", true)
-      .order("display_order", { ascending: true });
+      .from("drinks")
+      .select("id, category")
+      .eq("is_available", true)
+      .order("category");
 
     if (error) {
       console.error("Error fetching categories:", error);
       return [];
     }
-    return data || [];
-  }
 
-  async addCategory(
-    category: Omit<DynamicCategory, "id" | "drinkIds" | "displayOrder">,
-  ): Promise<DynamicCategory | null> {
-    const categories = await this.getCategories();
-    const newCategory: DynamicCategory = {
-      ...category,
-      id: `cat_${Date.now()}`,
-      drinkIds: [],
-      displayOrder: categories.length + 1,
+    const grouped = new Map<string, string[]>();
+    (data || []).forEach((row) => {
+      const label = row.category || "Uncategorized";
+      grouped.set(label, [...(grouped.get(label) || []), row.id]);
+    });
+
+    return Array.from(grouped.entries()).map(([label, drinkIds], index) => ({
+      id: label,
+      label,
+      description: "",
+      drinkIds,
       isActive: true,
-    };
-
-    const { data, error } = await supabase
-      .from("menu_categories")
-      .insert([newCategory])
-      .select()
-      .single();
-
-    if (error) {
-      console.error("Error adding category:", error);
-      return null;
-    }
-    this.notify();
-    return data;
+      displayOrder: index + 1,
+    }));
   }
 
-  async updateCategory(
-    id: string,
-    updates: Partial<DynamicCategory>,
-  ): Promise<boolean> {
-    const { error } = await supabase
-      .from("menu_categories")
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq("id", id);
-
-    if (error) {
-      console.error("Error updating category:", error);
-      return false;
-    }
-    this.notify();
-    return true;
+  async addCategory(): Promise<DynamicCategory | null> {
+    return null;
   }
 
-  async deleteCategory(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from("menu_categories")
-      .delete()
-      .eq("id", id);
+  async updateCategory(): Promise<boolean> {
+    return false;
+  }
 
-    if (error) {
-      console.error("Error deleting category:", error);
-      return false;
-    }
-    this.notify();
-    return true;
+  async deleteCategory(): Promise<boolean> {
+    return false;
   }
 
   // Drink Management
   async getDrinksByCategory(categoryId: string): Promise<DynamicDrink[]> {
     const { data, error } = await supabase
-      .from("menu_drinks")
+      .from("drinks")
       .select("*")
-      .eq("category_id", categoryId)
+      .eq("category", categoryId)
       .eq("is_available", true);
 
     if (error) {
       console.error("Error fetching drinks:", error);
       return [];
     }
-    return data || [];
+
+    return Promise.all(((data || []) as DrinkRow[]).map((row) => this.mapDrink(row)));
   }
 
   async getAllDrinks(): Promise<DynamicDrink[]> {
     const { data, error } = await supabase
-      .from("menu_drinks")
+      .from("drinks")
       .select("*")
       .eq("is_available", true);
 
@@ -156,52 +163,90 @@ class DynamicMenuService {
       console.error("Error fetching drinks:", error);
       return [];
     }
-    return data || [];
+
+    return Promise.all(((data || []) as DrinkRow[]).map((row) => this.mapDrink(row)));
   }
 
   async addDrink(
     drink: Omit<DynamicDrink, "id">,
   ): Promise<DynamicDrink | null> {
-    const newDrink: DynamicDrink = {
-      ...drink,
-      id: `drink_${Date.now()}`,
-      isAvailable: true,
-    };
-
     const { data, error } = await supabase
-      .from("menu_drinks")
-      .insert([newDrink])
-      .select()
+      .from("drinks")
+      .insert({
+        name: drink.name,
+        description: drink.description,
+        image_url: drink.image,
+        category: drink.categoryId,
+        is_available: true,
+      })
+      .select("*")
       .single();
 
     if (error) {
       console.error("Error adding drink:", error);
       return null;
     }
+
+    const drinkId = data.id as string;
+    const sizes = ["regular", "medium", "large"].map((size) => ({
+      drink_id: drinkId,
+      size,
+      price: drink.price,
+    }));
+
+    const { error: sizeError } = await supabase.from("drink_sizes").insert(sizes);
+    if (sizeError) {
+      console.error("Error adding drink sizes:", sizeError);
+      await supabase.from("drinks").delete().eq("id", drinkId);
+      return null;
+    }
+
     this.notify();
-    return data;
+    return this.mapDrink(data as DrinkRow);
   }
 
   async updateDrink(
     id: string,
     updates: Partial<DynamicDrink>,
   ): Promise<boolean> {
-    const { error } = await supabase
-      .from("menu_drinks")
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq("id", id);
+    const updateRow: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.name !== undefined) updateRow.name = updates.name;
+    if (updates.description !== undefined)
+      updateRow.description = updates.description;
+    if (updates.image !== undefined) updateRow.image_url = updates.image;
+    if (updates.categoryId !== undefined) updateRow.category = updates.categoryId;
+    if (updates.isAvailable !== undefined)
+      updateRow.is_available = updates.isAvailable;
 
+    const { error } = await supabase.from("drinks").update(updateRow).eq("id", id);
     if (error) {
       console.error("Error updating drink:", error);
       return false;
     }
+
+    if (updates.price !== undefined) {
+      const { error: sizeError } = await supabase
+        .from("drink_sizes")
+        .update({ price: updates.price })
+        .eq("drink_id", id)
+        .eq("size", "regular");
+      if (sizeError) {
+        console.error("Error updating drink price:", sizeError);
+        return false;
+      }
+    }
+
     this.notify();
     return true;
   }
 
   async deleteDrink(id: string): Promise<boolean> {
-    const { error } = await supabase.from("menu_drinks").delete().eq("id", id);
+    await supabase.from("drink_toppings").delete().eq("drink_id", id);
+    await supabase.from("drink_sizes").delete().eq("drink_id", id);
 
+    const { error } = await supabase.from("drinks").delete().eq("id", id);
     if (error) {
       console.error("Error deleting drink:", error);
       return false;
@@ -213,15 +258,22 @@ class DynamicMenuService {
   // Topping Management
   async getToppings(): Promise<Topping[]> {
     const { data, error } = await supabase
-      .from("menu_toppings")
+      .from("toppings")
       .select("*")
-      .eq("is_available", true);
+      .eq("is_available", true)
+      .order("name");
 
     if (error) {
       console.error("Error fetching toppings:", error);
       return [];
     }
-    return data || [];
+
+    return (data || []).map((row) => ({
+      id: row.id,
+      name: row.name,
+      price: row.price ?? 0,
+      isAvailable: row.is_available ?? true,
+    }));
   }
 
   async getToppingPrice(toppingName: string): Promise<number> {
@@ -231,16 +283,14 @@ class DynamicMenuService {
   }
 
   async addTopping(topping: Omit<Topping, "id">): Promise<Topping | null> {
-    const newTopping: Topping = {
-      ...topping,
-      id: `top_${Date.now()}`,
-      isAvailable: true,
-    };
-
     const { data, error } = await supabase
-      .from("menu_toppings")
-      .insert([newTopping])
-      .select()
+      .from("toppings")
+      .insert({
+        name: topping.name,
+        price: topping.price,
+        is_available: topping.isAvailable,
+      })
+      .select("*")
       .single();
 
     if (error) {
@@ -248,13 +298,26 @@ class DynamicMenuService {
       return null;
     }
     this.notify();
-    return data;
+    return {
+      id: data.id,
+      name: data.name,
+      price: data.price ?? 0,
+      isAvailable: data.is_available ?? true,
+    };
   }
 
   async updateTopping(id: string, updates: Partial<Topping>): Promise<boolean> {
+    const updateRow: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.name !== undefined) updateRow.name = updates.name;
+    if (updates.price !== undefined) updateRow.price = updates.price;
+    if (updates.isAvailable !== undefined)
+      updateRow.is_available = updates.isAvailable;
+
     const { error } = await supabase
-      .from("menu_toppings")
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .from("toppings")
+      .update(updateRow)
       .eq("id", id);
 
     if (error) {
@@ -266,10 +329,7 @@ class DynamicMenuService {
   }
 
   async deleteTopping(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from("menu_toppings")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("toppings").delete().eq("id", id);
 
     if (error) {
       console.error("Error deleting topping:", error);
@@ -282,30 +342,34 @@ class DynamicMenuService {
   // Sugar Level Management
   async getSugarLevels(): Promise<SugarLevel[]> {
     const { data, error } = await supabase
-      .from("menu_sugar_levels")
+      .from("sugar_levels")
       .select("*")
-      .eq("is_available", true);
+      .order("percentage");
 
     if (error) {
       console.error("Error fetching sugar levels:", error);
       return [];
     }
-    return data || [];
+
+    return (data || []).map((row) => ({
+      id: row.id,
+      label: row.label,
+      percentage: row.percentage ?? 0,
+      isAvailable: true,
+    }));
   }
 
   async addSugarLevel(
     level: Omit<SugarLevel, "id">,
   ): Promise<SugarLevel | null> {
-    const newLevel: SugarLevel = {
-      ...level,
-      id: `sugar_${Date.now()}`,
-      isAvailable: true,
-    };
-
     const { data, error } = await supabase
-      .from("menu_sugar_levels")
-      .insert([newLevel])
-      .select()
+      .from("sugar_levels")
+      .insert({
+        label: level.label,
+        percentage: level.percentage,
+        price_addition: 0,
+      })
+      .select("*")
       .single();
 
     if (error) {
@@ -313,16 +377,28 @@ class DynamicMenuService {
       return null;
     }
     this.notify();
-    return data;
+    return {
+      id: data.id,
+      label: data.label,
+      percentage: data.percentage ?? 0,
+      isAvailable: true,
+    };
   }
 
   async updateSugarLevel(
     id: string,
     updates: Partial<SugarLevel>,
   ): Promise<boolean> {
+    const updateRow: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    };
+    if (updates.label !== undefined) updateRow.label = updates.label;
+    if (updates.percentage !== undefined)
+      updateRow.percentage = updates.percentage;
+
     const { error } = await supabase
-      .from("menu_sugar_levels")
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .from("sugar_levels")
+      .update(updateRow)
       .eq("id", id);
 
     if (error) {
@@ -334,10 +410,7 @@ class DynamicMenuService {
   }
 
   async deleteSugarLevel(id: string): Promise<boolean> {
-    const { error } = await supabase
-      .from("menu_sugar_levels")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("sugar_levels").delete().eq("id", id);
 
     if (error) {
       console.error("Error deleting sugar level:", error);

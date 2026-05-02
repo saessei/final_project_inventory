@@ -64,7 +64,7 @@ class DrinkService {
   // ============ TOPPINGS ============
   async getAllToppings(client?: SupabaseClient): Promise<Topping[]> {
     const { data, error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .select("*")
       .eq("is_available", true)
       .order("name");
@@ -87,7 +87,7 @@ class DrinkService {
     client?: SupabaseClient,
   ): Promise<boolean> {
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .insert({ name, price });
 
     if (error) {
@@ -105,7 +105,7 @@ class DrinkService {
     client?: SupabaseClient,
   ): Promise<boolean> {
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .update({ name, price })
       .eq("id", id);
 
@@ -119,7 +119,7 @@ class DrinkService {
 
   async deleteTopping(id: string, client?: SupabaseClient): Promise<boolean> {
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .delete()
       .eq("id", id);
 
@@ -216,7 +216,7 @@ class DrinkService {
       .from("drink_toppings")
       .select(
         `
-        topping:default_toppings(*)
+        topping:toppings(*)
       `,
       )
       .eq("drink_id", drinkId);
