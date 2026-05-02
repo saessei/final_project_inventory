@@ -39,7 +39,7 @@ export const createOrder = async (
 
 export const updateOrderStatus = async (
   orderId: string,
-  newStatus: "pending" | "preparing" | "completed",
+  newStatus: "pending" | "preparing" | "ready" | "completed" | "cancelled",
   options?: { claim?: boolean; staffUserId?: string },
   client: SupabaseClient = supabase,
 ) => {
