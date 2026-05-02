@@ -212,18 +212,6 @@ export const MenuManager = () => {
         </div>
       </main>
 
-      {/* Category Modal */}
-      {showModal && activeTab === "categories" && (
-        <CategoryModal
-          item={editingItem as CategoryType}
-          onSave={handleSaveCategory}
-          onClose={() => {
-            setShowModal(false);
-            setEditingItem(null);
-          }}
-        />
-      )}
-
       {/* Drink Modal */}
       {showModal && activeTab === "drinks" && (
         <DrinkModal
@@ -234,7 +222,7 @@ export const MenuManager = () => {
             setEditingItem(null);
           }}
           allToppings={toppings}
-            categories={categories}
+          categories={categories}
           uploadImage={uploadImage}
         />
       )}
