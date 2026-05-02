@@ -1,5 +1,4 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { Signup } from "@/pages/Signup";
 import { Signin } from "@/pages/Signin";
 import { Kiosk } from "@/pages/Kiosk";
 import { QueuedOrders } from "@/pages/QueuedOrders";
@@ -14,7 +13,6 @@ import { AppProtectedRoute } from "@/pages/AppProtectedRoute";
 
 export const router = createBrowserRouter([
   { path: "/", element: <Navigate to="/signin" replace /> },
-  { path: "/signup", element: <Signup /> },
   { path: "/signin", element: <Signin /> },
   {
     path: "/role-select",
@@ -51,7 +49,7 @@ export const router = createBrowserRouter([
   {
     path: "/reports",
     element: (
-      <AppProtectedRoute staffAllowed>
+      <AppProtectedRoute staffAllowed={false}>
         <Reports />
       </AppProtectedRoute>
     ),

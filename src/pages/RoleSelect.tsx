@@ -1,13 +1,23 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { useDashboardMode } from "@/components/contexts/DashboardModeContext";
+import { useAdminPin } from "@/components/contexts/AdminPinContext";
 
 export const RoleSelect = () => {
   const navigate = useNavigate();
-  const { setMode } = useDashboardMode();
+  const { mode, setMode } = useDashboardMode();
+  const { openPinModal } = useAdminPin();
 
-  const handleSelect = (mode: "admin" | "staff") => {
-    setMode(mode);
+  const handleSelect = (nextMode: "admin" | "staff") => {
+    if (nextMode === "admin" && mode === "staff") {
+      openPinModal(() => {
+        setMode("admin");
+        navigate("/kiosk", { replace: true });
+      });
+      return;
+    }
+
+    setMode(nextMode);
     navigate("/kiosk", { replace: true });
   };
 

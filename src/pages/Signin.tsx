@@ -1,6 +1,6 @@
 // components/Signin.tsx
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { Header } from "@/components/ui/Header";
 import { BobaFooter } from "@/components/ui/BobaFooter";
@@ -59,17 +59,9 @@ export const Signin = () => {
             Sign In
           </h2>
 
-          <div className="flex justify-center mb-6">
-            <p className="text-center text-sm text-gray-500 font-quicksand flex items-center gap-2">
-              Don't have an account?{" "}
-              <Link
-                className="text-brown-two font-bold px-3 py-1 bg-cream border border-brown/30 rounded-full hover:bg-brown hover:text-white transition-colors duration-300"
-                to="/signup"
-              >
-                Sign Up
-              </Link>
-            </p>
-          </div>
+          <p className="text-center text-sm text-gray-500 font-quicksand mb-6">
+            Use the store account provided by the admin.
+          </p>
 
           <div className="flex flex-col font-quicksand text-brown-two">
             <TextField

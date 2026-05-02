@@ -16,8 +16,9 @@ const meta: Meta<typeof Sidebar> = {
               session: {
                 user: { email: "tea.lover@example.com" },
               } as Record<string, unknown>,
+              loading: false,
+              hasAdminPin: true,
               signOut: async () => console.log("Signed out!"),
-              signUpNewUser: async () => ({ success: false }),
               signInUser: async () => ({ success: false }),
               refreshSession: async () => console.log("Session refreshed!"),
             } as unknown as never

@@ -8,11 +8,13 @@ import {
   Menu,
   X,
   ClipboardList,
+  ShieldCheck,
 } from "lucide-react";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import Logo from "/src/assets/QueueTea.png";
 import { useDashboardMode } from "@/components/contexts/DashboardModeContext";
+import { useAdminPin } from "@/components/contexts/AdminPinContext";
 
 export const Sidebar = () => {
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -20,6 +22,7 @@ export const Sidebar = () => {
 
   const { session, signOut } = UserAuth();
   const { mode, clearMode } = useDashboardMode();
+  const { openPinModal } = useAdminPin();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -60,6 +63,13 @@ export const Sidebar = () => {
   const handleReturnToRoleSelect = () => {
     clearMode();
     navigate("/role-select");
+  };
+
+  const handleStaffAdminUnlock = () => {
+    openPinModal(() => {
+      clearMode();
+      navigate("/role-select");
+    });
   };
 
   return (
@@ -156,6 +166,16 @@ export const Sidebar = () => {
                 <span>Sign out</span>
               </button>
             </>
+          )}
+
+          {mode === "staff" && (
+            <button
+              onClick={handleStaffAdminUnlock}
+              className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-100 transition-colors"
+            >
+              <ShieldCheck size={16} />
+              <span>Admin Unlock</span>
+            </button>
           )}
         </div>
       </div>

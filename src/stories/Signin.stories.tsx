@@ -15,18 +15,13 @@ interface MockProps {
       };
     } | null;
     loading?: boolean;
+    hasAdminPin?: boolean;
     isAdmin?: boolean;
     needsAdminPin?: boolean;
     signInUser?: (
       e: string,
       p: string,
     ) => Promise<{ success: boolean; data?: unknown; error?: string }>;
-    signUpNewUser?: (
-      e: string,
-      p: string,
-      n: string,
-      pin?: string,
-    ) => Promise<{ success: boolean; data?: unknown; error?: unknown }>;
     signOut?: () => Promise<void>;
     refreshSession?: () => Promise<void>;
     setNeedsAdminPin?: (value: boolean) => void;
