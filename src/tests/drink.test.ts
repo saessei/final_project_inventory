@@ -13,7 +13,7 @@ describe("DrinkService Integration Test", () => {
     }
     if (testToppingId) {
       await supabaseAdmin
-        .from("default_toppings")
+        .from("toppings")
         .delete()
         .eq("id", testToppingId);
     }
@@ -51,6 +51,7 @@ describe("DrinkService Integration Test", () => {
       name: drinkName,
       description: "A refreshing test drink",
       image_url: "http://example.com/test.jpg",
+      category: "Test Category",
     };
     const sizes = { regular: 50, medium: 65, large: 80 };
 

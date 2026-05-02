@@ -16,6 +16,14 @@ import {
   type Topping,
   type SugarLevel,
 } from "@/services/DrinkService";
+import { Skeleton } from "@/components/ui/Skeleton";
+
+
+/** Extract size label from the cart drink_name, e.g. "Matcha (Large)" → "large" */
+function extractSizeName(drinkName: string): string {
+  const match = drinkName.match(/\((\w+)\)$/);
+  return match ? match[1].toLowerCase() : "regular";
+}
 
 export const Kiosk = () => {
   const { session } = UserAuth();
@@ -33,6 +41,7 @@ export const Kiosk = () => {
   const [customerName, setCustomerName] = useState("");
   const [drinks, setDrinks] = useState<Drink[]>([]);
   const [sugarLevels, setSugarLevels] = useState<SugarLevel[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Customization state
   const [selectedDrink, setSelectedDrink] = useState<Drink | null>(null);
@@ -47,6 +56,7 @@ export const Kiosk = () => {
   // Load data
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true);
       try {
         const [drinksData, sugarData] = await Promise.all([
           drinkService.getAllDrinks(),
@@ -60,6 +70,8 @@ export const Kiosk = () => {
         if (defaultSugar) setSelectedSugar(defaultSugar);
       } catch (error) {
         console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
       }
     };
     loadData();
@@ -138,10 +150,7 @@ export const Kiosk = () => {
   const handleCheckout = async () => {
     if (cart.length === 0 || isSubmitting) return;
 
-    console.log("🛒 Cart before checkout:", cart);
-    console.log("💰 cartTotal being sent:", cartTotal);
-    console.log("💰 cartTotal type:", typeof cartTotal);
-
+    // Build text summary (kept for backward compatibility)
     const orderDetails = cart
       .map((item) => {
         const toppings = item.toppings?.length
@@ -151,17 +160,39 @@ export const Kiosk = () => {
       })
       .join(" • ");
 
-    console.log("📝 Order details:", orderDetails);
+    // Build structured items for order_items + order_item_toppings
+    const items = cart.map((item) => {
+      const allToppings = (item.toppings ?? []).map((name) => {
+        const found = selectedDrink?.available_toppings?.find(
+          (t) => t.name === name,
+        );
+        return {
+          topping_id: found?.id,
+          topping_name: name,
+          price: found?.price ?? 0,
+        };
+      });
+
+      return {
+        drink_id: item.drink_id,
+        drink_name: item.drink_name,
+        size_name: extractSizeName(item.drink_name),
+        sugar_label: item.sugar,
+        unit_price: Number(item.drink_price),
+        quantity: item.quantity,
+        line_total: Number(item.drink_price) * item.quantity,
+        toppings: allToppings,
+      };
+    });
 
     try {
-      const result = await createOrder({
+      await createOrder({
         customer_name: customerName.trim() || "Guest",
         order_details: orderDetails,
         status: "pending",
-        total_price: Number(cartTotal), // Force to number
+        total_price: Number(cartTotal),
+        items,
       });
-
-      console.log("✅ Order result:", result);
 
       await clearCart();
       setLastOrderSummary(orderDetails);
@@ -173,6 +204,49 @@ export const Kiosk = () => {
   };
 
   const hasNoMenu = drinks.length === 0;
+
+  if (loading) {
+    return (
+      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+        <div className="fixed top-0 left-0 h-screen w-64 z-10 hidden lg:block">
+          <Sidebar />
+        </div>
+        
+        <div className="fixed top-0 right-0 h-screen w-full lg:w-[22rem] bg-white shadow-xl z-20 flex flex-col hidden lg:flex">
+          <div className="p-6 border-b flex-1">
+            <Skeleton className="h-8 w-32 mb-6" />
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-4">
+                  <Skeleton className="h-16 w-16 rounded-xl flex-shrink-0" />
+                  <div className="flex-1 space-y-2 py-1">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="p-6 border-t bg-gray-50/50">
+            <Skeleton className="h-12 w-full rounded-xl" />
+          </div>
+        </div>
+
+        <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+          <div className="mb-6">
+            <Skeleton className="h-12 w-48 mb-2 bg-gray-300" />
+            <Skeleton className="h-5 w-64 bg-gray-200" />
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <Skeleton key={i} className="aspect-[4/5] w-full rounded-3xl bg-white/60 border border-gray-100" />
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">

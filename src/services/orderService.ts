@@ -1,18 +1,27 @@
 import supabase from "@/lib/supabaseClient";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+export interface CreateOrderItemInput {
+  drink_id: string;
+  drink_name: string;
+  size_name: string;
+  sugar_label: string;
+  unit_price: number;
+  quantity: number;
+  line_total: number;
+  toppings: { topping_id?: string; topping_name: string; price: number }[];
+}
+
 export const createOrder = async (
   order: {
     customer_name: string;
     order_details: string;
     status: string;
     total_price?: number;
+    items?: CreateOrderItemInput[];
   },
   client: SupabaseClient = supabase,
 ) => {
-  console.log("Received order object:", order);
-  console.log("total_price value:", order.total_price);
-
   const orderToSave = {
     customer_name: order.customer_name,
     order_details: order.order_details,
@@ -21,20 +30,62 @@ export const createOrder = async (
     created_at: new Date().toISOString(),
   };
 
-  console.log("🔍 DEBUG - Saving this to database:", orderToSave);
-
   const { data, error } = await client
     .from("orders")
     .insert([orderToSave])
-    .select();
+    .select()
+    .single();
 
   if (error) {
     console.error("❌ Create order failed:", error);
     throw new Error(error.message);
   }
 
-  console.log("✅ Order saved successfully:", data);
-  return data;
+  const orderId = data.id as string;
+
+  // Insert structured order_items + order_item_toppings
+  if (order.items && order.items.length > 0) {
+    for (const item of order.items) {
+      const { data: itemData, error: itemError } = await client
+        .from("order_items")
+        .insert({
+          order_id: orderId,
+          drink_id: item.drink_id,
+          drink_name: item.drink_name,
+          size_name: item.size_name,
+          sugar_label: item.sugar_label,
+          unit_price: item.unit_price,
+          quantity: item.quantity,
+          line_total: item.line_total,
+        })
+        .select()
+        .single();
+
+      if (itemError) {
+        console.error("❌ Insert order_item failed:", itemError);
+        continue;
+      }
+
+      if (item.toppings.length > 0) {
+        const toppingRows = item.toppings.map((t) => ({
+          order_item_id: itemData.id,
+          topping_id: t.topping_id || null,
+          topping_name: t.topping_name,
+          price: t.price,
+        }));
+
+        const { error: toppingError } = await client
+          .from("order_item_toppings")
+          .insert(toppingRows);
+
+        if (toppingError) {
+          console.error("❌ Insert order_item_toppings failed:", toppingError);
+        }
+      }
+    }
+  }
+
+  return [data];
 };
 
 export const updateOrderStatus = async (

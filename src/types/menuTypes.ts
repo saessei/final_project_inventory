@@ -12,6 +12,7 @@ export interface DrinkType {
   name: string;
   description: string;
   image_url: string;
+  category: string;
   sizes: {
     regular: number;
     medium: number;
@@ -27,17 +28,13 @@ export interface ToppingType {
   is_available: boolean;
 }
 
-export interface CategoryType {
-  id: string;
-  label: string;
-  description: string;
-  drinkIds: string[];
-}
+// CategoryType removed
 
 export interface DrinkModalData {
   name: string;
   description: string;
   image_url: string;
+  category: string;
   regular_price: string;
   medium_price: string;
   large_price: string;

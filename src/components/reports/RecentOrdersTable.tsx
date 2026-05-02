@@ -39,11 +39,31 @@ export const RecentOrdersTable = ({
                 <td className="py-3 font-medium">{order.customer_name}</td>
                 <td
                   className="py-3 text-gray-600 max-w-md truncate"
-                  title={order.order_details}
+                  title={
+                    order.order_items?.length > 0
+                      ? order.order_items
+                          .map(
+                            (i) =>
+                              `${i.quantity}x ${i.drink_name}`,
+                          )
+                          .join(", ")
+                      : order.order_details
+                  }
                 >
-                  {order.order_details.length > 40
-                    ? order.order_details.slice(0, 40) + "..."
-                    : order.order_details}
+                  {(() => {
+                    const text =
+                      order.order_items?.length > 0
+                        ? order.order_items
+                            .map(
+                              (i) =>
+                                `${i.quantity}x ${i.drink_name}`,
+                            )
+                            .join(", ")
+                        : order.order_details;
+                    return text.length > 40
+                      ? text.slice(0, 40) + "..."
+                      : text;
+                  })()}
                 </td>
                 <td className="py-3">
                   <span

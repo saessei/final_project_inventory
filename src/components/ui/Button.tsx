@@ -27,7 +27,7 @@ const variants: Record<ButtonVariant, string> = {
     "bg-gradient-to-r from-brown-two to-dark-brown text-white shadow-md hover:scale-[1.02] active:scale-95",
   solid: "bg-dark-brown text-white hover:bg-brown-dark",
   secondary:
-    "bg-cream border border-brown/30 text-brown-two hover:bg-brown hover:text-white",
+    "bg-cream border border-brown/30 text-brown-two hover:bg-brown hover:text-white hover:scale-[1.02] active:scale-95",
   outline: "border border-gray-300 bg-white text-gray-600 hover:bg-gray-50",
   ghost: "text-gray-500 hover:text-dark-brown hover:bg-gray-100",
   danger: "bg-red-100 text-red-600 hover:bg-red-200",

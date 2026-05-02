@@ -276,7 +276,7 @@ class DynamicMenuService {
   // Topping Management
   async getToppings(client?: SupabaseClient): Promise<Topping[]> {
     const { data, error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .select("*")
       .eq("is_available", true)
       .order("name");
@@ -308,7 +308,7 @@ class DynamicMenuService {
     client?: SupabaseClient,
   ): Promise<Topping | null> {
     const { data, error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .insert({ name: topping.name, price: topping.price })
       .select("*")
       .single();
@@ -341,7 +341,7 @@ class DynamicMenuService {
       updateRow.is_available = data.isAvailable;
 
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .update(updateRow)
       .eq("id", id);
 
@@ -355,7 +355,7 @@ class DynamicMenuService {
 
   async deleteTopping(id: string, client?: SupabaseClient): Promise<boolean> {
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .delete()
       .eq("id", id);
 

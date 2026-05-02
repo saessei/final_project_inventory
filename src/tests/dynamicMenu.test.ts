@@ -24,7 +24,7 @@ describe("DynamicMenuService (integration, real Supabase DB)", () => {
     }
     if (createdToppingIds.length) {
       await supabaseAdmin
-        .from("default_toppings")
+        .from("toppings")
         .delete()
         .in("id", createdToppingIds);
     }

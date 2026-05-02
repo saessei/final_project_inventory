@@ -4,9 +4,10 @@ import { useOrders, type Order } from "@/hooks/useOrders";
 import { updateOrderStatus } from "@/services/orderService";
 import { OrderStatusButton } from "@/components/ui/OrderStatusButton";
 import { UserAuth } from "@/components/auth/AuthContext";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export const QueuedOrders = () => {
-  const { orders, fetchOrders } = useOrders();
+  const { orders, fetchOrders, loading } = useOrders();
   const [viewMode, setViewMode] = useState<"active" | "completed">("active");
 
   // current logged-in barista
@@ -64,6 +65,43 @@ export const QueuedOrders = () => {
 
     // completed/cancelled -> no-op
   };
+
+  if (loading) {
+    return (
+      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+        <div className="fixed top-0 left-0 h-screen w-64 z-10 hidden lg:block">
+          <Sidebar />
+        </div>
+
+        <main className="ml-0 lg:ml-64 mr-0 lg:mr-[12rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+          <div className="mb-6">
+            <Skeleton className="h-12 w-64 mb-2 bg-gray-300" />
+            <Skeleton className="h-5 w-48 bg-gray-200" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200">
+                <Skeleton className="h-3 w-24 mb-4 bg-gray-200" />
+                <Skeleton className="h-12 w-16 bg-gray-300" />
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-6 flex flex-wrap gap-3">
+            <Skeleton className="h-10 w-24 rounded-full bg-gray-300" />
+            <Skeleton className="h-10 w-28 rounded-full bg-gray-200" />
+          </div>
+
+          <div className="grid gap-5">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="h-48 w-full rounded-[2rem] bg-white border border-slate-200" />
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
@@ -173,9 +211,33 @@ export const QueuedOrders = () => {
                     <p className="text-xs uppercase tracking-[0.25em] text-gray-500">
                       Order details
                     </p>
-                    <p className="mt-3 text-sm text-gray-600 whitespace-pre-wrap">
-                      {order.order_details}
-                    </p>
+                    <div className="mt-3 text-sm text-gray-600 space-y-2">
+                      {order.items && order.items.length > 0 ? (
+                        order.items.map((item) => (
+                          <div key={item.id}>
+                            <span className="font-medium">
+                              {item.quantity}x {item.drink_name}
+                            </span>
+                            <span className="text-gray-400">
+                              {" "}
+                              ({item.size_name}) — {item.sugar_label}
+                            </span>
+                            {item.order_item_toppings?.length > 0 && (
+                              <span className="text-gray-400">
+                                ,{" "}
+                                {item.order_item_toppings
+                                  .map((t) => t.topping_name)
+                                  .join(", ")}
+                              </span>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <p className="whitespace-pre-wrap">
+                          {order.order_details}
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className="rounded-3xl bg-[#f8f7f1] p-4">
                     <p className="text-xs uppercase tracking-[0.25em] text-gray-500">

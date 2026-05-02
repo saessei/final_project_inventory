@@ -25,6 +25,9 @@ export default defineConfig(({ mode }) => {
       environment: "jsdom",
       globals: true,
       setupFiles: [path.resolve(__dirname, "./src/tests/setup.ts")],
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
       env: {
         ...env,
         VITE_SUPABASE_URL: resolvedSupabaseUrl,

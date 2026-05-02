@@ -6,70 +6,18 @@ import { Modal } from "@/components/ui/Modal";
 import { TextArea } from "@/components/ui/TextArea";
 import { TextField } from "@/components/ui/TextField";
 import type {
-  CategoryType,
   DrinkModalData,
   DrinkType,
   ToppingType,
 } from "@/types/menuTypes";
 
-interface CategoryModalProps {
-  item: CategoryType | null;
-  onSave: (data: { label: string; description: string }) => void;
-  onClose: () => void;
-}
-
-export const CategoryModal = ({
-  item,
-  onSave,
-  onClose,
-}: CategoryModalProps) => {
-  const [formData, setFormData] = useState({
-    label: item?.label || "",
-    description: item?.description || "",
-  });
-
-  return (
-    <Modal
-      title={`${item?.id ? "Edit" : "Add"} Category`}
-      onClose={onClose}
-      size="sm"
-      footer={
-        <>
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button variant="solid" onClick={() => onSave(formData)}>
-            Save
-          </Button>
-        </>
-      }
-    >
-      <div className="space-y-4">
-        <TextField
-          placeholder="Category Name"
-          value={formData.label}
-          onChange={(e) => setFormData({ ...formData, label: e.target.value })}
-          className="rounded-lg py-2"
-        />
-        <TextArea
-          placeholder="Description"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          className="rounded-lg py-2"
-          rows={3}
-        />
-      </div>
-    </Modal>
-  );
-};
 
 interface DrinkModalProps {
   item: DrinkType | null;
   onSave: (data: DrinkModalData) => void;
   onClose: () => void;
   allToppings: ToppingType[];
+  existingCategories: string[];
   uploadImage: (file: File) => Promise<string>;
 }
 
@@ -78,17 +26,20 @@ export const DrinkModal = ({
   onSave,
   onClose,
   allToppings,
+  existingCategories,
   uploadImage,
 }: DrinkModalProps) => {
   const [formData, setFormData] = useState<DrinkModalData>({
     name: item?.name || "",
     description: item?.description || "",
     image_url: item?.image_url || "",
+    category: item?.category || "",
     regular_price: item?.sizes?.regular?.toString() || "",
     medium_price: item?.sizes?.medium?.toString() || "",
     large_price: item?.sizes?.large?.toString() || "",
     selected_toppings: item?.available_toppings?.map((t) => t.id) || [],
   });
+  const [isNewCategory, setIsNewCategory] = useState(false);
   const [imagePreview, setImagePreview] = useState(item?.image_url || "");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -200,6 +151,44 @@ export const DrinkModal = ({
           rows={3}
           placeholder="Describe the drink..."
         />
+
+        <div className="flex flex-col gap-2">
+          <label className="font-semibold text-sm">Category *</label>
+          {isNewCategory ? (
+            <div className="flex gap-2">
+              <TextField
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                placeholder="Enter new category"
+                className="flex-1 rounded-lg py-2"
+                required
+              />
+              <Button variant="outline" onClick={() => setIsNewCategory(false)}>
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <select
+              value={formData.category}
+              onChange={(e) => {
+                if (e.target.value === "ADD_NEW") {
+                  setIsNewCategory(true);
+                  setFormData({ ...formData, category: "" });
+                } else {
+                  setFormData({ ...formData, category: e.target.value });
+                }
+              }}
+              className="w-full rounded-lg border border-gray-300 py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brown focus:border-transparent text-sm"
+              required
+            >
+              <option value="" disabled>Select a category</option>
+              {existingCategories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+              <option value="ADD_NEW">+ Add New Category</option>
+            </select>
+          )}
+        </div>
 
         <div className="grid grid-cols-3 gap-4">
           <TextField

@@ -8,6 +8,7 @@ export interface Drink {
   description: string;
   image_url: string;
   is_available: boolean;
+  category: string;
   sizes: {
     regular: number;
     medium: number;
@@ -64,7 +65,7 @@ class DrinkService {
   // ============ TOPPINGS ============
   async getAllToppings(client?: SupabaseClient): Promise<Topping[]> {
     const { data, error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .select("*")
       .eq("is_available", true)
       .order("name");
@@ -87,7 +88,7 @@ class DrinkService {
     client?: SupabaseClient,
   ): Promise<boolean> {
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .insert({ name, price });
 
     if (error) {
@@ -105,7 +106,7 @@ class DrinkService {
     client?: SupabaseClient,
   ): Promise<boolean> {
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .update({ name, price })
       .eq("id", id);
 
@@ -119,7 +120,7 @@ class DrinkService {
 
   async deleteTopping(id: string, client?: SupabaseClient): Promise<boolean> {
     const { error } = await this.getClient(client)
-      .from("default_toppings")
+      .from("toppings")
       .delete()
       .eq("id", id);
 
@@ -179,6 +180,7 @@ class DrinkService {
     const drinksWithDetails = await Promise.all(
       (drinks || []).map(async (drink) => ({
         ...drink,
+        category: drink.type || "",
         sizes: await this.getDrinkSizes(drink.id, client),
         available_toppings: await this.getDrinkToppings(drink.id, client),
       })),
@@ -216,7 +218,7 @@ class DrinkService {
       .from("drink_toppings")
       .select(
         `
-        topping:default_toppings(*)
+        topping:toppings(*)
       `,
       )
       .eq("drink_id", drinkId);
@@ -246,7 +248,7 @@ class DrinkService {
   }
 
   async createDrink(
-    drink: { name: string; description: string; image_url: string },
+    drink: { name: string; description: string; image_url: string; category: string },
     sizes: { regular: number; medium: number; large: number },
     toppingIds: string[],
     client?: SupabaseClient,
@@ -261,6 +263,7 @@ class DrinkService {
         description: drink.description,
         image_url: drink.image_url,
         is_available: true,
+        type: drink.category,
       })
       .select()
       .single();
@@ -305,7 +308,7 @@ class DrinkService {
 
   async updateDrink(
     drinkId: string,
-    updates: { name?: string; description?: string; image_url?: string },
+    updates: { name?: string; description?: string; image_url?: string; category?: string },
     sizes?: { regular: number; medium: number; large: number },
     toppingIds?: string[],
     client?: SupabaseClient,
@@ -313,9 +316,15 @@ class DrinkService {
     const db = this.getClient(client);
 
     // 1. Update drink
+    const updatePayload: any = { ...updates };
+    if (updates.category !== undefined) {
+      updatePayload.type = updates.category;
+      delete updatePayload.category;
+    }
+
     const { error: drinkError } = await db
       .from("drinks")
-      .update({ ...updates })
+      .update(updatePayload)
       .eq("id", drinkId);
 
     if (drinkError) {
