@@ -6,7 +6,7 @@ export interface Order {
   id: string;
   customer_name: string;
   order_details: string;
-  status: "pending" | "preparing" | "completed";
+  status: "pending" | "preparing" | "ready" | "completed" | "cancelled";
   created_at: string;
   claimed_by: string | null;
   claimed_at: string | null;
@@ -25,6 +25,17 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
     if (data) setOrders(data);
     setLoading(false);
   }, [supabase]);
+
+  const updateOrderInState = useCallback(
+    (orderId: string, status: Order["status"]) => {
+      setOrders((currentOrders) =>
+        currentOrders.map((order) =>
+          order.id === orderId ? { ...order, status } : order,
+        ),
+      );
+    },
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -57,5 +68,5 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
     };
   }, [supabase]);
 
-  return { orders, fetchOrders, loading };
+  return { orders, fetchOrders, loading, updateOrderInState };
 };

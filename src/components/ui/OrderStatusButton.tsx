@@ -1,6 +1,6 @@
 import { Button } from "./Button";
 
-type OrderStatus = "pending" | "preparing" | "completed";
+type OrderStatus = "pending" | "preparing" | "ready" | "completed" | "cancelled";
 
 interface OrderButtonProps {
   status: OrderStatus;
@@ -17,14 +17,24 @@ const config: Record<
     text: "text-dark-brown",
   },
   preparing: {
-    label: "Mark as Complete",
+    label: "Mark Ready",
     color: "bg-orange-100",
     text: "text-brown-two",
+  },
+  ready: {
+    label: "Complete Order",
+    color: "bg-blue-100",
+    text: "text-blue-600",
   },
   completed: {
     label: "Archive Order",
     color: "bg-green-100",
-    text: "text-green-500",
+    text: "text-green-600",
+  },
+  cancelled: {
+    label: "Archived",
+    color: "bg-gray-100",
+    text: "text-gray-400",
   },
 };
 

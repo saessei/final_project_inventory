@@ -9,7 +9,7 @@ import { QueueSkeleton } from "@/components/ui/LoadingSkeletons";
 const ITEMS_PER_PAGE = 6;
 
 export const QueuedOrders = () => {
-  const { orders, fetchOrders, loading } = useOrders();
+  const { orders, loading, updateOrderInState } = useOrders();
   const [viewMode, setViewMode] = useState<"active" | "completed">("active");
   const [completedPage, setCompletedPage] = useState(1);
 
@@ -31,7 +31,9 @@ export const QueuedOrders = () => {
   const activeOrders = orders
     .filter(
       (order) =>
-        order.status === "pending" || order.status === "preparing",
+        order.status === "pending" ||
+        order.status === "preparing" ||
+        order.status === "ready",
     )
     .sort(
       (a, b) =>
@@ -44,8 +46,12 @@ export const QueuedOrders = () => {
     completedPage * ITEMS_PER_PAGE,
   );
 
-  const queueOrders = viewMode === "active" ? activeOrders : paginatedCompleted;
+  const displayOrders = viewMode === "active" ? activeOrders : paginatedCompleted;
   const totalPages = Math.ceil(completedOrders.length / ITEMS_PER_PAGE);
+  
+  const queueOrders = viewMode === "active" 
+    ? displayOrders 
+    : displayOrders.filter((order) => order.status !== "cancelled");
 
   const handleStatusChange = async (order: Order) => {
     if (order.status === "pending") {
@@ -58,20 +64,35 @@ export const QueuedOrders = () => {
 
       if (!updated) {
         console.warn("Order already claimed by someone else.");
+        return;
       }
 
-      fetchOrders();
+      updateOrderInState(order.id, "preparing");
       return;
     }
 
-    // preparing -> completed
+    // preparing -> ready
     if (order.status === "preparing") {
-      await updateOrderStatus(order.id, "completed");
-      fetchOrders();
+      await updateOrderStatus(order.id, "ready");
+      updateOrderInState(order.id, "ready");
       return;
     }
 
-    // completed/cancelled -> no-op
+    // ready -> completed
+    if (order.status === "ready") {
+      await updateOrderStatus(order.id, "completed");
+      updateOrderInState(order.id, "completed");
+      return;
+    }
+
+    // completed -> cancelled (archive)
+    if (order.status === "completed") {
+      await updateOrderStatus(order.id, "cancelled");
+      updateOrderInState(order.id, "cancelled");
+      return;
+    }
+
+    // cancelled -> no-op (archived orders cannot be modified)
   };
 
   return (
@@ -141,14 +162,17 @@ export const QueuedOrders = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {queueOrders.length === 0 ? (
-              <div className="rounded-[2rem] bg-white p-10 text-center text-gray-500 shadow-sm border border-slate-200">
+              <div className="rounded-[2rem] bg-white p-10 text-center text-gray-500 shadow-sm border border-slate-200 col-span-full">
                 {viewMode === "active"
                   ? "No incoming or preparing orders yet."
-                  : "No completed orders yet."}
+                  : "No completed orders to archive."}
               </div>
             ) : (
               queueOrders.map((order) => {
-                const items = order.order_details.split("\n").filter((line) => line.trim());
+                const items = order.order_details
+                  .split(/\s*•\s*|\n+/)
+                  .map((line) => line.trim())
+                  .filter(Boolean);
                 return (
                   <article
                     key={order.id}
@@ -169,14 +193,22 @@ export const QueuedOrders = () => {
                             ? "bg-orange-50 text-orange-700 border-orange-200"
                             : order.status === "preparing"
                               ? "bg-brown/10 text-brown border-brown/20"
-                              : "bg-emerald-100 text-emerald-700 border-emerald-200"
+                              : order.status === "ready"
+                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                : order.status === "completed"
+                                  ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                                  : "bg-gray-100 text-gray-600 border-gray-200"
                         }`}
                       >
                         {order.status === "pending"
-                          ? "Incoming"
+                          ? "New Order"
                           : order.status === "preparing"
                             ? "Preparing"
-                            : "Completed"}
+                            : order.status === "ready"
+                              ? "Ready for Pickup"
+                              : order.status === "completed"
+                                ? "Completed"
+                                : "Archived"}
                       </div>
                     </div>
 
@@ -184,17 +216,20 @@ export const QueuedOrders = () => {
                       {order.customer_name}
                     </h3>
 
-                    <div className="space-y-2 mb-4">
+                    <div className="mb-4 rounded-xl bg-[#f8f7f1] p-3">
                       {items.map((item, idx) => (
-                        <p key={idx} className="text-xs text-gray-600 leading-relaxed">
+                        <p
+                          key={idx}
+                          className={`text-xs text-gray-700 leading-relaxed ${
+                            idx === 0 ? "" : "mt-1 pt-1 border-t border-slate-200/70"
+                          }`}
+                        >
                           {item}
                         </p>
                       ))}
                     </div>
 
-                    {(order.status === "pending" ||
-                      order.status === "preparing" ||
-                      order.status === "completed") && (
+                    {order.status !== "cancelled" && (
                       <OrderStatusButton
                         status={order.status}
                         onClick={() => handleStatusChange(order)}
