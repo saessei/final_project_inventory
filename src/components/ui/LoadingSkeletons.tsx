@@ -196,3 +196,99 @@ export const ReportsSkeleton = ({ loading, children }: SkeletonShellProps) => (
     {children}
   </Skeleton>
 );
+
+const KioskFallback = () => (
+  <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+    <div className="fixed top-0 left-0 h-screen w-64 z-10 hidden lg:block">
+      <div className={`${bone} h-full w-full rounded-none`} />
+    </div>
+
+    <div className="fixed top-0 right-0 h-screen w-[22rem] z-10 hidden lg:block">
+      <div className={`${bone} h-full w-full rounded-none`} />
+    </div>
+
+    <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+      <div className="mb-6 space-y-3">
+        <div className={`${bone} h-12 w-72`} />
+        <div className={`${bone} h-5 w-96`} />
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-2 auto-rows-fr">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div key={index} className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-4 shadow-sm space-y-4">
+            <div className={`${bone} h-48 w-full rounded-2xl`} />
+            <div className={`${bone} h-8 w-2/3`} />
+            <div className={`${bone} h-4 w-11/12`} />
+            <div className={`${bone} h-4 w-5/6`} />
+            <div className="mt-auto space-y-3">
+              <div className={`${bone} h-8 w-32`} />
+              <div className={`${bone} h-12 w-full rounded-xl`} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </main>
+  </div>
+);
+
+const QueueFallback = () => (
+  <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+    <div className="fixed top-0 left-0 h-screen w-64 z-10 hidden lg:block">
+      <div className={`${bone} h-full w-full rounded-none`} />
+    </div>
+
+    <main className="ml-0 lg:ml-64 mr-0 lg:mr-[12rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+      <div className="mb-6 space-y-3">
+        <div className={`${bone} h-12 w-72`} />
+        <div className={`${bone} h-5 w-96`} />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200 space-y-4">
+            <div className={`${bone} h-4 w-24`} />
+            <div className={`${bone} h-12 w-16`} />
+          </div>
+        ))}
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-3">
+        <div className={`${bone} h-10 w-28 rounded-full`} />
+        <div className={`${bone} h-10 w-32 rounded-full`} />
+      </div>
+
+      <div className="grid gap-5">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <article key={index} className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="space-y-3">
+                <div className={`${bone} h-3 w-32`} />
+                <div className={`${bone} h-8 w-56`} />
+              </div>
+              <div className={`${bone} h-10 w-28 rounded-full`} />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className={`${bone} h-24 w-full rounded-3xl`} />
+              <div className={`${bone} h-24 w-full rounded-3xl`} />
+            </div>
+            <div className="flex justify-end">
+              <div className={`${bone} h-11 w-40 rounded-2xl`} />
+            </div>
+          </article>
+        ))}
+      </div>
+    </main>
+  </div>
+);
+
+export const KioskSkeleton = ({ loading, children }: SkeletonShellProps) => (
+  <Skeleton name="kiosk-page" loading={loading} fallback={<KioskFallback />}>
+    {children}
+  </Skeleton>
+);
+
+export const QueueSkeleton = ({ loading, children }: SkeletonShellProps) => (
+  <Skeleton name="queue-page" loading={loading} fallback={<QueueFallback />}>
+    {children}
+  </Skeleton>
+);

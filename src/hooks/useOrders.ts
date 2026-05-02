@@ -14,13 +14,16 @@ export interface Order {
 
 export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
   const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const fetchOrders = useCallback(async () => {
+    setLoading(true);
     const { data } = await supabase
       .from("orders")
       .select("*")
       .order("created_at");
     if (data) setOrders(data);
+    setLoading(false);
   }, [supabase]);
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
         .select("*")
         .order("created_at");
       if (!cancelled && data) setOrders(data);
+      if (!cancelled) setLoading(false);
     };
 
     void run();
@@ -53,5 +57,5 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
     };
   }, [supabase]);
 
-  return { orders, fetchOrders };
+  return { orders, fetchOrders, loading };
 };
