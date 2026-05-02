@@ -41,7 +41,7 @@ export const ReportsHeader = ({
           </span>
         </Button>
         {showDatePicker && (
-          <div className="absolute right-0 mt-2 bg-white border rounded-xl shadow-lg z-20 w-48">
+          <div className="absolute right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg z-20 w-48">
             <Button
               onClick={() => onSetDatePreset(1)}
               variant="ghost"

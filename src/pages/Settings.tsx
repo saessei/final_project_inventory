@@ -99,14 +99,14 @@ export const Settings = () => {
   };
 
   return (
-    <SettingsSkeleton loading={loading}>
-      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
-        <div className="fixed top-0 left-0 h-screen w-64 z-10">
-          <Sidebar />
-        </div>
+    <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+      <div className="fixed top-0 left-0 h-screen w-64 z-10">
+        <Sidebar />
+      </div>
 
-        <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-16 lg:pt-10">
-          <div className="max-w-5xl mx-auto">
+      <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-16 lg:pt-10">
+        <SettingsSkeleton loading={loading}>
+          <div>
             <div className="mb-6">
               <h1 className="text-4xl font-black font-fredoka">
                 Account Settings
@@ -126,7 +126,6 @@ export const Settings = () => {
               </div>
             )}
 
-            {/* Name modal */}
             <div className="grid gap-6 lg:grid-cols-2">
               <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 className="text-xl font-semibold text-dark-brown">
@@ -162,8 +161,6 @@ export const Settings = () => {
                   </Button>
                 </form>
               </section>
-
-              {/* Password modal */}
 
               <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h2 className="text-xl font-semibold text-dark-brown">
@@ -201,8 +198,8 @@ export const Settings = () => {
               </section>
             </div>
           </div>
-        </main>
-      </div>
-    </SettingsSkeleton>
+        </SettingsSkeleton>
+      </main>
+    </div>
   );
 };

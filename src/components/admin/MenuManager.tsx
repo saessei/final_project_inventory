@@ -4,14 +4,12 @@ import { drinkService } from "@/services/drinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
-import supabase from "@/lib/supabaseClient";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { MenuManagerSkeleton } from "@/components/ui/LoadingSkeletons";
 import { DrinkModal, ToppingModal } from "./AdminModals";
 import type {
   DrinkModalData,
   DrinkType,
-  SugarLevel,
   TabType,
   ToppingType,
 } from "@/types/menuTypes";
@@ -28,7 +26,6 @@ export const MenuManager = () => {
 
   const [drinks, setDrinks] = useState<DrinkType[]>([]);
   const [toppings, setToppings] = useState<ToppingType[]>([]);
-  const [sugarLevels, setSugarLevels] = useState<SugarLevel[]>([]);
   const categories = Array.from(
     new Set(
       drinks
@@ -42,15 +39,13 @@ export const MenuManager = () => {
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const [drinksData, toppingsData, sugarData] = await Promise.all([
+    const [drinksData, toppingsData] = await Promise.all([
       drinkService.getAllDrinks(),
       drinkService.getAllToppings(),
-      drinkService.getAllSugarLevels(),
     ]);
 
     setDrinks(drinksData);
     setToppings(toppingsData);
-    setSugarLevels(sugarData);
     setLoading(false);
   }, []);
 
@@ -143,35 +138,23 @@ export const MenuManager = () => {
     }
   };
 
-  const handleUpdateSugarLevel = async (id: string, price_addition: number) => {
-    await drinkService.updateSugarLevel(id, price_addition);
-    await loadData();
-  };
-
-  const uploadImage = async (file: File): Promise<string> => {
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `drinks/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("drink-images")
-      .upload(filePath, file);
-
-    if (uploadError) throw uploadError;
-
-    const { data: publicUrlData } = supabase.storage
-      .from("drink-images")
-      .getPublicUrl(filePath);
-
-    return publicUrlData.publicUrl;
-  };
 
   if (authLoading) {
     return <MenuManagerSkeleton loading>{null}</MenuManagerSkeleton>;
   }
 
   if (loading) {
-    return <MenuManagerSkeleton loading>{null}</MenuManagerSkeleton>;
+    return (
+      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+        <div className="fixed top-0 left-0 h-screen w-64 z-10">
+          <Sidebar />
+        </div>
+
+        <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-20 lg:pt-6">
+          <MenuManagerSkeleton loading>{null}</MenuManagerSkeleton>
+        </main>
+      </div>
+    );
   }
 
   return (
@@ -193,7 +176,6 @@ export const MenuManager = () => {
             activeTab={activeTab}
             drinks={drinks}
             toppings={toppings}
-            sugarLevels={sugarLevels}
             onTabChange={setActiveTab}
             onAddDrink={() => {
               setEditingItem(null);
@@ -207,7 +189,6 @@ export const MenuManager = () => {
             onAddTopping={handleAddTopping}
             onEditTopping={handleEditTopping}
             onDeleteTopping={handleDeleteTopping}
-            onUpdateSugarLevel={handleUpdateSugarLevel}
           />
         </div>
       </main>
@@ -223,7 +204,6 @@ export const MenuManager = () => {
           }}
           allToppings={toppings}
           categories={categories}
-          uploadImage={uploadImage}
         />
       )}
 

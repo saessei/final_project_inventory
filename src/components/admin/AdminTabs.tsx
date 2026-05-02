@@ -1,29 +1,12 @@
-import {
-  Candy,
-  CirclePlus,
-  CupSoda,
-  Plus,
-  TrendingUp,
-} from "lucide-react";
-import { Alert } from "@/components/ui/Alert";
+import { CirclePlus, CupSoda, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import {
-  DrinkCard,
-  SugarLevelCard,
-  ToppingCard,
-} from "./AdminCards";
-import type {
-  DrinkType,
-  SugarLevel,
-  TabType,
-  ToppingType,
-} from "@/types/menuTypes";
+import { DrinkCard, ToppingCard } from "./AdminCards";
+import type { DrinkType, TabType, ToppingType } from "@/types/menuTypes";
 
 interface AdminTabsProps {
   activeTab: TabType;
   drinks: DrinkType[];
   toppings: ToppingType[];
-  sugarLevels: SugarLevel[];
   onTabChange: (tab: TabType) => void;
   onAddDrink: () => void;
   onEditDrink: (drink: DrinkType) => void;
@@ -31,14 +14,12 @@ interface AdminTabsProps {
   onAddTopping: () => void;
   onEditTopping: (topping: ToppingType) => void;
   onDeleteTopping: (id: string, name: string) => void;
-  onUpdateSugarLevel: (id: string, price: number) => void;
 }
 
 export const AdminTabs = ({
   activeTab,
   drinks,
   toppings,
-  sugarLevels,
   onTabChange,
   onAddDrink,
   onEditDrink,
@@ -46,7 +27,6 @@ export const AdminTabs = ({
   onAddTopping,
   onEditTopping,
   onDeleteTopping,
-  onUpdateSugarLevel,
 }: AdminTabsProps) => {
   const tabs = [
     {
@@ -58,11 +38,6 @@ export const AdminTabs = ({
       type: "toppings" as const,
       label: `Toppings (${toppings.length})`,
       icon: <CirclePlus size={18} />,
-    },
-    {
-      type: "sugar-levels" as const,
-      label: "Sugar Levels",
-      icon: <Candy size={18} />,
     },
   ];
 
@@ -134,32 +109,6 @@ export const AdminTabs = ({
         </div>
       )}
 
-      {activeTab === "sugar-levels" && (
-        <div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {sugarLevels.map((level) => (
-              <SugarLevelCard
-                key={level.id}
-                level={level}
-                onUpdate={onUpdateSugarLevel}
-              />
-            ))}
-          </div>
-          <Alert
-            variant="info"
-            className="mt-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-200 text-yellow-800 font-normal"
-          >
-            <div className="flex items-center gap-2">
-              <TrendingUp size={20} className="text-yellow-600" />
-              <span className="text-sm">
-                Sugar levels: 25%, 50%, 75% have no additional charge by
-                default. 100% sweetness adds ₱5.00. Just type the price directly
-                in the input field. Press Enter or click outside to save.
-              </span>
-            </div>
-          </Alert>
-        </div>
-      )}
     </>
   );
 };

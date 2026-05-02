@@ -1,7 +1,7 @@
 import placeholderImg from "@/assets/Placeholder.jpg";
 import { Button } from "@/components/ui/Button";
 import { X } from "lucide-react";
-import type { Drink, SugarLevel, Topping } from "@/services/drinkService";
+import type { Drink, SugarLevel, Topping } from "@/services/DrinkService";
 
 interface CustomizationModalProps {
   drink: Drink;
@@ -81,7 +81,7 @@ export const CustomizationModal = ({
                   variant="outline"
                   className={`px-3 py-2 hover:scale-105 ${
                     selectedSize === option.key
-                      ? "bg-dark-brown text-white border-dark-brown"
+                      ? "bg-dark-brown text-cream border-dark-brown"
                       : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
                   }`}
                 >
@@ -102,7 +102,7 @@ export const CustomizationModal = ({
                   variant="outline"
                   className={`px-3 py-2 hover:scale-105 ${
                     selectedSugar?.id === level.id
-                      ? "bg-dark-brown text-white border-dark-brown"
+                      ? "bg-dark-brown text-cream border-dark-brown"
                       : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
                   }`}
                 >
@@ -128,7 +128,7 @@ export const CustomizationModal = ({
                     variant="outline"
                     className={`px-3 py-2 hover:scale-105 ${
                       selectedToppings.some((t) => t.id === topping.id)
-                        ? "bg-dark-brown text-white border-dark-brown"
+                        ? "bg-dark-brown text-cream border-dark-brown"
                         : "bg-[#f3f1eb] text-[#6b5d4d] border-transparent hover:bg-brown/20"
                     }`}
                   >

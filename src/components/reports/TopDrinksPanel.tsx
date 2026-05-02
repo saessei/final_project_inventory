@@ -5,7 +5,7 @@ interface TopDrinksPanelProps {
 }
 
 export const TopDrinksPanel = ({ topDrinks }: TopDrinksPanelProps) => (
-  <div className="bg-white rounded-2xl p-6 shadow-sm border">
+  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
     <div className="flex items-center gap-2 mb-4">
       <CupSoda className="text-brown-two" size={20} />
       <h3 className="font-bold text-lg">Top Selling Drinks</h3>

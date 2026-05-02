@@ -14,7 +14,7 @@ export const StatsCards = ({
   todayRevenue,
 }: StatsCardsProps) => (
   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div className="bg-white rounded-2xl p-6 shadow-sm border">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
       <div className="flex justify-between items-center">
         <div>
           <p className="text-sm text-gray-400 uppercase tracking-wide">
@@ -28,7 +28,7 @@ export const StatsCards = ({
       </div>
     </div>
 
-    <div className="bg-white rounded-2xl p-6 shadow-sm border">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
       <div className="flex justify-between items-center">
         <div>
           <p className="text-sm text-gray-400 uppercase tracking-wide">
@@ -44,7 +44,7 @@ export const StatsCards = ({
       </div>
     </div>
 
-    <div className="bg-white rounded-2xl p-6 shadow-sm border">
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
       <div className="flex justify-between items-center">
         <div>
           <p className="text-sm text-gray-400 uppercase tracking-wide">

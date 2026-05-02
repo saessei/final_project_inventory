@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Upload } from "lucide-react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -71,7 +70,6 @@ interface DrinkModalProps {
   onClose: () => void;
   allToppings: ToppingType[];
   categories: string[];
-  uploadImage: (file: File) => Promise<string>;
 }
 
 export const DrinkModal = ({
@@ -80,7 +78,6 @@ export const DrinkModal = ({
   onClose,
   allToppings,
   categories,
-  uploadImage,
 }: DrinkModalProps) => {
   const initialCategory = item?.category || "";
   const initialCategoryExists = initialCategory
@@ -102,27 +99,6 @@ export const DrinkModal = ({
   const [customCategory, setCustomCategory] = useState(
     initialCategoryExists ? "" : initialCategory,
   );
-  const [imagePreview, setImagePreview] = useState(item?.image_url || "");
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploading(true);
-    setUploadError("");
-    try {
-      const url = await uploadImage(file);
-      setImagePreview(url);
-      setFormData({ ...formData, image_url: url });
-    } catch (error) {
-      console.error("Upload failed:", error);
-      setUploadError("Failed to upload image");
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleNumberChange = (
     field: keyof Pick<
@@ -186,35 +162,6 @@ export const DrinkModal = ({
       }
     >
       <div className="space-y-4">
-        <div>
-          <label className="font-semibold text-sm">Drink Photo</label>
-          <div className="mt-1 flex items-center gap-4">
-            {imagePreview && (
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="h-20 w-20 object-cover rounded-lg"
-              />
-            )}
-            <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-semibold transition-colors">
-              <Upload size={18} />
-              <span>{uploading ? "Uploading..." : "Choose Image"}</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                disabled={uploading}
-              />
-            </label>
-          </div>
-          {uploadError && (
-            <Alert variant="error" className="mt-2 font-normal">
-              {uploadError}
-            </Alert>
-          )}
-        </div>
-
         <TextField
           label="Drink Name *"
           type="text"
@@ -222,17 +169,6 @@ export const DrinkModal = ({
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           className="rounded-lg py-2"
           required
-        />
-
-        <TextArea
-          label="Description"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          className="rounded-lg py-2"
-          rows={3}
-          placeholder="Describe the drink..."
         />
 
         <div>

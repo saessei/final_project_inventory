@@ -83,13 +83,13 @@ export const Reports = () => {
   };
 
   return (
-    <ReportsSkeleton loading={loading}>
-      <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
-        <div className="fixed top-0 left-0 h-screen w-64 z-10">
-          <Sidebar />
-        </div>
+    <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
+      <div className="fixed top-0 left-0 h-screen w-64 z-10">
+        <Sidebar />
+      </div>
 
-        <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+      <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+        <ReportsSkeleton loading={loading}>
           <div className="max-w-7xl mx-auto">
             <ReportsHeader
               dateRange={dateRange}
@@ -116,8 +116,8 @@ export const Reports = () => {
             <BusyHoursPanel busyHours={busyHours} />
             <RecentOrdersTable loading={loading} orders={orders} />
           </div>
-        </main>
-      </div>
-    </ReportsSkeleton>
+        </ReportsSkeleton>
+      </main>
+    </div>
   );
 };

@@ -11,7 +11,7 @@ export const RecentOrdersTable = ({
   loading,
   orders,
 }: RecentOrdersTableProps) => (
-  <div className="bg-white rounded-2xl p-6 shadow-sm border">
+  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
     <div className="flex items-center gap-2 mb-4">
       <ListTodo className="text-brown-two" size={20} />
       <h3 className="font-bold text-lg">Recent Orders</h3>
@@ -25,7 +25,7 @@ export const RecentOrdersTable = ({
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="grid grid-cols-5 gap-4 rounded-xl border border-slate-100 p-3"
+                className="grid grid-cols-5 gap-4 rounded-xl border border-slate-200 p-3"
               >
                 <div className="h-4 w-24 rounded-full bg-slate-200/80 animate-pulse" />
                 <div className="h-4 w-full rounded-full bg-slate-200/80 animate-pulse" />
@@ -46,7 +46,7 @@ export const RecentOrdersTable = ({
     ) : (
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="border-b">
+          <thead className="border-b border-slate-200">
             <tr className="text-left text-gray-400">
               <th className="pb-3">Customer</th>
               <th className="pb-3">Items</th>
@@ -57,7 +57,7 @@ export const RecentOrdersTable = ({
           </thead>
           <tbody>
             {orders.slice(0, 10).map((order) => (
-              <tr key={order.id} className="border-b last:border-0">
+              <tr key={order.id} className="border-b border-slate-100 last:border-0">
                 <td className="py-3 font-medium">{order.customer_name}</td>
                 <td
                   className="py-3 text-gray-600 max-w-md truncate"

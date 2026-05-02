@@ -1,4 +1,4 @@
-export type TabType = "drinks" | "toppings" | "sugar-levels";
+export type TabType = "drinks" | "toppings";
 
 export interface SugarLevel {
   id: string;

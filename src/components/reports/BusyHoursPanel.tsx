@@ -6,7 +6,7 @@ interface BusyHoursPanelProps {
 }
 
 export const BusyHoursPanel = ({ busyHours }: BusyHoursPanelProps) => (
-  <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6">
+  <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-6">
     <div className="flex items-center gap-2 mb-4">
       <Clock className="text-brown-two" size={20} />
       <h3 className="font-bold text-lg">Busiest Hours</h3>
