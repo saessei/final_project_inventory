@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { drinkService } from "@/services/DrinkService";
+import { drinkService } from "@/services/drinkService";
 import { supabaseAdmin } from "@/tests/supabaseTestClient";
 
 describe("DrinkService Integration Test", () => {

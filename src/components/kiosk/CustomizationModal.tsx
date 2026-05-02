@@ -1,7 +1,7 @@
 import placeholderImg from "@/assets/Placeholder.jpg";
 import { Button } from "@/components/ui/Button";
 import { X } from "lucide-react";
-import type { Drink, SugarLevel, Topping } from "@/services/DrinkService";
+import type { Drink, SugarLevel, Topping } from "@/services/drinkService";
 
 interface CustomizationModalProps {
   drink: Drink;

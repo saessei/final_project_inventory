@@ -1,5 +1,5 @@
 // src/patterns/DynamicStrategies.ts
-import { dynamicMenu } from "@/services/DynamicMenuService";
+import { dynamicMenu } from "@/services/dynamicMenuService";
 
 export interface CustomizationStrategy {
   name: string;

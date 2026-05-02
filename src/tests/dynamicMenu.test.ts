@@ -1,6 +1,6 @@
 import { describe, it, expect, afterAll } from "vitest";
 import { supabaseAdmin } from "@/tests/supabaseTestClient";
-import { dynamicMenu } from "@/services/DynamicMenuService";
+import { dynamicMenu } from "@/services/dynamicMenuService";
 
 describe("DynamicMenuService (integration, real Supabase DB)", () => {
   const testRunId = `vitest-dynamicMenu-${Date.now()}`;
