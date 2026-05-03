@@ -94,7 +94,6 @@ export const QueuedOrders = () => {
       const updated = await updateOrderStatus(order.id, "preparing", {
         claim: true,
         staffUserId,
-        expectedCurrentStatus: "pending",
       });
 
       if (!updated) {
@@ -108,54 +107,21 @@ export const QueuedOrders = () => {
 
     // preparing -> ready
     if (order.status === "preparing") {
-      if (!staffUserId) return;
-
-      const updated = await updateOrderStatus(order.id, "ready", {
-        staffUserId,
-        expectedCurrentStatus: "preparing",
-      });
-
-      if (!updated) {
-        console.warn("Order could not be moved to ready.");
-        return;
-      }
-
+      await updateOrderStatus(order.id, "ready");
       updateOrderInState(order.id, "ready");
       return;
     }
 
     // ready -> completed
     if (order.status === "ready") {
-      if (!staffUserId) return;
-
-      const updated = await updateOrderStatus(order.id, "completed", {
-        staffUserId,
-        expectedCurrentStatus: "ready",
-      });
-
-      if (!updated) {
-        console.warn("Order could not be marked as picked up.");
-        return;
-      }
-
+      await updateOrderStatus(order.id, "completed");
       updateOrderInState(order.id, "completed");
       return;
     }
 
     // completed -> cancelled (archive)
     if (order.status === "completed") {
-      if (!staffUserId) return;
-
-      const updated = await updateOrderStatus(order.id, "cancelled", {
-        staffUserId,
-        expectedCurrentStatus: "completed",
-      });
-
-      if (!updated) {
-        console.warn("Order could not be archived.");
-        return;
-      }
-
+      await updateOrderStatus(order.id, "cancelled");
       updateOrderInState(order.id, "cancelled");
       return;
     }
