@@ -8,6 +8,15 @@ interface SelectOption {
   icon?: React.ReactNode;
 }
 
+interface SelectOptionAction {
+  label: string;
+  render: (
+    option: SelectOption,
+    isSelected: boolean,
+    closeDropdown: () => void,
+  ) => React.ReactNode;
+}
+
 interface SelectProps {
   label?: string;
   value: string;
@@ -16,6 +25,7 @@ interface SelectProps {
   placeholder?: string;
   className?: string;
   error?: string;
+  optionAction?: SelectOptionAction;
 }
 
 export const Select = ({
@@ -26,6 +36,7 @@ export const Select = ({
   placeholder = "Select an option",
   className,
   error,
+  optionAction,
 }: SelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,26 +90,33 @@ export const Select = ({
             {options.map((option) => {
               const isSelected = option.value === value;
               return (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => {
-                    onChange(option.value);
-                    setIsOpen(false);
-                  }}
-                  className={cx(
-                    "w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all group",
-                    isSelected 
-                      ? "bg-brown text-white" 
-                      : "text-dark-brown hover:bg-cream/50"
+                <div key={option.value} className="group flex items-center gap-2 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                    }}
+                    className={cx(
+                      "flex-1 flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+                      isSelected
+                        ? "bg-brown text-white"
+                        : "text-dark-brown hover:bg-cream/50"
+                    )}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      {option.icon}
+                      <span className="truncate">{option.label}</span>
+                    </div>
+                    {isSelected && <Check size={16} strokeWidth={3} />}
+                  </button>
+
+                  {optionAction && (
+                    <div className="shrink-0 pr-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity">
+                      {optionAction.render(option, isSelected, () => setIsOpen(false))}
+                    </div>
                   )}
-                >
-                  <div className="flex items-center gap-3">
-                    {option.icon}
-                    <span>{option.label}</span>
-                  </div>
-                  {isSelected && <Check size={16} strokeWidth={3} />}
-                </button>
+                </div>
               );
             })}
           </div>

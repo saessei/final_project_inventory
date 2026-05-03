@@ -34,6 +34,12 @@ export interface CategoryType {
   drinkIds: string[];
 }
 
+export interface MenuCategory {
+  id: string;
+  name: string;
+  is_active: boolean;
+}
+
 export interface DrinkModalData {
   name: string;
   category: string;

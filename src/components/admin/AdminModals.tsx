@@ -5,20 +5,14 @@ import { Modal } from "@/components/ui/Modal";
 import { TextArea } from "@/components/ui/TextArea";
 import { TextField } from "@/components/ui/TextField";
 import { Select } from "@/components/ui/Select";
-import { Coffee, Search, Check, Tag, DollarSign, Layers, Plus } from "lucide-react";
+import { Coffee, Search, Check, Tag, DollarSign, Layers, Plus, Trash2 } from "lucide-react";
 import { cx } from "@/components/ui/utils";
 import type {
-  CategoryType,
   DrinkModalData,
   DrinkType,
+  MenuCategory,
   ToppingType,
 } from "@/types/menuTypes";
-
-interface CategoryModalProps {
-  item: CategoryType | null;
-  onSave: (data: { label: string; description: string }) => void;
-  onClose: () => void;
-}
 
 const SectionLabel = ({ icon: Icon, children }: { icon: any; children: React.ReactNode }) => (
   <div className="flex items-center gap-2 mb-3">
@@ -33,7 +27,11 @@ export const CategoryModal = ({
   item,
   onSave,
   onClose,
-}: CategoryModalProps) => {
+}: {
+  item: { id?: string; label: string; description: string } | null;
+  onSave: (data: { label: string; description: string }) => void;
+  onClose: () => void;
+}) => {
   const [formData, setFormData] = useState({
     label: item?.label || "",
     description: item?.description || "",
@@ -84,7 +82,8 @@ interface DrinkModalProps {
   onSave: (data: DrinkModalData) => void;
   onClose: () => void;
   allToppings: ToppingType[];
-  categories: string[];
+  categories: MenuCategory[];
+  onDeleteCategory: (categoryId: string) => Promise<boolean> | boolean;
 }
 
 export const DrinkModal = ({
@@ -93,10 +92,11 @@ export const DrinkModal = ({
   onClose,
   allToppings,
   categories,
+  onDeleteCategory,
 }: DrinkModalProps) => {
   const initialCategory = item?.category || "";
   const initialCategoryExists = initialCategory
-    ? categories.includes(initialCategory)
+    ? categories.some((category) => category.name === initialCategory)
     : false;
   
   const [formData, setFormData] = useState<DrinkModalData>({
@@ -116,9 +116,12 @@ export const DrinkModal = ({
     initialCategoryExists ? "" : initialCategory,
   );
   const [toppingSearch, setToppingSearch] = useState("");
+  const [categoryToDelete, setCategoryToDelete] = useState<MenuCategory | null>(null);
+  const [deleteError, setDeleteError] = useState("");
+  const [deletingCategory, setDeletingCategory] = useState(false);
 
-  const filteredToppings = allToppings.filter(t => 
-    t.name.toLowerCase().includes(toppingSearch.toLowerCase())
+  const filteredToppings = allToppings.filter((t) =>
+    t.name.toLowerCase().includes(toppingSearch.toLowerCase()),
   );
 
   const handleNumberChange = (
@@ -145,12 +148,18 @@ export const DrinkModal = ({
     }
   };
 
-  const categoryOptions = categories.length > 0 ? categories : [];
+  const categoryOptions = categories
+    .filter((category) => category.name.toLowerCase() !== "beverages")
+    .map((category) => category.name);
   const showCustomCategory = categorySelection === "__new__";
 
   const selectOptions = [
-    ...categoryOptions.map(cat => ({ value: cat, label: cat })),
-    { value: "__new__", label: "+ Add new category", icon: <Plus size={14} className="text-brown" /> }
+    ...categoryOptions.map((cat) => ({ value: cat, label: cat })),
+    {
+      value: "__new__",
+      label: "+ Add new category",
+      icon: <Plus size={14} className="text-brown" />,
+    },
   ];
 
   const handleCategorySelection = (value: string) => {
@@ -171,25 +180,49 @@ export const DrinkModal = ({
     });
   };
 
+  const handleDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+
+    setDeletingCategory(true);
+    setDeleteError("");
+
+    const success = await onDeleteCategory(categoryToDelete.id);
+    if (!success) {
+      setDeleteError(`Unable to delete \"${categoryToDelete.name}\" right now.`);
+      setDeletingCategory(false);
+      return;
+    }
+
+    if (formData.category === categoryToDelete.name) {
+      setFormData({ ...formData, category: "" });
+      setCategorySelection("__new__");
+      setCustomCategory("");
+    }
+
+    setDeletingCategory(false);
+    setCategoryToDelete(null);
+  };
+
   return (
-    <Modal
-      title={`${item?.id ? "Edit" : "Add"} Drink`}
-      description="Update drink details, prices, toppings, and availability."
-      icon={<Coffee size={32} strokeWidth={2.5} />}
-      onClose={onClose}
-      size="xl"
-      footer={
-        <>
-          <Button variant="outline" onClick={onClose} className="rounded-xl px-6">
-            Cancel
-          </Button>
-          <Button variant="solid" onClick={() => onSave(formData)} className="rounded-xl px-10">
-            Save Changes
-          </Button>
-        </>
-      }
-    >
-      <div className="space-y-8">
+    <>
+      <Modal
+        title={`${item?.id ? "Edit" : "Add"} Drink`}
+        description="Update drink details, prices, toppings, and availability."
+        icon={<Coffee size={32} strokeWidth={2.5} />}
+        onClose={onClose}
+        size="xl"
+        footer={
+          <>
+            <Button variant="outline" onClick={onClose} className="rounded-xl px-6">
+              Cancel
+            </Button>
+            <Button variant="solid" onClick={() => onSave(formData)} className="rounded-xl px-10">
+              Save Changes
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-8">
         {/* Availability Toggle Section */}
         <div className="flex items-center justify-between p-5 bg-cream/30 rounded-3xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-4">
@@ -251,6 +284,33 @@ export const DrinkModal = ({
                 onChange={handleCategorySelection}
                 options={selectOptions}
                 placeholder="Select a category"
+                optionAction={{
+                  label: "Delete category",
+                  render: (option, isSelected, closeDropdown) =>
+                    option.value !== "__new__" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const matchedCategory = categories.find(
+                            (category) => category.name === option.value,
+                          );
+                          if (!matchedCategory) return;
+                          closeDropdown();
+                          setDeleteError("");
+                          setCategoryToDelete(matchedCategory);
+                        }}
+                        className={cx(
+                          "inline-flex h-9 w-9 items-center justify-center rounded-full border transition-all",
+                          isSelected
+                            ? "border-white/25 text-white hover:bg-white/10"
+                            : "border-slate-200 bg-white text-rose-500 hover:border-rose-200 hover:bg-rose-50",
+                        )}
+                        aria-label={`Delete ${option.label}`}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    ) : null,
+                }}
               />
 
               {showCustomCategory && (
@@ -388,8 +448,53 @@ export const DrinkModal = ({
             )}
           </div>
         </section>
-      </div>
-    </Modal>
+        </div>
+      </Modal>
+
+      {categoryToDelete && (
+        <Modal
+          title={`Delete ${categoryToDelete.name}?`}
+          description="This will remove the category from all drinks."
+          onClose={() => {
+            if (deletingCategory) return;
+            setCategoryToDelete(null);
+            setDeleteError("");
+          }}
+          size="sm"
+          footer={
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setCategoryToDelete(null);
+                  setDeleteError("");
+                }}
+                className="rounded-xl px-6"
+                disabled={deletingCategory}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => void handleDeleteCategory()}
+                className="rounded-xl px-8"
+                isLoading={deletingCategory}
+                loadingText="Deleting..."
+              >
+                Delete
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            {deleteError && <Alert type="error">{deleteError}</Alert>}
+            <p className="text-sm text-gray-600">
+              Delete "{categoryToDelete.name}"? This will detach it from any drinks that use it.
+            </p>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 };
 

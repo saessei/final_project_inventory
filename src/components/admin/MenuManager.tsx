@@ -13,6 +13,7 @@ import { Search } from "lucide-react";
 import type {
   DrinkModalData,
   DrinkType,
+  MenuCategory,
   TabType,
   ToppingType,
 } from "@/types/menuTypes";
@@ -32,29 +33,37 @@ export const MenuManager = () => {
 
   const [drinks, setDrinks] = useState<DrinkType[]>([]);
   const [toppings, setToppings] = useState<ToppingType[]>([]);
-  const categories = Array.from(
-    new Set(
-      drinks
-        .map((drink) => drink.category?.trim())
-        .filter((category): category is string => Boolean(category))
-        .filter((category) => category.toLowerCase() !== "beverages"),
-    ),
-  ).sort((a, b) => a.localeCompare(b));
+  const [categories, setCategories] = useState<MenuCategory[]>([]);
+  const categoryNames = categories.map((category) => category.name);
 
   const { session, loading: authLoading } = UserAuth();
   const navigate = useNavigate();
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const [drinksData, toppingsData] = await Promise.all([
+    const [drinksData, toppingsData, categoriesData] = await Promise.all([
       drinkService.getAllDrinks(false),
       drinkService.getAllToppings(),
+      drinkService.getAllCategories(),
     ]);
 
     setDrinks(drinksData);
     setToppings(toppingsData);
+    setCategories(
+      categoriesData.filter(
+        (category) => category.name.toLowerCase() !== "beverages",
+      ),
+    );
     setLoading(false);
   }, []);
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    const success = await drinkService.deleteCategory(categoryId);
+    if (success) {
+      await loadData();
+    }
+    return success;
+  };
 
   const filteredDrinks = useMemo(() => {
     return drinks.filter((drink) => {
@@ -243,7 +252,7 @@ export const MenuManager = () => {
                     onChange={setCategoryFilter}
                     options={[
                       { value: "all", label: "All Categories" },
-                      ...categories.map((c) => ({ value: c, label: c })),
+                      ...categoryNames.map((c) => ({ value: c, label: c })),
                     ]}
                   />
                 </div>
@@ -295,6 +304,7 @@ export const MenuManager = () => {
           }}
           allToppings={toppings}
           categories={categories}
+          onDeleteCategory={handleDeleteCategory}
         />
       )}
 
