@@ -6,12 +6,14 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   leftIcon?: ReactNode;
   rightElement?: ReactNode;
+  error?: string;
 }
 
 export const TextField = ({
   label,
   leftIcon,
   rightElement,
+  error,
   className,
   id,
   ...props
@@ -38,7 +40,10 @@ export const TextField = ({
         <input
           id={inputId}
           className={cx(
-            "w-full rounded-2xl bg-gray-100/85 border border-transparent px-3 py-3 text-dark-brown outline-none transition-all focus:border-brown focus:ring-2 focus:ring-brown/20",
+            "w-full rounded-2xl bg-gray-100/85 border px-3 py-3 text-dark-brown outline-none transition-all focus:ring-2 focus:ring-brown/20",
+            error 
+              ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200" 
+              : "border-transparent focus:border-brown",
             leftIcon && "pl-10",
             rightElement && "pr-12",
             className,
@@ -51,6 +56,11 @@ export const TextField = ({
           </div>
         )}
       </div>
+      {error && (
+        <p className="text-[10px] ml-2 font-black text-rose-500 uppercase tracking-widest">
+          {error}
+        </p>
+      )}
     </div>
   );
 };

@@ -1,4 +1,6 @@
+import React from 'react';
 import type { Preview } from '@storybook/react-vite'
+import '../src/index.css';
 
 const preview: Preview = {
   parameters: {
@@ -9,13 +11,38 @@ const preview: Preview = {
       },
     },
 
+    backgrounds: {
+      default: 'cream',
+      values: [
+        { name: 'cream', value: '#fff8f0' },
+        { name: 'white', value: '#ffffff' },
+      ],
+    },
     a11y: {
-      // 'todo' - show a11y violations in the test UI only
-      // 'error' - fail CI on a11y violations
-      // 'off' - skip a11y checks entirely
       test: "todo"
     }
   },
+  decorators: [
+    (Story, context) => {
+      const isFullscreen = context.parameters.layout === 'fullscreen';
+      
+      return React.createElement(
+        'div',
+        { 
+          style: { 
+            fontFamily: 'Quicksand, sans-serif', 
+            padding: isFullscreen ? '0' : '2rem', 
+            minHeight: '100vh',
+            display: isFullscreen ? 'block' : 'flex',
+            alignItems: isFullscreen ? 'stretch' : 'center',
+            justifyContent: isFullscreen ? 'stretch' : 'center'
+          }, 
+          className: 'bg-cream w-full h-full' 
+        },
+        React.createElement(Story)
+      );
+    },
+  ],
 };
 
 export default preview;
