@@ -1,8 +1,9 @@
-import { Trash, Edit2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { TextField } from "@/components/ui/TextField";
+import { Select } from "@/components/ui/Select";
+import { CreditCard, Wallet, Banknote, Trash, Edit2 } from "lucide-react";
 import type { CartItem } from "@/hooks/useCart";
 
 interface CartSidebarProps {
@@ -41,6 +42,12 @@ export const CartSidebar = ({
     onCheckout();
     setIsMobileOpen(false);
   };
+
+  const paymentOptions = [
+    { value: "cash", label: "Cash", icon: <Banknote size={16}/>},
+    { value: "gcash", label: "GCash", icon: <Wallet size={16} /> },
+    { value: "card", label: "Card", icon: <CreditCard size={16} /> },
+  ];
 
   const panelClassName =
     "fixed bg-white border-slate-200 p-5 overflow-y-auto no-scrollbar transition-transform duration-300 ease-in-out " +
@@ -168,25 +175,20 @@ export const CartSidebar = ({
         <div className="mt-4 border-t pt-4">
           <TextField
             id="customerName"
-            label="Customer Name (Optional)"
+            label="Customer Name"
             type="text"
             value={customerName}
             onChange={(e) => onCustomerNameChange(e.target.value)}
             placeholder="Enter customer name"
             className="border-slate-200 bg-white text-slate-800 focus:border-brown focus:ring-0 shadow-sm"
           />
-          <div className="mt-3">
-            <label className="block text-sm font-semibold mb-1 text-slate-700">Payment Method</label>
-            <select
-              value={paymentMethod}
-              onChange={(e) => onPaymentMethodChange(e.target.value)}
-              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-brown focus:outline-none focus:ring-0 shadow-sm"
-            >
-              <option value="cash">Cash</option>
-              <option value="gcash">GCash</option>
-              <option value="card">Card</option>
-            </select>
-          </div>
+          <Select
+            label="Payment Method"
+            value={paymentMethod}
+            onChange={onPaymentMethodChange}
+            options={paymentOptions}
+            className="mt-3"
+          />
           <div className="mt-4">
             <div className="flex justify-between items-center mb-2">
               <p className="text-sm font-semibold text-gray-600">Subtotal</p>
