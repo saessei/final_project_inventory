@@ -1,5 +1,5 @@
 // src/components/Kiosk.tsx
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { createOrder } from "@/services/orderService";
@@ -50,6 +50,7 @@ export const Kiosk = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutSuccessOpen, setCheckoutSuccessOpen] = useState(false);
   const [lastOrderSummary, setLastOrderSummary] = useState("");
+  const checkoutLockRef = useRef(false);
 
   // Load data
   useEffect(() => {
@@ -168,11 +169,10 @@ export const Kiosk = () => {
   );
 
   const handleCheckout = async () => {
-    if (cart.length === 0 || isSubmitting) return;
+    if (cart.length === 0 || isSubmitting || checkoutLockRef.current) return;
 
-    console.log("🛒 Cart before checkout:", cart);
-    console.log("💰 cartTotal being sent:", cartTotal);
-    console.log("💰 cartTotal type:", typeof cartTotal);
+    checkoutLockRef.current = true;
+    setIsSubmitting(true);
 
     const orderDetails = cart
       .map((item) => {
@@ -183,8 +183,6 @@ export const Kiosk = () => {
       })
       .join(" • ");
 
-    console.log("📝 Order details:", orderDetails);
-
     try {
       const result = await createOrder({
         customer_name: customerName.trim() || "Guest",
@@ -194,14 +192,16 @@ export const Kiosk = () => {
         items: cart,
       });
 
-      console.log("✅ Order result:", result);
-
+      console.log("Order created:", result);
       await clearCart();
       setLastOrderSummary(orderDetails);
       setCustomerName("");
       setCheckoutSuccessOpen(true);
     } catch (error) {
       console.error("❌ Failed to send order to queue:", error);
+    } finally {
+      checkoutLockRef.current = false;
+      setIsSubmitting(false);
     }
   };
 
@@ -219,6 +219,7 @@ export const Kiosk = () => {
         customerName={customerName}
         onCustomerNameChange={setCustomerName}
         onCheckout={handleCheckout}
+        isCheckingOut={isSubmitting}
         onDecrementItem={decrementItemAtIndex}
         onIncrementItem={incrementItemAtIndex}
         onRemoveItem={removeItemAtIndex}

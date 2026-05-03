@@ -9,6 +9,7 @@ interface CartSidebarProps {
   cart: CartItem[];
   cartTotal: number;
   customerName: string;
+  isCheckingOut?: boolean;
   onCustomerNameChange: (name: string) => void;
   onCheckout: () => void;
   onDecrementItem: (index: number) => void;
@@ -20,6 +21,7 @@ export const CartSidebar = ({
   cart,
   cartTotal,
   customerName,
+  isCheckingOut = false,
   onCustomerNameChange,
   onCheckout,
   onDecrementItem,
@@ -153,7 +155,13 @@ export const CartSidebar = ({
               variant="solid"
               fullWidth
               className="mt-4"
-              disabled={cart.length === 0 || customerName.trim() === ""}
+              disabled={
+                isCheckingOut ||
+                cart.length === 0 ||
+                customerName.trim() === ""
+              }
+              isLoading={isCheckingOut}
+              loadingText="Checking out..."
             >
               Check Out
             </Button>
