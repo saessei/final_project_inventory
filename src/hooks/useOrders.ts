@@ -3,6 +3,8 @@ import defaultSupabase from "@/lib/supabaseClient";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { formatOrderDetails, type OrderStatus } from "@/services/orderService";
 
+const POLL_INTERVAL_MS = 4000;
+
 export interface Order {
   id: string;
   customer_name: string;
@@ -35,17 +37,27 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
-    const { data } = await supabase
-      .from("orders")
-      .select(
-        "*, order_items(*, order_item_toppings(topping_name))",
-      )
-      .order("created_at");
-    if (data) setOrders((data as OrderRow[]).map(mapOrder));
-    setLoading(false);
-  }, [supabase]);
+  const fetchOrders = useCallback(
+    async (showLoading: boolean = true) => {
+      if (showLoading) setLoading(true);
+
+      const { data, error } = await supabase
+        .from("orders")
+        .select(
+          "*, order_items(*, order_item_toppings(topping_name))",
+        )
+        .order("created_at");
+
+      if (error) {
+        console.error("Failed to fetch orders:", error.message);
+      } else if (data) {
+        setOrders((data as OrderRow[]).map(mapOrder));
+      }
+
+      if (showLoading) setLoading(false);
+    },
+    [supabase],
+  );
 
   const updateOrderInState = useCallback(
     (orderId: string, status: Order["status"]) => {
@@ -61,35 +73,58 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
   useEffect(() => {
     let cancelled = false;
 
-    const run = async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select(
-          "*, order_items(*, order_item_toppings(topping_name))",
-        )
-        .order("created_at");
-      if (!cancelled && data) setOrders((data as OrderRow[]).map(mapOrder));
-      if (!cancelled) setLoading(false);
+    const syncOrders = async (showLoading: boolean = false) => {
+      await fetchOrders(showLoading);
+      if (!cancelled && showLoading) {
+        setLoading(false);
+      }
     };
 
-    void run();
+    void syncOrders(true);
+
+    const channelName = `queue-tea-live-orders-${Math.random().toString(36).slice(2)}`;
 
     const channel = supabase
-      .channel("queue-tea-live")
+      .channel(channelName)
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
         () => {
-          void run();
+          if (!cancelled) {
+            void syncOrders(false);
+          }
         },
       )
+      .on("system", {}, () => {
+        if (!cancelled) {
+          void syncOrders(false);
+        }
+      })
       .subscribe();
+
+    const pollId = window.setInterval(() => {
+      if (!cancelled) {
+        void syncOrders(false);
+      }
+    }, POLL_INTERVAL_MS);
+
+    const onFocus = () => {
+      if (!cancelled) {
+        void syncOrders(false);
+      }
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
 
     return () => {
       cancelled = true;
+      window.clearInterval(pollId);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
       supabase.removeChannel(channel);
     };
-  }, [supabase]);
+  }, [fetchOrders, supabase]);
 
   return { orders, fetchOrders, loading, updateOrderInState };
 };
