@@ -31,6 +31,12 @@ export interface SugarLevel {
   price_addition: number;
 }
 
+export interface MenuCategory {
+  id: string;
+  name: string;
+  is_active: boolean;
+}
+
 class DrinkService {
   private static instance: DrinkService;
   private listeners: Set<() => void> = new Set();
@@ -94,6 +100,49 @@ class DrinkService {
     }
 
     return created.id as string;
+  }
+
+  async getAllCategories(client?: SupabaseClient): Promise<MenuCategory[]> {
+    const { data, error } = await this.getClient(client)
+      .from("categories")
+      .select("id, name, is_active")
+      .eq("is_active", true)
+      .order("name");
+
+    if (error) {
+      console.error("Error fetching categories:", error);
+      return [];
+    }
+
+    return (data || []).map((item) => ({
+      id: item.id,
+      name: item.name,
+      is_active: item.is_active ?? true,
+    }));
+  }
+
+  async deleteCategory(id: string, client?: SupabaseClient): Promise<boolean> {
+    const db = this.getClient(client);
+
+    const { error: detachError } = await db
+      .from("drinks")
+      .update({ category_id: null })
+      .eq("category_id", id);
+
+    if (detachError) {
+      console.error("Error detaching drinks from category:", detachError);
+      return false;
+    }
+
+    const { error } = await db.from("categories").delete().eq("id", id);
+
+    if (error) {
+      console.error("Error deleting category:", error);
+      return false;
+    }
+
+    this.notify();
+    return true;
   }
 
   // ============ TOPPINGS ============
