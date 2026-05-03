@@ -96,7 +96,7 @@ export const Reports = () => {
         <Sidebar />
       </div>
 
-      <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
+      <main className="ml-0 lg:ml-64 h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-16 lg:pt-6">
         <div className="max-w-7xl mx-auto mb-6">
           <ReportsHeader
             dateRange={dateRange}
