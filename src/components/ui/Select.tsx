@@ -92,7 +92,7 @@ export const Select = ({
             {options.map((option) => {
               const isSelected = option.value === value;
               return (
-                <div key={option.value} className="group flex items-center gap-2 rounded-xl">
+                <div key={option.value} className="group flex items-center gap-1.5 sm:gap-2 rounded-xl">
                   <button
                     type="button"
                     onClick={() => {
@@ -101,7 +101,7 @@ export const Select = ({
                       setOpenActionFor(null);
                     }}
                     className={cx(
-                      "flex-1 flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
+                      "flex-1 flex items-center justify-between min-w-0 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
                       isSelected
                         ? "bg-brown text-white"
                         : "text-dark-brown hover:bg-cream/50"
@@ -128,7 +128,7 @@ export const Select = ({
                             event.stopPropagation();
                             setOpenActionFor(option.value);
                           }}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-dark-brown"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-dark-brown"
                           aria-label={`${optionAction.label} for ${option.label}`}
                         >
                           <MoreHorizontal size={14} />
