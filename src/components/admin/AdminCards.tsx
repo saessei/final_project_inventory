@@ -72,8 +72,14 @@ interface DrinkCardProps {
   onDelete: () => void;
 }
 
-export const DrinkCard = ({ drink, onEdit, onDelete }: DrinkCardProps) => (
-  <div className="group relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+export const DrinkCard = ({ drink, onEdit, onDelete }: DrinkCardProps) => {
+  const [actionsOpen, setActionsOpen] = useState(false);
+
+  return (
+  <div
+    className="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+    onClick={() => setActionsOpen((prev) => !prev)}
+  >
     <div className="flex items-center justify-between gap-3 mb-2">
       <div className="min-w-0">
         <h3 className="truncate font-black text-dark-brown text-base leading-tight">{drink.name}</h3>
@@ -92,11 +98,17 @@ export const DrinkCard = ({ drink, onEdit, onDelete }: DrinkCardProps) => (
       </div>
     </div>
 
-    {/* Subtle Action Overlay - Hidden by default, shows on hover */}
-    <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-2xl bg-white/95 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+    <div
+      className={`absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-2xl bg-white/95 transition-opacity duration-200 ${
+        actionsOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
+    >
       <IconButton
         label={`Edit ${drink.name}`}
-        onClick={onEdit}
+        onClick={(event) => {
+          event.stopPropagation();
+          onEdit();
+        }}
         variant="ghost"
         className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-brown hover:bg-slate-100 transition-all border border-slate-200"
       >
@@ -104,7 +116,10 @@ export const DrinkCard = ({ drink, onEdit, onDelete }: DrinkCardProps) => (
       </IconButton>
       <IconButton
         label={`Delete ${drink.name}`}
-        onClick={onDelete}
+        onClick={(event) => {
+          event.stopPropagation();
+          onDelete();
+        }}
         variant="danger"
         className="rounded-xl bg-rose-50 p-2 text-rose-500 hover:bg-rose-100 hover:text-rose-700 transition-all border border-rose-100"
       >
@@ -112,13 +127,17 @@ export const DrinkCard = ({ drink, onEdit, onDelete }: DrinkCardProps) => (
       </IconButton>
     </div>
 
-    {/* Small visible hint for desktop, but primarily for discoverability */}
-    <div className="mt-2 flex items-center justify-between text-[10px] text-slate-300 font-bold uppercase tracking-widest group-hover:opacity-0 transition-opacity">
+    <div
+      className={`mt-2 flex items-center justify-between text-[10px] text-slate-300 font-bold uppercase tracking-widest transition-opacity ${
+        actionsOpen ? "opacity-0" : "opacity-100"
+      }`}
+    >
       <span>Manage Item</span>
       <MoreHorizontal size={14} />
     </div>
   </div>
-);
+  );
+};
 
 interface ToppingCardProps {
   topping: ToppingType;
@@ -130,8 +149,14 @@ export const ToppingCard = ({
   topping,
   onEdit,
   onDelete,
-}: ToppingCardProps) => (
-  <div className="group relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+}: ToppingCardProps) => {
+  const [actionsOpen, setActionsOpen] = useState(false);
+
+  return (
+  <div
+    className="relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+    onClick={() => setActionsOpen((prev) => !prev)}
+  >
     <div className="flex items-center justify-between gap-3 mb-2">
       <div className="min-w-0 flex items-center gap-2">
         <Tag size={16} className="shrink-0 text-brown-two" />
@@ -151,11 +176,17 @@ export const ToppingCard = ({
       </div>
     </div>
 
-    {/* Subtle Action Overlay */}
-    <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-2xl bg-white/95 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+    <div
+      className={`absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-2xl bg-white/95 transition-opacity duration-200 ${
+        actionsOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+      }`}
+    >
       <IconButton
         label={`Edit ${topping.name}`}
-        onClick={onEdit}
+        onClick={(event) => {
+          event.stopPropagation();
+          onEdit();
+        }}
         variant="ghost"
         className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-brown hover:bg-slate-100 transition-all border border-slate-200"
       >
@@ -163,7 +194,10 @@ export const ToppingCard = ({
       </IconButton>
       <IconButton
         label={`Delete ${topping.name}`}
-        onClick={onDelete}
+        onClick={(event) => {
+          event.stopPropagation();
+          onDelete();
+        }}
         variant="danger"
         className="rounded-xl bg-rose-50 p-2 text-rose-500 hover:bg-rose-100 hover:text-rose-700 transition-all border border-rose-100"
       >
@@ -171,12 +205,17 @@ export const ToppingCard = ({
       </IconButton>
     </div>
 
-    <div className="mt-2 flex items-center justify-between text-[10px] text-slate-300 font-bold uppercase tracking-widest group-hover:opacity-0 transition-opacity">
+    <div
+      className={`mt-2 flex items-center justify-between text-[10px] text-slate-300 font-bold uppercase tracking-widest transition-opacity ${
+        actionsOpen ? "opacity-0" : "opacity-100"
+      }`}
+    >
       <span>Manage Topping</span>
       <MoreHorizontal size={14} />
     </div>
   </div>
-);
+  );
+};
 
 interface CategoryCardProps {
   category: CategoryType;
