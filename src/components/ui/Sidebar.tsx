@@ -74,40 +74,54 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <button
-        onClick={() => setIsMobileOpen(!isMobileOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md"
-        aria-label="Toggle menu"
-      >
-        {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      {!isMobileOpen && (
+        <button
+          type="button"
+          onClick={() => setIsMobileOpen(true)}
+          className="lg:hidden fixed bottom-4 left-4 z-40 inline-flex items-center gap-2 rounded-full bg-dark-brown px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-black/20"
+          aria-label="Open sidebar"
+          aria-expanded={isMobileOpen}
+        >
+          <Menu size={18} />
+          <span>Menu</span>
+        </button>
+      )}
 
-      {/* Mobile overlay */}
       {isMobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-40"
+          className="lg:hidden fixed inset-0 bg-black/50 z-[55]"
           onClick={() => setIsMobileOpen(false)}
         />
       )}
 
       <div
         ref={sidebarRef}
-        className={`bg-bg-lightgray fixed top-0 left-0 h-screen min-h-screen p-5 pt-8 flex flex-col justify-between shadow-lg font-quicksand z-50 transition-transform duration-300 ease-in-out ${
+        className={`bg-bg-lightgray fixed top-0 left-0 h-screen min-h-screen w-64 max-w-[86vw] p-5 pt-8 flex flex-col justify-between shadow-lg font-quicksand z-[60] transition-transform duration-300 ease-in-out overflow-y-auto no-scrollbar lg:w-64 lg:max-w-none ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-        } w-64`}
+        }`}
       >
         <div>
-          <div className="flex items-center gap-3 mb-10">
-            <img src={Logo} className="w-10 h-10" alt="Logo" />
-            <div>
-              <h1 className="text-dark-brown font-bold font-quicksand text-2xl">
-                QueueTea
-              </h1>
-              <p className="text-brown font-regular font-quicksand text-xs">
-                © 2026 QueueTea
-              </p>
+          <div className="mb-8 flex items-start justify-between gap-4 lg:mb-10">
+            <div className="flex items-center gap-3">
+              <img src={Logo} className="w-10 h-10" alt="Logo" />
+              <div>
+                <h1 className="text-dark-brown font-bold font-quicksand text-2xl">
+                  QueueTea
+                </h1>
+                <p className="text-brown font-regular font-quicksand text-xs">
+                  © 2026 QueueTea
+                </p>
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setIsMobileOpen(false)}
+              className="lg:hidden inline-flex items-center justify-center rounded-full bg-white/80 p-2 text-dark-brown shadow-sm ring-1 ring-black/5"
+              aria-label="Close sidebar"
+            >
+              <X size={18} />
+            </button>
           </div>
 
           <ul className="space-y-2">
