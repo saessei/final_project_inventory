@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createHashRouter, Navigate } from "react-router-dom";
 import { Signin } from "@/pages/Signin";
 import { Kiosk } from "@/pages/Kiosk";
 import { QueuedOrders } from "@/pages/QueuedOrders";
@@ -11,7 +11,7 @@ import { AppProtectedRoute } from "@/pages/AppProtectedRoute";
 // Remove these lines:
 // import { DrinkManager } from "../components/Admin/DrinkManager";
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   { path: "/", element: <Navigate to="/signin" replace /> },
   { path: "/signin", element: <Signin /> },
   {
