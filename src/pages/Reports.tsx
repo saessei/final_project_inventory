@@ -92,7 +92,7 @@ export const Reports = () => {
 
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
-      <div className="fixed top-0 left-0 h-screen w-64 z-10">
+      <div className="fixed top-0 left-0 h-screen w-64 z-50">
         <Sidebar />
       </div>
 
