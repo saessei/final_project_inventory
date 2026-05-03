@@ -124,7 +124,7 @@ export const createOrder = async (
 export const updateOrderStatus = async (
   orderId: string,
   newStatus: OrderStatus,
-  options?: { claim?: boolean; staffUserId?: string },
+  options?: { claim?: boolean; staffUserId?: string; expectedCurrentStatus?: OrderStatus },
   client: SupabaseClient = supabase,
 ) => {
   const { data: existing } = await client
@@ -148,8 +148,14 @@ export const updateOrderStatus = async (
 
   let query = client.from("orders").update(patch).eq("id", orderId);
 
+  if (options?.expectedCurrentStatus) {
+    query = query.eq("status", options.expectedCurrentStatus);
+  }
+
   if (options?.claim) {
     query = query.is("claimed_by", null);
+  } else if (options?.staffUserId) {
+    query = query.eq("claimed_by", options.staffUserId);
   }
 
   const { data, error } = await query.select();
