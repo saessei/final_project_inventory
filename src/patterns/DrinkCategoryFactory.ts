@@ -1,5 +1,6 @@
 import { Drink, DrinkFactory } from "@/patterns/drinkFactory";
-import { dynamicMenu } from "@/services/dynamicMenuService";
+import { dynamicMenu } from "@/services/DynamicMenuService";
+import type { DynamicCategory, DynamicDrink } from "@/services/DynamicMenuService";
 
 export type DrinkCategoryId = string;
 
@@ -11,7 +12,7 @@ export interface DrinkCategory {
 
 export async function getCategoryFactories(): Promise<DrinkCategory[]> {
   const categories = await dynamicMenu.getCategories();
-  return categories.map((cat) => ({
+  return categories.map((cat: DynamicCategory) => ({
     id: cat.id,
     label: cat.label,
     description: cat.description,
@@ -24,7 +25,7 @@ export async function createDrinksForCategory(
   const dynamicDrinks = await dynamicMenu.getDrinksByCategory(id);
 
   // Convert dynamic drinks to the Drink interface using the factory
-  return dynamicDrinks.map((dynamicDrink) => {
+  return dynamicDrinks.map((dynamicDrink: DynamicDrink) => {
     // Map the dynamic drink to use DrinkFactory
     const validType = dynamicDrink.type as
       | "BrownSugar"
