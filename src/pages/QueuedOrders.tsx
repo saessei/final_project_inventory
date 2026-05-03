@@ -4,7 +4,7 @@ import { useOrders, type Order } from "@/hooks/useOrders";
 import { updateOrderStatus } from "@/services/orderService";
 import { OrderStatusButton } from "@/components/ui/OrderStatusButton";
 import { UserAuth } from "@/components/auth/AuthContext";
-import { QueueSkeleton } from "@/components/ui/LoadingSkeletons";
+import { QueueSummarySkeleton, QueueCardsSkeleton } from "@/components/ui/LoadingSkeletons";
 
 const ITEMS_PER_PAGE = 6;
 
@@ -101,7 +101,7 @@ export const QueuedOrders = () => {
           </p>
         </div>
 
-        <QueueSkeleton loading={loading}>
+        <QueueSummarySkeleton loading={loading}>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200">
               <p className="text-xs uppercase tracking-[0.24em] text-gray-400">
@@ -129,6 +129,7 @@ export const QueuedOrders = () => {
             </div>
           </div>
 
+        </QueueSummarySkeleton>
           <div className="mb-6 flex flex-wrap gap-3">
             <button
               onClick={() => setViewMode("active")}
@@ -152,7 +153,8 @@ export const QueuedOrders = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <QueueCardsSkeleton loading={loading}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {queueOrders.length === 0 ? (
               <div className="rounded-[2rem] bg-white p-10 text-center text-gray-500 shadow-sm border border-slate-200 col-span-full">
                 {viewMode === "active"
@@ -250,7 +252,8 @@ export const QueuedOrders = () => {
                 Next
               </button>
             </div>
-          )}        </QueueSkeleton>
+          )}
+        </QueueCardsSkeleton>
       </main>
     </div>
   );
