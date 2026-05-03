@@ -30,17 +30,17 @@ export const AdminPinModal = ({
   const checkUserPinStatus = useCallback(async () => {
     try {
       const { data: profile, error } = await supabase
-        .from("profiles")
-        .select("admin_pin")
-        .eq("id", session?.user?.id)
-        .single();
+        .from("admin_settings")
+        .select("admin_pin_hash")
+        .limit(1)
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching profile:", error);
         setHasExistingPin(false);
       } else {
-        console.log("Has existing PIN:", !!profile?.admin_pin);
-        setHasExistingPin(!!profile?.admin_pin);
+        console.log("Has existing PIN:", !!profile?.admin_pin_hash);
+        setHasExistingPin(!!profile?.admin_pin_hash);
       }
     } catch (err) {
       console.error("Error checking PIN status:", err);
@@ -81,9 +81,9 @@ export const AdminPinModal = ({
     }
 
     const { error: updateError } = await supabase
-      .from("profiles")
-      .update({ admin_pin: pin })
-      .eq("id", session.user.id);
+      .from("admin_settings")
+      .update({ admin_pin_hash: pin })
+      .not("id", "is", null);
 
     if (updateError) {
       console.error("Update error:", updateError);
@@ -114,10 +114,10 @@ export const AdminPinModal = ({
     setError("");
 
     const { data: profile, error: fetchError } = await supabase
-      .from("profiles")
-      .select("admin_pin")
-      .eq("id", session.user.id)
-      .single();
+      .from("admin_settings")
+      .select("admin_pin_hash")
+      .limit(1)
+      .maybeSingle();
 
     if (fetchError) {
       console.error("Fetch error:", fetchError);
@@ -128,9 +128,9 @@ export const AdminPinModal = ({
     }
 
     console.log("Entered PIN:", pin);
-    console.log("Saved PIN:", profile?.admin_pin);
+    console.log("Saved PIN:", profile?.admin_pin_hash);
 
-    if (pin === profile?.admin_pin) {
+    if (pin === profile?.admin_pin_hash) {
       console.log("PIN verified, success!");
       hasVerifiedRef.current = true;
       await refreshSession();

@@ -32,8 +32,7 @@ export const QueuedOrders = () => {
     .filter(
       (order) =>
         order.status === "pending" ||
-        order.status === "preparing" ||
-        order.status === "ready",
+        order.status === "preparing",
     )
     .sort(
       (a, b) =>
@@ -71,15 +70,8 @@ export const QueuedOrders = () => {
       return;
     }
 
-    // preparing -> ready
+    // preparing -> completed
     if (order.status === "preparing") {
-      await updateOrderStatus(order.id, "ready");
-      updateOrderInState(order.id, "ready");
-      return;
-    }
-
-    // ready -> completed
-    if (order.status === "ready") {
       await updateOrderStatus(order.id, "completed");
       updateOrderInState(order.id, "completed");
       return;
@@ -193,22 +185,18 @@ export const QueuedOrders = () => {
                             ? "bg-orange-50 text-orange-700 border-orange-200"
                             : order.status === "preparing"
                               ? "bg-brown/10 text-brown border-brown/20"
-                              : order.status === "ready"
-                                ? "bg-blue-50 text-blue-700 border-blue-200"
-                                : order.status === "completed"
-                                  ? "bg-emerald-100 text-emerald-700 border-emerald-200"
-                                  : "bg-gray-100 text-gray-600 border-gray-200"
+                              : order.status === "completed"
+                                ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                                : "bg-gray-100 text-gray-600 border-gray-200"
                         }`}
                       >
                         {order.status === "pending"
                           ? "New Order"
                           : order.status === "preparing"
                             ? "Preparing"
-                            : order.status === "ready"
-                              ? "Ready for Pickup"
-                              : order.status === "completed"
-                                ? "Completed"
-                                : "Archived"}
+                            : order.status === "completed"
+                              ? "Completed"
+                              : "Archived"}
                       </div>
                     </div>
 

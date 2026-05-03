@@ -124,15 +124,20 @@ export const Kiosk = () => {
     if (!selectedDrink || !selectedSugar) return;
 
     const totalPrice = calculateTotalPrice();
-    const sizeLabel =
-      selectedSize.charAt(0).toUpperCase() + selectedSize.slice(1);
 
     await upsertItem({
       drink_id: selectedDrink.id,
-      drink_name: `${selectedDrink.name} (${sizeLabel})`,
+      drink_name: selectedDrink.name,
+      size: selectedSize as "regular" | "medium" | "large",
       drink_price: totalPrice,
       sugar: selectedSugar.label,
+      sugar_percentage: selectedSugar.percentage,
       toppings: selectedToppings.map((t) => t.name),
+      topping_details: selectedToppings.map((t) => ({
+        id: t.id,
+        name: t.name,
+        price: t.price,
+      })),
       quantity: 1,
     });
 
@@ -183,9 +188,10 @@ export const Kiosk = () => {
     try {
       const result = await createOrder({
         customer_name: customerName.trim() || "Guest",
-        order_details: orderDetails,
         status: "pending",
-        total_price: Number(cartTotal), // Force to number
+        total_price: Number(cartTotal),
+        created_by: staffUserId ?? null,
+        items: cart,
       });
 
       console.log("✅ Order result:", result);

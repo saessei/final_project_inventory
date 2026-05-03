@@ -1,5 +1,5 @@
 import supabase from "@/lib/supabaseClient";
-import { DrinkType } from "@/patterns/DrinkFactory";
+import { DrinkType } from "@/patterns/drinkFactory";
 
 export interface Topping {
   id: string;
@@ -42,7 +42,8 @@ type DrinkRow = {
   name: string;
   description: string | null;
   image_url: string | null;
-  category: string | null;
+  category_id: string | null;
+  category?: { name: string } | { name: string }[] | null;
   is_available: boolean | null;
 };
 
@@ -89,7 +90,7 @@ class DynamicMenuService {
       description: row.description ?? "",
       price,
       image: row.image_url ?? "",
-      categoryId: row.category ?? "",
+      categoryId: row.category_id ?? "",
       availableToppings: [],
       availableSugarLevels: [],
       isAvailable: row.is_available ?? true,
@@ -99,29 +100,23 @@ class DynamicMenuService {
   // Category Management
   async getCategories(): Promise<DynamicCategory[]> {
     const { data, error } = await supabase
-      .from("drinks")
-      .select("id, category")
-      .eq("is_available", true)
-      .order("category");
+      .from("categories")
+      .select("id, name, description, display_order, is_active, drinks(id)")
+      .eq("is_active", true)
+      .order("display_order");
 
     if (error) {
       console.error("Error fetching categories:", error);
       return [];
     }
 
-    const grouped = new Map<string, string[]>();
-    (data || []).forEach((row) => {
-      const label = row.category || "Uncategorized";
-      grouped.set(label, [...(grouped.get(label) || []), row.id]);
-    });
-
-    return Array.from(grouped.entries()).map(([label, drinkIds], index) => ({
-      id: label,
-      label,
-      description: "",
-      drinkIds,
-      isActive: true,
-      displayOrder: index + 1,
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      label: row.name,
+      description: row.description ?? "",
+      drinkIds: (row.drinks || []).map((drink: { id: string }) => drink.id),
+      isActive: row.is_active ?? true,
+      displayOrder: row.display_order ?? 0,
     }));
   }
 
@@ -142,7 +137,7 @@ class DynamicMenuService {
     const { data, error } = await supabase
       .from("drinks")
       .select("*")
-      .eq("category", categoryId)
+      .eq("category_id", categoryId)
       .eq("is_available", true);
 
     if (error) {
@@ -156,7 +151,7 @@ class DynamicMenuService {
   async getAllDrinks(): Promise<DynamicDrink[]> {
     const { data, error } = await supabase
       .from("drinks")
-      .select("*")
+      .select("*, category:categories(name)")
       .eq("is_available", true);
 
     if (error) {
@@ -176,7 +171,7 @@ class DynamicMenuService {
         name: drink.name,
         description: drink.description,
         image_url: drink.image,
-        category: drink.categoryId,
+        category_id: drink.categoryId || null,
         is_available: true,
       })
       .select("*")
@@ -216,7 +211,8 @@ class DynamicMenuService {
     if (updates.description !== undefined)
       updateRow.description = updates.description;
     if (updates.image !== undefined) updateRow.image_url = updates.image;
-    if (updates.categoryId !== undefined) updateRow.category = updates.categoryId;
+    if (updates.categoryId !== undefined)
+      updateRow.category_id = updates.categoryId || null;
     if (updates.isAvailable !== undefined)
       updateRow.is_available = updates.isAvailable;
 

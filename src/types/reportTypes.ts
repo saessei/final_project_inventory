@@ -5,6 +5,19 @@ export interface ReportOrder {
   status: string;
   created_at: string;
   total_price: number;
+  order_items?: ReportOrderItem[];
+}
+
+export interface ReportOrderItem {
+  id: string;
+  drink_name: string;
+  quantity: number;
+  line_total: number;
+  order_item_toppings?: ReportOrderItemTopping[];
+}
+
+export interface ReportOrderItemTopping {
+  topping_name: string;
 }
 
 export interface DateRange {

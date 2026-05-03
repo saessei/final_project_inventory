@@ -44,13 +44,13 @@ export const AuthContextProvider = ({ children }: AuthProviderProps) => {
     setSession(updatedSession ?? null);
 
     if (updatedSession?.user?.id) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("admin_pin")
-        .eq("id", updatedSession.user.id)
-        .single();
+      const { data: settings } = await supabase
+        .from("admin_settings")
+        .select("admin_pin_hash")
+        .limit(1)
+        .maybeSingle();
 
-      setHasAdminPin(!!profile?.admin_pin);
+      setHasAdminPin(!!settings?.admin_pin_hash);
     } else {
       setHasAdminPin(false);
     }

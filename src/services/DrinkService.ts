@@ -7,6 +7,7 @@ export interface Drink {
   name: string;
   description: string;
   image_url: string;
+  category_id?: string | null;
   category?: string | null;
   is_available: boolean;
   sizes: {
@@ -60,6 +61,41 @@ class DrinkService {
    */
   private getClient(client?: SupabaseClient) {
     return client || supabase;
+  }
+
+  private async ensureCategoryId(
+    categoryName?: string | null,
+    client?: SupabaseClient,
+  ): Promise<string | null> {
+    const name = categoryName?.trim();
+    if (!name) return null;
+
+    const db = this.getClient(client);
+    const { data: existing, error: findError } = await db
+      .from("categories")
+      .select("id")
+      .eq("name", name)
+      .maybeSingle();
+
+    if (findError) {
+      console.error("Error finding category:", findError);
+      return null;
+    }
+
+    if (existing?.id) return existing.id as string;
+
+    const { data: created, error: createError } = await db
+      .from("categories")
+      .insert({ name, is_active: true })
+      .select("id")
+      .single();
+
+    if (createError) {
+      console.error("Error creating category:", createError);
+      return null;
+    }
+
+    return created.id as string;
   }
 
   // ============ TOPPINGS ============
@@ -168,8 +204,9 @@ class DrinkService {
   async getAllDrinks(client?: SupabaseClient): Promise<Drink[]> {
     const { data: drinks, error } = await this.getClient(client)
       .from("drinks")
-      .select("*")
+      .select("*, category:categories(name)")
       .eq("is_available", true)
+      .order("display_order", { ascending: true })
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -180,6 +217,9 @@ class DrinkService {
     const drinksWithDetails = await Promise.all(
       (drinks || []).map(async (drink) => ({
         ...drink,
+        category: Array.isArray(drink.category)
+          ? drink.category[0]?.name
+          : drink.category?.name,
         sizes: await this.getDrinkSizes(drink.id, client),
         available_toppings: await this.getDrinkToppings(drink.id, client),
       })),
@@ -253,15 +293,16 @@ class DrinkService {
     client?: SupabaseClient,
   ): Promise<boolean> {
     const db = this.getClient(client);
+    const categoryId = await this.ensureCategoryId(drink.category, client);
 
     // 1. Insert drink
     const { data: drinkData, error: drinkError } = await db
       .from("drinks")
       .insert({
+        category_id: categoryId,
         name: drink.name,
         description: drink.description,
         image_url: drink.image_url,
-        category: drink.category || null,
         is_available: true,
       })
       .select()
@@ -313,11 +354,19 @@ class DrinkService {
     client?: SupabaseClient,
   ): Promise<boolean> {
     const db = this.getClient(client);
+    const updateRow = { ...updates } as Record<string, unknown>;
+    if ("category" in updates) {
+      updateRow.category_id = await this.ensureCategoryId(
+        updates.category,
+        client,
+      );
+      delete updateRow.category;
+    }
 
     // 1. Update drink
     const { error: drinkError } = await db
       .from("drinks")
-      .update({ ...updates })
+      .update(updateRow)
       .eq("id", drinkId);
 
     if (drinkError) {

@@ -10,6 +10,7 @@ import { TopToppingsPanel } from "@/components/reports/TopToppingsPanel";
 import { useReportMetrics } from "@/hooks/useReportMetrics";
 import { ReportsSkeleton } from "@/components/ui/LoadingSkeletons";
 import type { ReportOrder } from "@/types/reportTypes";
+import { formatOrderDetails } from "@/services/orderService";
 
 export const Reports = () => {
   const [loading, setLoading] = useState(true);
@@ -24,12 +25,19 @@ export const Reports = () => {
     setLoading(true);
     const { data } = await supabase
       .from("orders")
-      .select("*")
+      .select(
+        "*, order_items(*, order_item_toppings(topping_name))",
+      )
       .gte("created_at", dateRange.startDate.toISOString())
       .lte("created_at", dateRange.endDate.toISOString())
       .order("created_at", { ascending: false });
 
-    setOrders(data || []);
+    setOrders(
+      ((data || []) as ReportOrder[]).map((order) => ({
+        ...order,
+        order_details: formatOrderDetails(order.order_items ?? []),
+      })),
+    );
     setLoading(false);
   }, [dateRange]);
 

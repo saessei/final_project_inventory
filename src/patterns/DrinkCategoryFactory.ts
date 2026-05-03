@@ -1,4 +1,4 @@
-import { Drink, DrinkFactory } from "@/patterns/DrinkFactory";
+import { Drink, DrinkFactory } from "@/patterns/drinkFactory";
 import { dynamicMenu } from "@/services/DynamicMenuService";
 import type { DynamicCategory, DynamicDrink } from "@/services/DynamicMenuService";
 

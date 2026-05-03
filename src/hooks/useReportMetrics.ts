@@ -9,14 +9,11 @@ export const useReportMetrics = (orders: ReportOrder[]) => {
 
   const drinkCounts = new Map<string, number>();
   orders.forEach((order) => {
-    const items = order.order_details.split(" • ");
-    items.forEach((item) => {
-      const match = item.match(/\d+x\s+(.+?)(?:\s*\(|,|$)/);
-      if (match) {
-        let name = match[1].trim();
-        name = name.replace(/\s*\([^)]+\)/, "").trim();
-        drinkCounts.set(name, (drinkCounts.get(name) || 0) + 1);
-      }
+    order.order_items?.forEach((item) => {
+      drinkCounts.set(
+        item.drink_name,
+        (drinkCounts.get(item.drink_name) || 0) + item.quantity,
+      );
     });
   });
 
@@ -26,15 +23,13 @@ export const useReportMetrics = (orders: ReportOrder[]) => {
 
   const toppingCounts = new Map<string, number>();
   orders.forEach((order) => {
-    const items = order.order_details.split(" • ");
-    items.forEach((item) => {
-      const toppingMatch = item.match(/,\s*([^,(]+)/g);
-      if (toppingMatch) {
-        toppingMatch.forEach((topping) => {
-          const name = topping.replace(/,\s*/, "").trim();
-          toppingCounts.set(name, (toppingCounts.get(name) || 0) + 1);
-        });
-      }
+    order.order_items?.forEach((item) => {
+      item.order_item_toppings?.forEach((topping) => {
+        toppingCounts.set(
+          topping.topping_name,
+          (toppingCounts.get(topping.topping_name) || 0) + item.quantity,
+        );
+      });
     });
   });
 

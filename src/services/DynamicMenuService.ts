@@ -39,10 +39,10 @@ export interface DynamicCategory {
 
 type DrinkRow = {
   id: string;
-  type?: string | null;
   name: string;
   description?: string | null;
   image_url?: string | null;
+  category_id?: string | null;
   is_available?: boolean | null;
 };
 
@@ -100,21 +100,71 @@ class DynamicMenuService {
     return (data?.price as number | null) ?? 0;
   }
 
+  private async ensureCategoryId(
+    categoryName?: string,
+    client?: SupabaseClient,
+  ): Promise<string | null> {
+    const name = categoryName?.trim();
+    if (!name) return null;
+
+    const db = this.getClient(client);
+    const { data: existing } = await db
+      .from("categories")
+      .select("id")
+      .eq("name", name)
+      .maybeSingle();
+
+    if (existing?.id) return existing.id as string;
+
+    const { data: created, error } = await db
+      .from("categories")
+      .insert({ name })
+      .select("id")
+      .single();
+
+    if (error) return null;
+    return created.id as string;
+  }
+
   // Category Management
   async getCategories(client?: SupabaseClient): Promise<DynamicCategory[]> {
-    void client;
-    // This codebase’s current Supabase schema doesn’t include a categories table.
-    // Return empty rather than throwing so callers can degrade gracefully.
-    return [];
+    const { data, error } = await this.getClient(client)
+      .from("categories")
+      .select("id, name, description, display_order, is_active, drinks(id)")
+      .order("display_order", { ascending: true });
+
+    if (error) return [];
+
+    return (data || []).map((row: any) => ({
+      id: row.id,
+      label: row.name,
+      description: row.description ?? "",
+      drinkIds: (row.drinks || []).map((drink: { id: string }) => drink.id),
+      isActive: row.is_active ?? true,
+      displayOrder: row.display_order ?? 0,
+    }));
   }
 
   async addCategory(
     category: { label: string; description: string },
     client?: SupabaseClient,
   ): Promise<DynamicCategory | null> {
-    void category;
-    void client;
-    return null;
+    const { data, error } = await this.getClient(client)
+      .from("categories")
+      .insert({ name: category.label, description: category.description })
+      .select("*")
+      .single();
+
+    if (error) return null;
+    this.notify();
+    return {
+      id: data.id,
+      label: data.name,
+      description: data.description ?? "",
+      drinkIds: [],
+      isActive: data.is_active ?? true,
+      displayOrder: data.display_order ?? 0,
+    };
   }
 
   async updateCategory(
@@ -122,19 +172,34 @@ class DynamicMenuService {
     data: Partial<DynamicCategory>,
     client?: SupabaseClient,
   ): Promise<boolean> {
-    void id;
-    void data;
-    void client;
-    return false;
+    const updateRow: Record<string, unknown> = {};
+    if (data.label !== undefined) updateRow.name = data.label;
+    if (data.description !== undefined) updateRow.description = data.description;
+    if (data.isActive !== undefined) updateRow.is_active = data.isActive;
+    if (data.displayOrder !== undefined)
+      updateRow.display_order = data.displayOrder;
+
+    const { error } = await this.getClient(client)
+      .from("categories")
+      .update(updateRow)
+      .eq("id", id);
+
+    if (error) return false;
+    this.notify();
+    return true;
   }
 
   async deleteCategory(
     id: string,
     client?: SupabaseClient,
   ): Promise<boolean> {
-    void id;
-    void client;
-    return false;
+    const { error } = await this.getClient(client)
+      .from("categories")
+      .delete()
+      .eq("id", id);
+    if (error) return false;
+    this.notify();
+    return true;
   }
 
   // Drink Management
@@ -164,12 +229,12 @@ class DynamicMenuService {
         const regularPrice = await this.getRegularPrice(row.id, client);
         return {
           id: row.id,
-          type: row.type ?? "",
+          type: "",
           name: row.name,
           description: row.description ?? "",
           price: regularPrice,
           image: row.image_url ?? "",
-          categoryId: "",
+          categoryId: row.category_id ?? "",
           availableToppings: [],
           availableSugarLevels: [],
           isAvailable: row.is_available ?? true,
@@ -189,6 +254,7 @@ class DynamicMenuService {
     const { data: created, error: drinkError } = await db
       .from("drinks")
       .insert({
+        category_id: await this.ensureCategoryId(drink.categoryId, client),
         name: drink.name,
         description: drink.description,
         image_url: drink.image,
@@ -234,12 +300,12 @@ class DynamicMenuService {
     this.notify();
     return {
       id: drinkId,
-      type: created.type ?? "",
+      type: "",
       name: created.name,
       description: created.description ?? "",
       price: drink.price,
       image: created.image_url ?? "",
-      categoryId: "",
+      categoryId: created.category_id ?? "",
       availableToppings: drink.availableToppings ?? [],
       availableSugarLevels: drink.availableSugarLevels ?? [],
       isAvailable: true,
