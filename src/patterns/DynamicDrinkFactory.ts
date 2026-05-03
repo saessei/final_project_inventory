@@ -1,5 +1,5 @@
 import supabase from "@/lib/supabaseClient";
-import { DrinkType } from "@/patterns/drinkFactory";
+import { DrinkType } from "@/patterns/DrinkFactory";
 
 export interface Topping {
   id: string;
