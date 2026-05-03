@@ -92,7 +92,13 @@ export function useCart(_staffUserId?: string) {
   }, []);
 
   const cartTotal = useMemo(
-    () => cart.reduce((sum, i) => sum + i.quantity * Number(i.drink_price), 0),
+    () =>
+      cart.reduce((sum, item) => {
+        const toppingSum =
+          item.topping_details?.reduce((tsum, t) => tsum + Number(t.price), 0) ||
+          0;
+        return sum + item.quantity * (Number(item.drink_price) + toppingSum);
+      }, 0),
     [cart],
   );
 
