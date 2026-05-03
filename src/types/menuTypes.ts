@@ -10,9 +10,8 @@ export interface SugarLevel {
 export interface DrinkType {
   id: string;
   name: string;
-  description: string;
-  image_url: string;
   category?: string | null;
+  is_available: boolean;
   sizes: {
     regular: number;
     medium: number;
@@ -37,9 +36,8 @@ export interface CategoryType {
 
 export interface DrinkModalData {
   name: string;
-  description: string;
-  image_url: string;
   category: string;
+  is_available: boolean;
   regular_price: string;
   medium_price: string;
   large_price: string;

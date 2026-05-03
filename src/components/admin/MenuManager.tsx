@@ -41,7 +41,7 @@ export const MenuManager = () => {
   const loadData = useCallback(async () => {
     setLoading(true);
     const [drinksData, toppingsData] = await Promise.all([
-      drinkService.getAllDrinks(),
+      drinkService.getAllDrinks(false),
       drinkService.getAllToppings(),
     ]);
 
@@ -70,9 +70,8 @@ export const MenuManager = () => {
         editingItem.id,
         {
           name: data.name,
-          description: data.description,
-          image_url: data.image_url,
           category,
+          is_available: data.is_available,
         },
         {
           regular: parseFloat(data.regular_price) || 0,
@@ -85,9 +84,8 @@ export const MenuManager = () => {
       await drinkService.createDrink(
         {
           name: data.name,
-          description: data.description,
-          image_url: data.image_url,
           category,
+          is_available: data.is_available,
         },
         {
           regular: parseFloat(data.regular_price) || 0,
