@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { useOrders, type Order } from "@/hooks/useOrders";
 import { updateOrderStatus } from "@/services/orderService";
@@ -13,6 +13,7 @@ const ITEMS_PER_PAGE = 6;
 export const QueuedOrders = () => {
   const { orders, loading, updateOrderInState } = useOrders();
   const [viewMode, setViewMode] = useState<"active" | "completed">("active");
+  const [activePage, setActivePage] = useState(1);
   const [completedPage, setCompletedPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
@@ -53,17 +54,38 @@ export const QueuedOrders = () => {
       order.status === "ready",
   );
 
+  const activeTotalPages = Math.max(1, Math.ceil(activeOrders.length / ITEMS_PER_PAGE));
+  const paginatedActive = activeOrders.slice(
+    (activePage - 1) * ITEMS_PER_PAGE,
+    activePage * ITEMS_PER_PAGE,
+  );
+
   const paginatedCompleted = completedOrders.slice(
     (completedPage - 1) * ITEMS_PER_PAGE,
     completedPage * ITEMS_PER_PAGE,
   );
 
-  const displayOrders = viewMode === "active" ? activeOrders : paginatedCompleted;
-  const totalPages = Math.ceil(completedOrders.length / ITEMS_PER_PAGE);
-  
-  const queueOrders = viewMode === "active" 
-    ? displayOrders 
-    : displayOrders.filter((order) => order.status !== "cancelled");
+  const completedTotalPages = Math.max(1, Math.ceil(completedOrders.length / ITEMS_PER_PAGE));
+
+  const queueOrders =
+    viewMode === "active"
+      ? paginatedActive
+      : paginatedCompleted.filter((order) => order.status !== "cancelled");
+
+  const currentPage = viewMode === "active" ? activePage : completedPage;
+  const totalPages = viewMode === "active" ? activeTotalPages : completedTotalPages;
+
+  useEffect(() => {
+    setActivePage((current) => Math.min(current, activeTotalPages));
+  }, [activeTotalPages]);
+
+  useEffect(() => {
+    setCompletedPage((current) => Math.min(current, completedTotalPages));
+  }, [completedTotalPages]);
+
+  const handleViewModeChange = (mode: "active" | "completed") => {
+    setViewMode(mode);
+  };
 
   const handleStatusChange = async (order: Order) => {
     if (order.status === "pending") {
@@ -183,7 +205,7 @@ export const QueuedOrders = () => {
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="flex bg-white rounded-full p-1 border border-slate-200 shadow-sm">
               <button
-                onClick={() => setViewMode("active")}
+                onClick={() => handleViewModeChange("active")}
                 className={`rounded-full px-5 py-1.5 text-xs font-black uppercase tracking-wider transition-all ${
                   viewMode === "active"
                     ? "bg-dark-brown text-white shadow-md"
@@ -193,7 +215,7 @@ export const QueuedOrders = () => {
                 Active
               </button>
               <button
-                onClick={() => setViewMode("completed")}
+                onClick={() => handleViewModeChange("completed")}
                 className={`rounded-full px-5 py-1.5 text-xs font-black uppercase tracking-wider transition-all ${
                   viewMode === "completed"
                     ? "bg-dark-brown text-white shadow-md"
@@ -297,21 +319,29 @@ export const QueuedOrders = () => {
               })
             )}
           </div>
-          {viewMode === "completed" && totalPages > 1 && (
+          {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 mt-6">
               <button
-                onClick={() => setCompletedPage(Math.max(1, completedPage - 1))}
-                disabled={completedPage === 1}
+                onClick={() =>
+                  viewMode === "active"
+                    ? setActivePage(Math.max(1, activePage - 1))
+                    : setCompletedPage(Math.max(1, completedPage - 1))
+                }
+                disabled={currentPage === 1}
                 className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50"
               >
                 Previous
               </button>
               <span className="text-sm text-gray-600">
-                Page {completedPage} of {totalPages}
+                Page {currentPage} of {totalPages}
               </span>
               <button
-                onClick={() => setCompletedPage(Math.min(totalPages, completedPage + 1))}
-                disabled={completedPage === totalPages}
+                onClick={() =>
+                  viewMode === "active"
+                    ? setActivePage(Math.min(totalPages, activePage + 1))
+                    : setCompletedPage(Math.min(totalPages, completedPage + 1))
+                }
+                disabled={currentPage === totalPages}
                 className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50"
               >
                 Next
