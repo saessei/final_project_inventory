@@ -211,12 +211,14 @@ export const DrinkModal = ({
         icon={<Coffee size={32} strokeWidth={2.5} />}
         onClose={onClose}
         size="xl"
+        className="max-h-[95vh] sm:max-h-[90vh]"
+        bodyClassName="px-4 py-2 sm:px-6"
         footer={
           <>
-            <Button variant="outline" onClick={onClose} className="rounded-xl px-6">
+            <Button variant="outline" onClick={onClose} className="w-full sm:w-auto rounded-xl px-6">
               Cancel
             </Button>
-            <Button variant="solid" onClick={() => onSave(formData)} className="rounded-xl px-10">
+            <Button variant="solid" onClick={() => onSave(formData)} className="w-full sm:w-auto rounded-xl px-10">
               Save Changes
             </Button>
           </>
@@ -224,8 +226,8 @@ export const DrinkModal = ({
       >
         <div className="space-y-8">
         {/* Availability Toggle Section */}
-        <div className="flex items-center justify-between p-5 bg-cream/30 rounded-3xl border border-slate-100 shadow-sm">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-5 bg-cream/30 rounded-3xl border border-slate-100 shadow-sm">
+          <div className="flex items-start sm:items-center gap-4">
             <div className={cx(
               "p-3 rounded-2xl",
               formData.is_available ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
@@ -237,7 +239,7 @@ export const DrinkModal = ({
               <p className="text-xs text-gray-500 font-medium">Is this drink currently available for purchase?</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between sm:justify-start gap-4">
             <span className={cx(
               "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shadow-sm border",
               formData.is_available 
@@ -267,7 +269,7 @@ export const DrinkModal = ({
         {/* Basic Information Section */}
         <section>
           <SectionLabel icon={Tag}>Basic Information</SectionLabel>
-          <div className="grid grid-cols-2 gap-4 p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
             <TextField
               label="Drink Name *"
               placeholder="e.g. Classic Pearl Milk Tea"
@@ -332,7 +334,7 @@ export const DrinkModal = ({
         {/* Pricing Section */}
         <section>
           <SectionLabel icon={DollarSign}>Pricing Options (₱)</SectionLabel>
-          <div className="grid grid-cols-3 gap-4 p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
             <div className="relative">
               <div className="absolute left-4 top-10 text-gray-400 font-bold">₱</div>
               <TextField
@@ -377,9 +379,9 @@ export const DrinkModal = ({
 
         {/* Toppings Section */}
         <section>
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <SectionLabel icon={Layers}>Available Toppings</SectionLabel>
-            <div className="relative w-64">
+            <div className="relative w-full sm:w-64">
               <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input 
                 type="text" 
@@ -392,7 +394,7 @@ export const DrinkModal = ({
           </div>
 
           <div className="bg-[#fcfbf7]/50 rounded-[2rem] border border-slate-100 p-5">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[18rem] overflow-y-auto no-scrollbar pr-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[18rem] overflow-y-auto no-scrollbar pr-1">
               {filteredToppings.map(topping => {
                 const isSelected = formData.selected_toppings.includes(topping.id);
                 return (
@@ -406,7 +408,7 @@ export const DrinkModal = ({
                       setFormData({ ...formData, selected_toppings: newToppings });
                     }}
                     className={cx(
-                      "flex flex-col items-start p-4 rounded-2xl border transition-all text-left relative group",
+                      "flex flex-col items-start p-3 sm:p-4 rounded-2xl border transition-all text-left relative group",
                       isSelected 
                         ? "bg-white border-brown ring-1 ring-brown/20 shadow-md translate-y-[-1px]" 
                         : "bg-white border-slate-100 hover:border-slate-200 shadow-sm"
