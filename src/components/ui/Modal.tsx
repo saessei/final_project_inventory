@@ -42,26 +42,28 @@ export const Modal = ({
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         className={cx(
-          "bg-white rounded-[2rem] p-8 w-full shadow-2xl max-h-[90vh] overflow-y-auto no-scrollbar relative",
+          "bg-white rounded-[2rem] w-full shadow-2xl max-h-[90vh] flex flex-col relative overflow-hidden",
           sizes[size],
           className,
         )}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-start mb-8">
+        {/* Header - Fixed */}
+        <div className="flex justify-between items-start p-6 pb-2">
           <div>
             {title && (
               <div className="flex items-center gap-3">
                 {icon && <div className="text-brown">{icon}</div>}
-                <h2 id={titleId} className="text-3xl font-black font-fredoka text-dark-brown">
+                <h2
+                  id={titleId}
+                  className="text-2xl font-black font-fredoka text-dark-brown"
+                >
                   {title}
                 </h2>
               </div>
             )}
             {description && (
-              <p className="mt-1 text-gray-500 font-medium">
-                {description}
-              </p>
+              <p className="mt-1 text-sm text-gray-500 font-medium">{description}</p>
             )}
           </div>
           <IconButton
@@ -69,14 +71,23 @@ export const Modal = ({
             onClick={onClose}
             className="hover:bg-cream/50 transition-colors"
           >
-            <X size={24} className="text-gray-400" />
+            <X size={20} className="text-gray-400" />
           </IconButton>
         </div>
 
-        <div className={bodyClassName}>{children}</div>
+        {/* Body - Scrollable */}
+        <div
+          className={cx(
+            "flex-1 overflow-y-auto px-6 py-2 no-scrollbar",
+            bodyClassName,
+          )}
+        >
+          {children}
+        </div>
 
+        {/* Footer - Fixed */}
         {footer && (
-          <div className="flex justify-end gap-4 mt-10 pt-6 border-t border-slate-100 sticky bottom-0 bg-white -mx-8 px-8 -mb-2 pb-2">
+          <div className="flex justify-end gap-3 p-6 pt-4 border-t border-slate-50 bg-white">
             {footer}
           </div>
         )}

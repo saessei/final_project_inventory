@@ -14,8 +14,8 @@ export const DrinkGrid = ({ drinks, isSubmitting, onCustomize }: DrinkGridProps)
         type="button"
         disabled={isSubmitting}
         onClick={() => onCustomize(drink)}
-        className={`flex h-[96px] flex-col justify-between rounded border border-slate-200 bg-white p-2.5 text-left shadow-sm transition-colors active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brown/50 ${
-          isSubmitting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:border-brown hover:bg-brown/5"
+        className={`flex h-[110px] flex-col justify-between rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-brown/50 ${
+          isSubmitting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:border-brown hover:bg-[#fcfbf7] hover:shadow-md hover:-translate-y-0.5"
         }`}
       >
         <h4 className="w-full font-bold text-sm leading-tight text-dark-brown mb-1 line-clamp-2">

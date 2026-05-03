@@ -202,7 +202,14 @@ class DrinkService {
   async getAllDrinks(onlyAvailable: boolean = true, client?: SupabaseClient): Promise<Drink[]> {
     let query = this.getClient(client)
       .from("drinks")
-      .select("*, category:categories(name)");
+      .select(`
+        *,
+        category:categories(name),
+        sizes:drink_sizes(size, price),
+        drink_toppings:drink_toppings(
+          topping:toppings(*)
+        )
+      `);
     
     if (onlyAvailable) {
       query = query.eq("is_available", true);
@@ -217,18 +224,45 @@ class DrinkService {
       return [];
     }
 
-    const drinksWithDetails = await Promise.all(
-      (drinks || []).map(async (drink) => ({
-        ...drink,
-        category: Array.isArray(drink.category)
-          ? drink.category[0]?.name
-          : drink.category?.name,
-        sizes: await this.getDrinkSizes(drink.id, client),
-        available_toppings: await this.getDrinkToppings(drink.id, client),
-      })),
-    );
+    return (drinks || []).map((drink: any) => {
+      // Format category
+      const categoryName = Array.isArray(drink.category)
+        ? drink.category[0]?.name
+        : drink.category?.name;
 
-    return drinksWithDetails;
+      // Format sizes into the expected object structure
+      const sizeMap = { regular: 0, medium: 0, large: 0 };
+      if (Array.isArray(drink.sizes)) {
+        drink.sizes.forEach((s: any) => {
+          if (s.size in sizeMap) {
+            sizeMap[s.size as keyof typeof sizeMap] = s.price;
+          }
+        });
+      }
+
+      // Format toppings
+      const toppings = Array.isArray(drink.drink_toppings)
+        ? drink.drink_toppings
+            .map((dt: any) => {
+              const t = Array.isArray(dt.topping) ? dt.topping[0] : dt.topping;
+              if (!t) return null;
+              return {
+                id: t.id,
+                name: t.name,
+                price: t.price ?? 0,
+                is_available: t.is_available,
+              };
+            })
+            .filter(Boolean)
+        : [];
+
+      return {
+        ...drink,
+        category: categoryName,
+        sizes: sizeMap,
+        available_toppings: toppings,
+      };
+    });
   }
 
   async getDrinkSizes(

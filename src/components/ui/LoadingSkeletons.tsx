@@ -1,20 +1,20 @@
 import type { ReactNode } from "react";
 import { Skeleton } from "boneyard-js/react";
 
-const bone = "animate-pulse rounded-2xl bg-slate-200/80";
+const bone = "animate-pulse rounded-xl bg-slate-200/60";
 
 const AuthFallback = () => (
   <div className="bg-cream min-h-screen flex items-center justify-center px-4">
-    <div className="w-full max-w-md rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
-      <div className="mx-auto h-14 w-14 rounded-2xl bg-slate-200/80 animate-pulse" />
-      <div className="mt-6 space-y-3">
+    <div className="w-full max-w-md rounded-[2.5rem] border border-slate-100 bg-white p-8 shadow-sm">
+      <div className="mx-auto h-16 w-16 rounded-[1.25rem] bg-slate-200/60 animate-pulse" />
+      <div className="mt-8 space-y-4">
         <div className={`${bone} h-8 w-2/3 mx-auto`} />
         <div className={`${bone} h-4 w-full`} />
         <div className={`${bone} h-4 w-5/6 mx-auto`} />
       </div>
-      <div className="mt-8 space-y-3">
-        <div className={`${bone} h-12 w-full`} />
-        <div className={`${bone} h-12 w-full`} />
+      <div className="mt-10 space-y-3">
+        <div className={`${bone} h-12 w-full rounded-2xl`} />
+        <div className={`${bone} h-12 w-full rounded-2xl`} />
       </div>
     </div>
   </div>
@@ -22,23 +22,23 @@ const AuthFallback = () => (
 
 const SettingsFallback = () => (
   <div className="max-w-5xl mx-auto">
-    <div className="grid gap-6 lg:grid-cols-2">
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+    <div className="grid gap-8 lg:grid-cols-2">
+      <div className="rounded-[2rem] border border-slate-100 bg-white p-8 shadow-sm space-y-6">
         <div className={`${bone} h-6 w-44`} />
         <div className={`${bone} h-4 w-3/4`} />
         <div className="space-y-4 pt-2">
-          <div className={`${bone} h-14 w-full`} />
-          <div className={`${bone} h-12 w-full`} />
+          <div className={`${bone} h-14 w-full rounded-2xl`} />
+          <div className={`${bone} h-12 w-full rounded-2xl`} />
         </div>
       </div>
 
-      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+      <div className="rounded-[2rem] border border-slate-100 bg-white p-8 shadow-sm space-y-6">
         <div className={`${bone} h-6 w-52`} />
         <div className={`${bone} h-4 w-3/4`} />
         <div className="space-y-4 pt-2">
-          <div className={`${bone} h-14 w-full`} />
-          <div className={`${bone} h-14 w-full`} />
-          <div className={`${bone} h-12 w-full`} />
+          <div className={`${bone} h-14 w-full rounded-2xl`} />
+          <div className={`${bone} h-14 w-full rounded-2xl`} />
+          <div className={`${bone} h-12 w-full rounded-2xl`} />
         </div>
       </div>
     </div>
@@ -46,54 +46,54 @@ const SettingsFallback = () => (
 );
 
 const MenuManagerFallback = () => (
-  <div className="space-y-4">
-      <div className={`${bone} h-11 w-40 rounded-lg`} />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div key={index} className="rounded-2xl border border-slate-200 bg-white p-5 space-y-4 shadow-sm">
-            <div className={`${bone} h-6 w-3/5`} />
-            <div className={`${bone} h-4 w-11/12`} />
-            <div className="flex gap-2 pt-2">
-              <div className={`${bone} h-9 w-20 rounded-full`} />
-              <div className={`${bone} h-9 w-20 rounded-full`} />
-            </div>
+  <div className="space-y-6">
+    <div className={`${bone} h-11 w-40 rounded-2xl`} />
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="rounded-2xl border border-slate-100 bg-white p-5 space-y-4 shadow-sm">
+          <div className={`${bone} h-6 w-3/5`} />
+          <div className={`${bone} h-4 w-11/12`} />
+          <div className="flex gap-2 pt-2">
+            <div className={`${bone} h-9 w-20 rounded-full`} />
+            <div className={`${bone} h-9 w-20 rounded-full`} />
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
+  </div>
 );
 
 const ReportsFallback = () => (
-  <div className="max-w-7xl mx-auto space-y-6">
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+  <div className="max-w-7xl mx-auto space-y-8">
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
       {Array.from({ length: 3 }).map((_, index) => (
-        <div key={index} className="bg-white rounded-2xl p-6 shadow-sm border space-y-4">
+        <div key={index} className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 space-y-4">
           <div className={`${bone} h-4 w-32`} />
-          <div className={`${bone} h-10 w-28`} />
+          <div className={`${bone} h-10 w-28 rounded-2xl`} />
         </div>
       ))}
     </div>
 
-    <div className="grid lg:grid-cols-2 gap-6">
-      <div className="bg-white rounded-2xl p-6 shadow-sm border space-y-4">
+    <div className="grid lg:grid-cols-2 gap-8">
+      <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 space-y-4">
         <div className={`${bone} h-5 w-44`} />
-        <div className="space-y-3">
+        <div className="space-y-3 pt-2">
           {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className={`${bone} h-10 w-full`} />
+            <div key={index} className={`${bone} h-10 w-full rounded-xl`} />
           ))}
         </div>
       </div>
-      <div className="bg-white rounded-2xl p-6 shadow-sm border space-y-4">
+      <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 space-y-4">
         <div className={`${bone} h-5 w-44`} />
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3 pt-2">
           {Array.from({ length: 5 }).map((_, index) => (
-            <div key={index} className={`${bone} h-16 w-20 rounded-xl`} />
+            <div key={index} className={`${bone} h-16 w-20 rounded-2xl`} />
           ))}
         </div>
       </div>
     </div>
 
-    <div className="bg-white rounded-2xl p-6 shadow-sm border space-y-4">
+    <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 space-y-6">
       <div className={`${bone} h-5 w-44`} />
       <div className="grid grid-cols-5 gap-4">
         {Array.from({ length: 5 }).map((_, index) => (
@@ -102,7 +102,7 @@ const ReportsFallback = () => (
       </div>
       <div className="space-y-3">
         {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className={`${bone} h-11 w-full`} />
+          <div key={index} className={`${bone} h-11 w-full rounded-xl`} />
         ))}
       </div>
     </div>
@@ -144,18 +144,19 @@ export const ReportsSkeleton = ({ loading, children }: SkeletonShellProps) => (
 
 const KioskFallback = () => (
   <div className="space-y-6">
-    <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-      {Array.from({ length: 8 }).map((_, index) => (
+    <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+      {Array.from({ length: 18 }).map((_, index) => (
         <div
           key={index}
-          className="flex flex-col items-start justify-between gap-2 rounded-lg border border-slate-200 bg-white p-3 shadow-sm"
+          className="flex h-[110px] flex-col items-start justify-between gap-2 rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm"
         >
           <div className="w-full space-y-2">
             <div className={`${bone} h-5 w-3/4 rounded-md`} />
             <div className={`${bone} h-4 w-1/2 rounded-md`} />
           </div>
-          <div className="w-full flex justify-end">
-            <div className={`${bone} h-8 w-16 rounded-md`} />
+          <div className="w-full flex items-center justify-between mt-auto">
+            <div className={`${bone} h-5 w-10 rounded-md`} />
+            <div className={`${bone} h-7 w-14 rounded-md`} />
           </div>
         </div>
       ))}
