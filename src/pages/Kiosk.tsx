@@ -27,6 +27,7 @@ export const Kiosk = () => {
   const staffUserId = session?.user?.id;
   const {
     cart,
+    cartTotal,
     loading: cartLoading,
     upsertItem,
     decrementItemAtIndex,
@@ -199,10 +200,7 @@ export const Kiosk = () => {
     );
   };
 
-  const cartTotal = cart.reduce(
-    (sum, item) => sum + Number(item.drink_price) * item.quantity,
-    0,
-  );
+
 
   const handleCheckout = async () => {
     if (cart.length === 0 || isSubmitting || checkoutLockRef.current) return;
