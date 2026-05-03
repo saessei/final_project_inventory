@@ -87,7 +87,10 @@ export const CartSidebar = ({
 
         <div className="space-y-3 max-h-[45vh] lg:max-h-[50vh] overflow-y-auto no-scrollbar pb-3">
           {cart.length === 0 ? (
-            <p className="text-sm text-gray-500">Cart is empty.</p>
+            <div className="py-6 text-center text-gray-500">
+              <p className="font-semibold text-gray-600 mb-1">No items added yet</p>
+              <p className="text-sm">Select a drink to begin an order</p>
+            </div>
           ) : (
             cart.map((item, idx) => {
               const total = Number(item.drink_price) * item.quantity;

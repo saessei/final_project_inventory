@@ -83,6 +83,14 @@ export function useCart(_staffUserId?: string) {
     setCart((current) => current.filter((_, i) => i !== index));
   }, []);
 
+  const replaceItemAtIndex = useCallback(async (index: number, item: Omit<CartItem, "id">) => {
+    setCart((current) =>
+      current.map((ci, i) =>
+        i === index ? { ...item, id: ci.id } : ci
+      )
+    );
+  }, []);
+
   const cartTotal = useMemo(
     () => cart.reduce((sum, i) => sum + i.quantity * Number(i.drink_price), 0),
     [cart],
@@ -97,6 +105,7 @@ export function useCart(_staffUserId?: string) {
     decrementItemAtIndex,
     incrementItemAtIndex,
     removeItemAtIndex,
+    replaceItemAtIndex,
     clearCart,
     cartTotal,
   };

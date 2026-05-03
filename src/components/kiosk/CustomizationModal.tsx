@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
-import { X } from "lucide-react";
+import { X, Check } from "lucide-react";
 import type { Drink, SugarLevel, Topping } from "@/services/DrinkService";
 
 interface CustomizationModalProps {
@@ -9,12 +9,14 @@ interface CustomizationModalProps {
   selectedSize: string;
   selectedSugar: SugarLevel | null;
   selectedToppings: Topping[];
+  notes: string;
   isSubmitting: boolean;
   totalPrice: number;
   onClose: () => void;
   onSizeChange: (size: string) => void;
   onSugarChange: (sugar: SugarLevel) => void;
   onToggleTopping: (topping: Topping) => void;
+  onNotesChange: (notes: string) => void;
   onAddToOrder: () => void;
 }
 
@@ -41,12 +43,14 @@ export const CustomizationModal = ({
   selectedSize,
   selectedSugar,
   selectedToppings,
+  notes,
   isSubmitting,
   totalPrice,
   onClose,
   onSizeChange,
   onSugarChange,
   onToggleTopping,
+  onNotesChange,
   onAddToOrder,
 }: CustomizationModalProps) => {
   const sizeOptions = [
@@ -97,7 +101,7 @@ export const CustomizationModal = ({
                   }`}
                 >
                   <span className="text-sm font-semibold">{option.label}</span>
-                  <span className="text-xs opacity-80">₱{option.price}</span>
+                  <span className="text-xs opacity-80 block">₱{option.price}</span>
                 </Button>
               ))}
             </div>
@@ -130,24 +134,40 @@ export const CustomizationModal = ({
           {drink.available_toppings.length > 0 && (
             <SectionCard title="Toppings">
               <div className="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto no-scrollbar">
-                {drink.available_toppings.map((topping) => (
-                  <Button
-                    key={topping.id}
-                    onClick={() => onToggleTopping(topping)}
-                    variant="outline"
-                    className={`rounded-2xl px-3 py-3 transition-all ${
-                      selectedToppings.some((t) => t.id === topping.id)
-                        ? "!bg-brown !text-white !border-brown shadow-md ring-2 ring-brown/15"
-                        : "bg-white text-[#6b5d4d] border-slate-200"
-                    }`}
-                  >
-                    <span className="text-sm font-semibold">{topping.name}</span>
-                    <span className="text-xs opacity-80">+₱{topping.price}</span>
-                  </Button>
-                ))}
+                {drink.available_toppings.map((topping) => {
+                  const isSelected = selectedToppings.some((t) => t.id === topping.id);
+                  return (
+                    <Button
+                      key={topping.id}
+                      onClick={() => onToggleTopping(topping)}
+                      variant="outline"
+                      className={`relative overflow-hidden rounded-2xl px-3 py-3 transition-all ${
+                        isSelected
+                          ? "!bg-brown !text-white !border-brown shadow-md ring-2 ring-brown/15"
+                          : "bg-white text-[#6b5d4d] border-slate-200"
+                      }`}
+                    >
+                      <div className="flex items-center justify-center gap-1.5">
+                        {isSelected && <Check size={14} className="text-white" />}
+                        <span className="text-sm font-semibold">{topping.name}</span>
+                      </div>
+                      <span className="text-xs opacity-80 block">+₱{topping.price}</span>
+                    </Button>
+                  );
+                })}
               </div>
             </SectionCard>
           )}
+
+          <SectionCard title="Special Requests / Notes">
+            <input
+              type="text"
+              value={notes}
+              onChange={(e) => onNotesChange(e.target.value)}
+              placeholder="e.g. Less ice, separate pearls, no straw"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-dark-brown outline-none transition-all focus:border-brown focus:ring-1 focus:ring-brown"
+            />
+          </SectionCard>
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-1">
             <Button
