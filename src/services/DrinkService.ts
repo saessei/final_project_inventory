@@ -5,8 +5,6 @@ import { SupabaseClient } from "@supabase/supabase-js";
 export interface Drink {
   id: string;
   name: string;
-  description: string;
-  image_url: string;
   category_id?: string | null;
   category?: string | null;
   is_available: boolean;
@@ -201,11 +199,16 @@ class DrinkService {
   }
 
   // ============ DRINKS ============
-  async getAllDrinks(client?: SupabaseClient): Promise<Drink[]> {
-    const { data: drinks, error } = await this.getClient(client)
+  async getAllDrinks(onlyAvailable: boolean = true, client?: SupabaseClient): Promise<Drink[]> {
+    let query = this.getClient(client)
       .from("drinks")
-      .select("*, category:categories(name)")
-      .eq("is_available", true)
+      .select("*, category:categories(name)");
+    
+    if (onlyAvailable) {
+      query = query.eq("is_available", true);
+    }
+
+    const { data: drinks, error } = await query
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: true });
 
@@ -287,7 +290,7 @@ class DrinkService {
   }
 
   async createDrink(
-    drink: { name: string; description: string; image_url: string; category?: string },
+    drink: { name: string; category?: string; is_available?: boolean },
     sizes: { regular: number; medium: number; large: number },
     toppingIds: string[],
     client?: SupabaseClient,
@@ -301,9 +304,7 @@ class DrinkService {
       .insert({
         category_id: categoryId,
         name: drink.name,
-        description: drink.description,
-        image_url: drink.image_url,
-        is_available: true,
+        is_available: drink.is_available ?? true,
       })
       .select()
       .single();
@@ -348,7 +349,7 @@ class DrinkService {
 
   async updateDrink(
     drinkId: string,
-    updates: { name?: string; description?: string; image_url?: string; category?: string | null },
+    updates: { name?: string; category?: string | null; is_available?: boolean },
     sizes?: { regular: number; medium: number; large: number },
     toppingIds?: string[],
     client?: SupabaseClient,
