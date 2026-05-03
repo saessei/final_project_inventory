@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { IconButton } from "@/components/ui/IconButton";
 import { TextField } from "@/components/ui/TextField";
 import { Select } from "@/components/ui/Select";
 import { CreditCard, Wallet, Banknote, Trash, Edit2, Minus, Plus } from "lucide-react";
@@ -100,7 +99,8 @@ export const CartSidebar = ({
             </div>
           ) : (
             cart.map((item, idx) => {
-              const total = Number(item.drink_price) * item.quantity;
+              const toppingSum = item.topping_details?.reduce((sum, t) => sum + Number(t.price), 0) || 0;
+              const total = (Number(item.drink_price) + toppingSum) * item.quantity;
               return (
                 <div
                   key={item.id}

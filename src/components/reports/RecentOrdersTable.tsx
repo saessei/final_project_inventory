@@ -44,47 +44,54 @@ export const RecentOrdersTable = ({
         No orders in this period
       </div>
     ) : (
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto -mx-6 sm:mx-0">
         <table className="w-full text-sm">
-          <thead className="border-b border-slate-200">
-            <tr className="text-left text-gray-400">
-              <th className="pb-3">Customer</th>
-              <th className="pb-3">Items</th>
-              <th className="pb-3">Status</th>
-              <th className="pb-3">Total</th>
-              <th className="pb-3">Time</th>
+          <thead className="border-b border-slate-100 bg-slate-50/50">
+            <tr className="text-left text-slate-400">
+              <th className="px-6 py-4 font-black text-[10px] uppercase tracking-widest">Customer</th>
+              <th className="px-6 py-4 font-black text-[10px] uppercase tracking-widest">Items</th>
+              <th className="px-6 py-4 font-black text-[10px] uppercase tracking-widest">Status</th>
+              <th className="px-6 py-4 font-black text-[10px] uppercase tracking-widest text-right">Total</th>
+              <th className="px-6 py-4 font-black text-[10px] uppercase tracking-widest text-right">Time</th>
             </tr>
           </thead>
           <tbody>
             {orders.slice(0, 10).map((order) => (
-              <tr key={order.id} className="border-b border-slate-100 last:border-0">
-                <td className="py-3 font-medium">{order.customer_name}</td>
-                <td
-                  className="py-3 text-gray-600 max-w-md truncate"
-                  title={order.order_details}
-                >
-                  {order.order_details.length > 40
-                    ? order.order_details.slice(0, 40) + "..."
-                    : order.order_details}
+              <tr key={order.id} className="group border-b border-slate-50 last:border-0 hover:bg-slate-50/80 transition-colors">
+                <td className="px-6 py-4">
+                  <p className="font-black text-dark-brown">{order.customer_name}</p>
+                  <p className="text-[10px] text-slate-300 font-bold tracking-tight">#{order.id.slice(0, 8)}</p>
                 </td>
-                <td className="py-3">
+                <td className="px-6 py-4 max-w-xs sm:max-w-md">
+                  <div 
+                    className="text-slate-500 text-xs line-clamp-1 group-hover:line-clamp-none transition-all duration-300"
+                    title={order.order_details}
+                  >
+                    {order.order_details}
+                  </div>
+                </td>
+                <td className="px-6 py-4">
                   <span
-                    className={`px-2 py-1 rounded-full text-xs capitalize ${
+                    className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
                       order.status === "completed"
-                        ? "bg-green-100 text-green-700"
-                        : order.status === "preparing"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-gray-100 text-gray-600"
+                        ? "bg-emerald-50 text-emerald-600 border-emerald-100"
+                        : order.status === "ready"
+                          ? "bg-blue-50 text-blue-600 border-blue-100"
+                          : order.status === "preparing"
+                            ? "bg-amber-50 text-amber-600 border-amber-100"
+                            : order.status === "cancelled"
+                              ? "bg-rose-50 text-rose-600 border-rose-100"
+                              : "bg-slate-50 text-slate-500 border-slate-100"
                     }`}
                   >
                     {order.status}
                   </span>
                 </td>
-                <td className="py-3 font-medium">
-                  ₱{order.total_price?.toFixed(2) || "0.00"}
+                <td className="px-6 py-4 font-black text-dark-brown text-right">
+                  ₱{order.total_price?.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </td>
-                <td className="py-3 text-gray-400 text-xs">
-                  {new Date(order.created_at).toLocaleTimeString()}
+                <td className="px-6 py-4 text-slate-400 text-[10px] font-bold text-right tabular-nums">
+                  {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </td>
               </tr>
             ))}
