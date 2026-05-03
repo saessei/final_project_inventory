@@ -119,9 +119,9 @@ export const Settings = () => {
             {(statusMessage || formError) && (
               <div className="mb-6 rounded-2xl px-4 py-3 text-sm font-medium">
                 {statusMessage ? (
-                  <Alert variant="success">{statusMessage}</Alert>
+                  <Alert type="success">{statusMessage}</Alert>
                 ) : (
-                  <Alert variant="error">{formError}</Alert>
+                  <Alert type="error">{formError}</Alert>
                 )}
               </div>
             )}

@@ -4,6 +4,7 @@ import { IconButton } from "./IconButton";
 import { cx } from "./utils";
 
 interface ModalProps {
+  isOpen?: boolean;
   title?: string;
   description?: string;
   icon?: ReactNode;
@@ -23,6 +24,7 @@ const sizes = {
 };
 
 export const Modal = ({
+  isOpen = true,
   title,
   description,
   icon,
@@ -34,6 +36,8 @@ export const Modal = ({
   bodyClassName,
 }: ModalProps) => {
   const titleId = useId();
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">

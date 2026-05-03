@@ -460,7 +460,7 @@ export const ToppingModal = ({ item, onSave, onClose }: ToppingModalProps) => {
       }
     >
       <div className="space-y-4">
-        {error && <Alert variant="error">{error}</Alert>}
+        {error && <Alert type="error">{error}</Alert>}
         <TextField
           label="Topping Name *"
           type="text"

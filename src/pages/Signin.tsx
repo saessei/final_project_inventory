@@ -109,7 +109,7 @@ export const Signin = () => {
             </div>
 
             {error && (
-              <Alert variant="error" className="mt-4 text-center">
+              <Alert type="error" className="mt-4 text-center">
                 {error}
               </Alert>
             )}
