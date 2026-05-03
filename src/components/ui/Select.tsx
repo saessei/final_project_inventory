@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown, Check } from "lucide-react";
+import { ChevronDown, Check, MoreHorizontal } from "lucide-react";
 import { cx } from "./utils";
 
 interface SelectOption {
@@ -39,6 +39,7 @@ export const Select = ({
   optionAction,
 }: SelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [openActionFor, setOpenActionFor] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   
   const selectedOption = options.find((opt) => opt.value === value);
@@ -47,6 +48,7 @@ export const Select = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
+        setOpenActionFor(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -96,6 +98,7 @@ export const Select = ({
                     onClick={() => {
                       onChange(option.value);
                       setIsOpen(false);
+                      setOpenActionFor(null);
                     }}
                     className={cx(
                       "flex-1 flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all",
@@ -112,8 +115,25 @@ export const Select = ({
                   </button>
 
                   {optionAction && (
-                    <div className="shrink-0 pr-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100 transition-opacity">
-                      {optionAction.render(option, isSelected, () => setIsOpen(false))}
+                    <div className="shrink-0 pr-1">
+                      {openActionFor === option.value ? (
+                        optionAction.render(option, isSelected, () => {
+                          setIsOpen(false);
+                          setOpenActionFor(null);
+                        })
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setOpenActionFor(option.value);
+                          }}
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all hover:bg-slate-50 hover:text-dark-brown"
+                          aria-label={`${optionAction.label} for ${option.label}`}
+                        >
+                          <MoreHorizontal size={14} />
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
