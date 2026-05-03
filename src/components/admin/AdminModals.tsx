@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { TextArea } from "@/components/ui/TextArea";
 import { TextField } from "@/components/ui/TextField";
-import { Coffee, Search, Check, Tag, DollarSign, Layers } from "lucide-react";
+import { Select } from "@/components/ui/Select";
+import { Coffee, Search, Check, Tag, DollarSign, Layers, Plus } from "lucide-react";
 import { cx } from "@/components/ui/utils";
 import type {
   CategoryType,
@@ -146,8 +147,11 @@ export const DrinkModal = ({
 
   const categoryOptions = categories.length > 0 ? categories : [];
   const showCustomCategory = categorySelection === "__new__";
-  const categorySelectClassName =
-    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-dark-brown outline-none transition-all focus:border-brown focus:ring-4 focus:ring-brown/5 appearance-none cursor-pointer";
+
+  const selectOptions = [
+    ...categoryOptions.map(cat => ({ value: cat, label: cat })),
+    { value: "__new__", label: "+ Add new category", icon: <Plus size={14} className="text-brown" /> }
+  ];
 
   const handleCategorySelection = (value: string) => {
     setCategorySelection(value);
@@ -240,31 +244,17 @@ export const DrinkModal = ({
               className="rounded-2xl py-3.5"
               required
             />
-            <div>
-              <label className="ml-2 text-xs uppercase font-black tracking-widest text-brown-two mb-2 block">
-                Category
-              </label>
-              <div className="relative group">
-                <select
-                  value={categorySelection}
-                  onChange={(e) => handleCategorySelection(e.target.value)}
-                  className={categorySelectClassName}
-                >
-                  <option value="">Select a category</option>
-                  {categoryOptions.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
-                    </option>
-                  ))}
-                  <option value="__new__">+ Add new category</option>
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 group-focus-within:text-brown transition-colors">
-                  <Check size={16} />
-                </div>
-              </div>
+            <div className="space-y-4">
+              <Select
+                label="Category"
+                value={categorySelection}
+                onChange={handleCategorySelection}
+                options={selectOptions}
+                placeholder="Select a category"
+              />
 
               {showCustomCategory && (
-                <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="animate-in fade-in slide-in-from-top-2 duration-200">
                   <TextField
                     label="New Category Name"
                     type="text"

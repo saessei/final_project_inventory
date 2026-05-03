@@ -95,7 +95,7 @@ export const QueuedOrders = () => {
 
       <main className="ml-0 lg:ml-64 mr-0 lg:mr-[12rem] h-screen overflow-y-auto no-scrollbar p-4 lg:p-6 pt-28 lg:pt-6">
         <div className="mb-6">
-          <h1 className="text-4xl font-black font-fredoka">Staff Station</h1>
+          <h1 className="text-4xl font-black font-fredoka">Order Queue</h1>
           <p className="text-lg text-gray-500">
             Take orders and move the queue from one shared station.
           </p>

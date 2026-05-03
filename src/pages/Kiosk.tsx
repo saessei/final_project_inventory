@@ -12,6 +12,7 @@ import { DrinkGrid } from "@/components/kiosk/DrinkGrid";
 import { EmptyMenuState } from "@/components/kiosk/EmptyMenuState";
 import { KioskSkeleton } from "@/components/ui/LoadingSkeletons";
 import { TextField } from "@/components/ui/TextField";
+import { Select } from "@/components/ui/Select";
 import { Search } from "lucide-react";
 import {
   drinkService,
@@ -243,6 +244,11 @@ export const Kiosk = () => {
 
   const hasNoMenu = drinks.length === 0;
 
+  const categoryOptions = [
+    { value: "all", label: "All Categories" },
+    ...categories.map((cat) => ({ value: cat, label: cat })),
+  ];
+
   return (
     <div className="bg-cream min-h-screen text-dark-brown font-quicksand">
       <div className="fixed top-0 left-0 h-screen w-64 z-10">
@@ -284,18 +290,14 @@ export const Kiosk = () => {
                 className="border-slate-200 bg-white text-dark-brown placeholder-gray-400 focus:border-dark-brown focus:ring-dark-brown/20"
               />
             </div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full sm:w-48 md:hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-dark-brown outline-none transition-all focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20"
-            >
-              <option value="all">All Categories</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+            <div className="w-full sm:w-64 md:hidden">
+              <Select
+                value={selectedCategory}
+                onChange={setSelectedCategory}
+                options={categoryOptions}
+                placeholder="All Categories"
+              />
+            </div>
           </div>
 
           {/* Quick Tabs */}
