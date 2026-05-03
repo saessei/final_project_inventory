@@ -185,7 +185,7 @@ export const DrinkModal = ({
         </>
       }
     >
-      <div className="space-y-10">
+      <div className="space-y-8">
         {/* Availability Toggle Section */}
         <div className="flex items-center justify-between p-5 bg-cream/30 rounded-3xl border border-slate-100 shadow-sm">
           <div className="flex items-center gap-4">
@@ -230,7 +230,7 @@ export const DrinkModal = ({
         {/* Basic Information Section */}
         <section>
           <SectionLabel icon={Tag}>Basic Information</SectionLabel>
-          <div className="grid grid-cols-2 gap-6 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
+          <div className="grid grid-cols-2 gap-4 p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
             <TextField
               label="Drink Name *"
               placeholder="e.g. Classic Pearl Milk Tea"
@@ -282,7 +282,7 @@ export const DrinkModal = ({
         {/* Pricing Section */}
         <section>
           <SectionLabel icon={DollarSign}>Pricing Options (₱)</SectionLabel>
-          <div className="grid grid-cols-3 gap-6 p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
+          <div className="grid grid-cols-3 gap-4 p-5 bg-white border border-slate-100 rounded-[2rem] shadow-sm">
             <div className="relative">
               <div className="absolute left-4 top-10 text-gray-400 font-bold">₱</div>
               <TextField
@@ -341,7 +341,7 @@ export const DrinkModal = ({
             </div>
           </div>
 
-          <div className="bg-[#fcfbf7]/50 rounded-[2rem] border border-slate-100 p-6">
+          <div className="bg-[#fcfbf7]/50 rounded-[2rem] border border-slate-100 p-5">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[18rem] overflow-y-auto no-scrollbar pr-1">
               {filteredToppings.map(topping => {
                 const isSelected = formData.selected_toppings.includes(topping.id);
