@@ -1,6 +1,7 @@
 import { CirclePlus, CupSoda, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { DrinkCard, ToppingCard } from "./AdminCards";
+import { MenuManagerSkeleton } from "@/components/ui/LoadingSkeletons";
 import type { DrinkType, TabType, ToppingType } from "@/types/menuTypes";
 
 interface AdminTabsProps {
@@ -14,6 +15,7 @@ interface AdminTabsProps {
   onAddTopping: () => void;
   onEditTopping: (topping: ToppingType) => void;
   onDeleteTopping: (id: string, name: string) => void;
+  loading?: boolean;
 }
 
 export const AdminTabs = ({
@@ -27,6 +29,7 @@ export const AdminTabs = ({
   onAddTopping,
   onEditTopping,
   onDeleteTopping,
+  loading = false,
 }: AdminTabsProps) => {
   const tabs = [
     {
@@ -64,49 +67,53 @@ export const AdminTabs = ({
       </div>
 
       {activeTab === "drinks" && (
-        <div>
-          <Button
-            onClick={onAddDrink}
-            variant="solid"
-            leftIcon={<Plus size={18} />}
-            className="mb-4 rounded-lg hover:opacity-90"
-          >
-            Add Drink
-          </Button>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {drinks.map((drink) => (
-              <DrinkCard
-                key={drink.id}
-                drink={drink}
-                onEdit={() => onEditDrink(drink)}
-                onDelete={() => onDeleteDrink(drink.id, drink.name)}
-              />
-            ))}
+        <MenuManagerSkeleton loading={loading}>
+          <div>
+            <Button
+              onClick={onAddDrink}
+              variant="solid"
+              leftIcon={<Plus size={18} />}
+              className="mb-4 rounded-lg hover:opacity-90"
+            >
+              Add Drink
+            </Button>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {drinks.map((drink) => (
+                <DrinkCard
+                  key={drink.id}
+                  drink={drink}
+                  onEdit={() => onEditDrink(drink)}
+                  onDelete={() => onDeleteDrink(drink.id, drink.name)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </MenuManagerSkeleton>
       )}
 
       {activeTab === "toppings" && (
-        <div>
-          <Button
-            onClick={onAddTopping}
-            variant="solid"
-            leftIcon={<Plus size={18} />}
-            className="mb-4 rounded-lg hover:opacity-90"
-          >
-            Add Topping
-          </Button>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {toppings.map((topping) => (
-              <ToppingCard
-                key={topping.id}
-                topping={topping}
-                onEdit={() => onEditTopping(topping)}
-                onDelete={() => onDeleteTopping(topping.id, topping.name)}
-              />
-            ))}
+        <MenuManagerSkeleton loading={loading}>
+          <div>
+            <Button
+              onClick={onAddTopping}
+              variant="solid"
+              leftIcon={<Plus size={18} />}
+              className="mb-4 rounded-lg hover:opacity-90"
+            >
+              Add Topping
+            </Button>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {toppings.map((topping) => (
+                <ToppingCard
+                  key={topping.id}
+                  topping={topping}
+                  onEdit={() => onEditTopping(topping)}
+                  onDelete={() => onDeleteTopping(topping.id, topping.name)}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        </MenuManagerSkeleton>
       )}
 
     </>

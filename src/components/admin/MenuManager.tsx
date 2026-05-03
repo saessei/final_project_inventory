@@ -165,9 +165,21 @@ export const MenuManager = () => {
             </div>
           </div>
 
-          <MenuManagerSkeleton loading>
-            <div className="max-w-7xl mx-auto" />
-          </MenuManagerSkeleton>
+          <div className="max-w-7xl mx-auto">
+            <AdminTabs
+              loading={true}
+              activeTab={activeTab}
+              drinks={[]}
+              toppings={[]}
+              onTabChange={setActiveTab}
+              onAddDrink={() => {}}
+              onEditDrink={() => {}}
+              onDeleteDrink={() => {}}
+              onAddTopping={() => {}}
+              onEditTopping={() => {}}
+              onDeleteTopping={() => {}}
+            />
+          </div>
         </main>
       </div>
     );
@@ -188,26 +200,25 @@ export const MenuManager = () => {
             </p>
           </div>
 
-          <MenuManagerSkeleton loading={loading}>
-            <AdminTabs
-              activeTab={activeTab}
-              drinks={drinks}
-              toppings={toppings}
-              onTabChange={setActiveTab}
-              onAddDrink={() => {
-                setEditingItem(null);
-                setShowModal(true);
-              }}
-              onEditDrink={(drink: DrinkType) => {
-                setEditingItem(drink);
-                setShowModal(true);
-              }}
-              onDeleteDrink={handleDeleteDrink}
-              onAddTopping={handleAddTopping}
-              onEditTopping={handleEditTopping}
-              onDeleteTopping={handleDeleteTopping}
-            />
-          </MenuManagerSkeleton>
+          <AdminTabs
+            loading={loading}
+            activeTab={activeTab}
+            drinks={drinks}
+            toppings={toppings}
+            onTabChange={setActiveTab}
+            onAddDrink={() => {
+              setEditingItem(null);
+              setShowModal(true);
+            }}
+            onEditDrink={(drink: DrinkType) => {
+              setEditingItem(drink);
+              setShowModal(true);
+            }}
+            onDeleteDrink={handleDeleteDrink}
+            onAddTopping={handleAddTopping}
+            onEditTopping={handleEditTopping}
+            onDeleteTopping={handleDeleteTopping}
+          />
         </div>
       </main>
 
