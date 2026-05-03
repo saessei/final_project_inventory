@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { TextField } from "@/components/ui/TextField";
 import { Select } from "@/components/ui/Select";
-import { CreditCard, Wallet, Banknote, Trash, Edit2 } from "lucide-react";
+import { CreditCard, Wallet, Banknote, Trash, Edit2, Minus, Plus } from "lucide-react";
 import type { CartItem } from "@/hooks/useCart";
 
 interface CartSidebarProps {
@@ -106,66 +106,75 @@ export const CartSidebar = ({
                   key={item.id}
                   className="border border-slate-200 rounded-xl p-3 bg-white shadow-sm"
                 >
-                  <div className="flex justify-between text-sm font-bold text-dark-brown">
-                    <span>{item.drink_name}</span>
-                    <span>₱{total.toFixed(2)}</span>
-                  </div>
-                  <div className="mt-1 space-y-0.5">
-                    <p className="text-xs text-gray-500 capitalize">
-                      Size: {item.size}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Sugar: {item.sugar}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Toppings:{" "}
-                      {item.toppings?.length ? item.toppings.join(", ") : "None"}
-                    </p>
-                    {item.notes && (
-                      <p className="text-xs font-medium text-brown">
-                        Notes: {item.notes}
-                      </p>
-                    )}
-                  </div>
-                  <div className="mt-3 flex items-center justify-between gap-3">
-                    <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={() => onDecrementItem(idx)}
-                        className="h-8 w-8 grid place-items-center text-slate-700 hover:bg-slate-200 disabled:opacity-50"
-                        disabled={item.quantity <= 1}
-                      >
-                        -
-                      </button>
-                      <div className="h-8 min-w-8 px-2 grid place-items-center text-sm font-bold text-slate-800 bg-white">
-                        {item.quantity}
+                    <div className="flex justify-between items-start mb-1.5">
+                      <span className="font-black text-sm text-dark-brown leading-tight pr-4">
+                        {item.drink_name}
+                      </span>
+                      <span className="font-bold text-sm text-dark-brown whitespace-nowrap">
+                        ₱{total.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 mb-3">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                        {item.size}
+                      </span>
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                        {item.sugar}
+                      </span>
+                      {item.toppings?.length > 0 && (
+                        <span className="text-[10px] font-medium text-gray-400 truncate max-w-[140px]">
+                          + {item.toppings.join(", ")}
+                        </span>
+                      )}
+                      {item.notes && (
+                        <p className="w-full text-[10px] italic font-medium text-brown/70 truncate">
+                          "{item.notes}"
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between border-t border-slate-50 pt-3">
+                      <div className="inline-flex items-center rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden h-9">
+                        <button
+                          type="button"
+                          onClick={() => onDecrementItem(idx)}
+                          className="w-8 h-full flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brown disabled:opacity-30 transition-colors"
+                          disabled={item.quantity <= 1}
+                        >
+                          <Minus size={14} strokeWidth={3} />
+                        </button>
+                        <div className="px-3 h-full flex items-center justify-center text-xs font-black text-dark-brown bg-cream/20 min-w-[32px]">
+                          {item.quantity}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => onIncrementItem(idx)}
+                          className="w-8 h-full flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-brown transition-colors"
+                        >
+                          <Plus size={14} strokeWidth={3} />
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => onIncrementItem(idx)}
-                        className="h-8 w-8 grid place-items-center text-slate-700 hover:bg-slate-200"
-                      >
-                        +
-                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => onEditItem(idx)}
+                          className="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-brown hover:border-brown/30 transition-all shadow-sm"
+                          title="Edit Item"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onRemoveItem(idx)}
+                          className="flex items-center justify-center w-9 h-9 rounded-xl border border-rose-100 bg-rose-50/30 text-rose-400 hover:bg-rose-50 hover:text-rose-600 transition-all shadow-sm"
+                          title="Remove Item"
+                        >
+                          <Trash size={16} />
+                        </button>
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => onEditItem(idx)}
-                        className="flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-slate-50 hover:text-brown"
-                      >
-                        <Edit2 size={12} /> Edit
-                      </button>
-                      <IconButton
-                        label={`Remove ${item.drink_name}`}
-                        onClick={() => onRemoveItem(idx)}
-                        variant="danger"
-                        className="h-auto w-auto rounded-md p-1.5"
-                      >
-                        <Trash size={16} />
-                      </IconButton>
-                    </div>
-                  </div>
                 </div>
               );
             })

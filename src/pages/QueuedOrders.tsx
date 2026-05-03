@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { useOrders, type Order } from "@/hooks/useOrders";
 import { updateOrderStatus } from "@/services/orderService";
 import { OrderStatusButton } from "@/components/ui/OrderStatusButton";
 import { UserAuth } from "@/components/auth/AuthContext";
+import { TextField } from "@/components/ui/TextField";
+import { Search, ArrowUpDown, Coffee, Clock, CheckCircle2 } from "lucide-react";
 import { QueueSummarySkeleton, QueueCardsSkeleton } from "@/components/ui/LoadingSkeletons";
 
 const ITEMS_PER_PAGE = 6;
@@ -12,33 +14,44 @@ export const QueuedOrders = () => {
   const { orders, loading, updateOrderInState } = useOrders();
   const [viewMode, setViewMode] = useState<"active" | "completed">("active");
   const [completedPage, setCompletedPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   // current logged-in staff member
   const { session } = UserAuth();
   const staffUserId = session?.user?.id;
 
-  const incomingOrders = orders.filter((order) => order.status === "pending");
-  const preparingOrders = orders.filter(
-    (order) => order.status === "preparing",
-  );
-  const completedOrders = orders
-    .filter((order) => order.status === "completed")
-    .sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
+  const filteredOrders = useMemo(() => {
+    let result = orders.filter((order) => {
+      const matchesSearch = 
+        order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        order.id.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
+    });
 
-  const activeOrders = orders
-    .filter(
-      (order) =>
-        order.status === "pending" ||
-        order.status === "preparing",
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime(),
-    );
+    result.sort((a, b) => {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+
+    return result;
+  }, [orders, searchQuery, sortOrder]);
+
+  const incomingOrders = filteredOrders.filter((order) => order.status === "pending");
+  const preparingOrders = filteredOrders.filter((order) => order.status === "preparing");
+  const readyOrders = filteredOrders.filter((order) => order.status === "ready");
+  
+  const completedOrders = filteredOrders
+    .filter((order) => order.status === "completed")
+    .filter((order) => order.status !== "cancelled");
+
+  const activeOrders = filteredOrders.filter(
+    (order) =>
+      order.status === "pending" ||
+      order.status === "preparing" ||
+      order.status === "ready",
+  );
 
   const paginatedCompleted = completedOrders.slice(
     (completedPage - 1) * ITEMS_PER_PAGE,
@@ -70,8 +83,15 @@ export const QueuedOrders = () => {
       return;
     }
 
-    // preparing -> completed
+    // preparing -> ready
     if (order.status === "preparing") {
+      await updateOrderStatus(order.id, "ready");
+      updateOrderInState(order.id, "ready");
+      return;
+    }
+
+    // ready -> completed
+    if (order.status === "ready") {
       await updateOrderStatus(order.id, "completed");
       updateOrderInState(order.id, "completed");
       return;
@@ -102,56 +122,96 @@ export const QueuedOrders = () => {
         </div>
 
         <QueueSummarySkeleton loading={loading}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200">
-              <p className="text-xs uppercase tracking-[0.24em] text-gray-400">
-                Incoming
-              </p>
-              <p className="mt-4 text-5xl font-black">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8">
+            <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200 group hover:border-brown/20 transition-colors">
+              <div className="flex items-center gap-2 mb-3">
+                <Clock size={14} className="text-gray-400" />
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                  Pending
+                </p>
+              </div>
+              <p className="text-4xl font-black text-dark-brown">
                 {incomingOrders.length.toString().padStart(2, "0")}
               </p>
             </div>
-            <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200">
-              <p className="text-xs uppercase tracking-[0.24em] text-gray-400">
-                In queue
-              </p>
-              <p className="mt-4 text-5xl font-black">
+            <div className="rounded-[2rem] bg-white p-6 shadow-sm border border-slate-200 group hover:border-brown/20 transition-colors">
+              <div className="flex items-center gap-2 mb-3">
+                <Coffee size={14} className="text-gray-400" />
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                  Preparing
+                </p>
+              </div>
+              <p className="text-4xl font-black text-dark-brown">
                 {preparingOrders.length.toString().padStart(2, "0")}
               </p>
             </div>
-            <div className="rounded-[2rem] bg-[#e6f6dc] p-6 shadow-sm border border-slate-200">
-              <p className="text-xs uppercase tracking-[0.24em] text-gray-400">
-                Completed
+            <div className="rounded-[2rem] bg-amber-50 p-6 shadow-sm border border-amber-100 group transition-colors">
+              <div className="flex items-center gap-2 mb-3">
+                <ArrowUpDown size={14} className="text-amber-400 rotate-90" />
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-600">
+                  Ready
+                </p>
+              </div>
+              <p className="text-4xl font-black text-amber-700">
+                {readyOrders.length.toString().padStart(2, "0")}
               </p>
-              <p className="mt-4 text-5xl font-black">
+            </div>
+            <div className="rounded-[2rem] bg-[#e6f6dc] p-6 shadow-sm border border-emerald-100 group transition-colors">
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle2 size={14} className="text-emerald-500" />
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600">
+                  Completed
+                </p>
+              </div>
+              <p className="text-4xl font-black text-emerald-700">
                 {completedOrders.length.toString().padStart(2, "0")}
               </p>
             </div>
           </div>
-
         </QueueSummarySkeleton>
-          <div className="mb-6 flex flex-wrap gap-3">
+
+        <div className="mb-6 flex flex-col md:flex-row gap-4 items-center">
+          <div className="flex-1 w-full">
+            <TextField
+              placeholder="Search by customer name or Order ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              leftIcon={<Search size={18} />}
+              className="rounded-2xl border-slate-200 bg-white"
+            />
+          </div>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <div className="flex bg-white rounded-full p-1 border border-slate-200 shadow-sm">
+              <button
+                onClick={() => setViewMode("active")}
+                className={`rounded-full px-5 py-1.5 text-xs font-black uppercase tracking-wider transition-all ${
+                  viewMode === "active"
+                    ? "bg-dark-brown text-white shadow-md"
+                    : "text-slate-400 hover:text-dark-brown"
+                }`}
+              >
+                Active
+              </button>
+              <button
+                onClick={() => setViewMode("completed")}
+                className={`rounded-full px-5 py-1.5 text-xs font-black uppercase tracking-wider transition-all ${
+                  viewMode === "completed"
+                    ? "bg-dark-brown text-white shadow-md"
+                    : "text-slate-400 hover:text-dark-brown"
+                }`}
+              >
+                History
+              </button>
+            </div>
             <button
-              onClick={() => setViewMode("active")}
-              className={`rounded-full px-5 py-2 text-sm font-semibold ${
-                viewMode === "active"
-                  ? "bg-dark-brown text-white"
-                  : "bg-white border border-slate-200 text-slate-600"
-              }`}
+              onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
+              className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-xs font-black uppercase tracking-wider text-dark-brown hover:bg-slate-50 transition-all shadow-sm"
             >
-              Active
-            </button>
-            <button
-              onClick={() => setViewMode("completed")}
-              className={`rounded-full px-5 py-2 text-sm font-semibold ${
-                viewMode === "completed"
-                  ? "bg-dark-brown text-white"
-                  : "bg-white border border-slate-200 text-slate-600"
-              }`}
-            >
-              Completed
+              <ArrowUpDown size={14} />
+              {sortOrder === "newest" ? "Newest First" : "Oldest First"}
             </button>
           </div>
+        </div>
 
           <QueueCardsSkeleton loading={loading}>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -182,23 +242,27 @@ export const QueuedOrders = () => {
                         </p>
                       </div>
                       <div
-                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                        className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
                           order.status === "pending"
                             ? "bg-orange-50 text-orange-700 border-orange-200"
                             : order.status === "preparing"
-                              ? "bg-brown/10 text-brown border-brown/20"
-                              : order.status === "completed"
-                                ? "bg-emerald-100 text-emerald-700 border-emerald-200"
-                                : "bg-gray-100 text-gray-600 border-gray-200"
+                              ? "bg-brown/5 text-brown border-brown/20"
+                              : order.status === "ready"
+                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                : order.status === "completed"
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                                  : "bg-gray-100 text-gray-600 border-gray-200"
                         }`}
                       >
                         {order.status === "pending"
-                          ? "New Order"
+                          ? "Pending"
                           : order.status === "preparing"
                             ? "Preparing"
-                            : order.status === "completed"
-                              ? "Completed"
-                              : "Archived"}
+                            : order.status === "ready"
+                              ? "Ready"
+                              : order.status === "completed"
+                                ? "Completed"
+                                : "Archived"}
                       </div>
                     </div>
 
@@ -210,9 +274,10 @@ export const QueuedOrders = () => {
                       {items.map((item, idx) => (
                         <p
                           key={idx}
-                          className={`text-xs text-gray-700 leading-relaxed ${
-                            idx === 0 ? "" : "mt-1 pt-1 border-t border-slate-200/70"
+                          className={`text-xs text-gray-700 leading-relaxed line-clamp-3 hover:line-clamp-none transition-all cursor-help ${
+                            idx === 0 ? "" : "mt-1 pt-1 border-t border-slate-200/50"
                           }`}
+                          title={item}
                         >
                           {item}
                         </p>

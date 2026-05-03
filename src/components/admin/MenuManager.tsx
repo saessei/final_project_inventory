@@ -1,5 +1,5 @@
 // src/components/Admin/MenuManager.tsx
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { drinkService } from "@/services/DrinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
@@ -7,6 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { MenuManagerSkeleton } from "@/components/ui/LoadingSkeletons";
 import { DrinkModal, ToppingModal } from "./AdminModals";
+import { TextField } from "@/components/ui/TextField";
+import { Select } from "@/components/ui/Select";
+import { Search } from "lucide-react";
 import type {
   DrinkModalData,
   DrinkType,
@@ -23,6 +26,9 @@ export const MenuManager = () => {
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [availabilityFilter, setAvailabilityFilter] = useState("all");
 
   const [drinks, setDrinks] = useState<DrinkType[]>([]);
   const [toppings, setToppings] = useState<ToppingType[]>([]);
@@ -49,6 +55,27 @@ export const MenuManager = () => {
     setToppings(toppingsData);
     setLoading(false);
   }, []);
+
+  const filteredDrinks = useMemo(() => {
+    return drinks.filter((drink) => {
+      const matchesSearch = drink.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = categoryFilter === "all" || drink.category === categoryFilter;
+      const matchesAvailability = 
+        availabilityFilter === "all" || 
+        (availabilityFilter === "available" ? drink.is_available : !drink.is_available);
+      return matchesSearch && matchesCategory && matchesAvailability;
+    });
+  }, [drinks, searchQuery, categoryFilter, availabilityFilter]);
+
+  const filteredToppings = useMemo(() => {
+    return toppings.filter((topping) => {
+      const matchesSearch = topping.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesAvailability = 
+        availabilityFilter === "all" || 
+        (availabilityFilter === "available" ? topping.is_available : !topping.is_available);
+      return matchesSearch && matchesAvailability;
+    });
+  }, [toppings, searchQuery, availabilityFilter]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -198,11 +225,48 @@ export const MenuManager = () => {
             </p>
           </div>
 
+          <div className="mb-6 flex flex-col md:flex-row gap-4">
+            <div className="flex-[2]">
+              <TextField
+                placeholder={`Search ${activeTab}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                leftIcon={<Search size={18} />}
+                className="rounded-2xl border-slate-200 bg-white"
+              />
+            </div>
+            <div className="flex flex-1 items-center gap-3">
+              {activeTab === "drinks" && (
+                <div className="flex-1 min-w-[140px]">
+                  <Select
+                    value={categoryFilter}
+                    onChange={setCategoryFilter}
+                    options={[
+                      { value: "all", label: "All Categories" },
+                      ...categories.map((c) => ({ value: c, label: c })),
+                    ]}
+                  />
+                </div>
+              )}
+              <div className="flex-1 min-w-[140px]">
+                <Select
+                  value={availabilityFilter}
+                  onChange={setAvailabilityFilter}
+                  options={[
+                    { value: "all", label: "All Status" },
+                    { value: "available", label: "Available" },
+                    { value: "unavailable", label: "Unavailable" },
+                  ]}
+                />
+              </div>
+            </div>
+          </div>
+
           <AdminTabs
             loading={loading}
             activeTab={activeTab}
-            drinks={drinks}
-            toppings={toppings}
+            drinks={filteredDrinks}
+            toppings={filteredToppings}
             onTabChange={setActiveTab}
             onAddDrink={() => {
               setEditingItem(null);

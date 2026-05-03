@@ -2,7 +2,7 @@ import supabase from "@/lib/supabaseClient";
 import type { CartItem } from "@/hooks/useCart";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export type OrderStatus = "pending" | "preparing" | "completed" | "cancelled";
+export type OrderStatus = "pending" | "preparing" | "ready" | "completed" | "cancelled";
 
 export const formatOrderDetails = (
   items: Array<{
