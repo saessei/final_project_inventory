@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Edit, Tag, Trash2 } from "lucide-react";
+import { Edit, Tag, Trash2, MoreHorizontal } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { TextField } from "@/components/ui/TextField";
 import type {
@@ -73,32 +73,49 @@ interface DrinkCardProps {
 }
 
 export const DrinkCard = ({ drink, onEdit, onDelete }: DrinkCardProps) => (
-  <div className="group rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-    <div className="flex items-center justify-between gap-3">
+  <div className="group relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+    <div className="flex items-center justify-between gap-3 mb-2">
       <div className="min-w-0">
-        <h3 className="truncate font-bold text-base">{drink.name}</h3>
-        <p className="truncate text-xs text-gray-500">
+        <h3 className="truncate font-black text-dark-brown text-base leading-tight">{drink.name}</h3>
+        <p className="truncate text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
           ₱{drink.sizes.regular} / ₱{drink.sizes.medium} / ₱{drink.sizes.large}
         </p>
       </div>
-      <div className="flex gap-2 opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100">
-        <IconButton
-          label={`Edit ${drink.name}`}
-          onClick={onEdit}
-          variant="ghost"
-          className="h-auto w-auto rounded-full p-2"
-        >
-          <Edit size={16} />
-        </IconButton>
-        <IconButton
-          label={`Delete ${drink.name}`}
-          onClick={onDelete}
-          variant="danger"
-          className="h-auto w-auto rounded-full p-2 bg-transparent"
-        >
-          <Trash2 size={16} />
-        </IconButton>
+      <div
+        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
+          drink.is_available
+            ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+            : "bg-rose-50 text-rose-600 border border-rose-100"
+        }`}
+      >
+        {drink.is_available ? "Available" : "Unavailable"}
       </div>
+    </div>
+
+    {/* Subtle Action Overlay - Hidden by default, shows on hover */}
+    <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-2xl bg-white/95 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <IconButton
+        label={`Edit ${drink.name}`}
+        onClick={onEdit}
+        variant="ghost"
+        className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-brown hover:bg-slate-100 transition-all border border-slate-200"
+      >
+        <Edit size={14} /> Edit
+      </IconButton>
+      <IconButton
+        label={`Delete ${drink.name}`}
+        onClick={onDelete}
+        variant="danger"
+        className="rounded-xl bg-rose-50 p-2 text-rose-500 hover:bg-rose-100 hover:text-rose-700 transition-all border border-rose-100"
+      >
+        <Trash2 size={16} />
+      </IconButton>
+    </div>
+
+    {/* Small visible hint for desktop, but primarily for discoverability */}
+    <div className="mt-2 flex items-center justify-between text-[10px] text-slate-300 font-bold uppercase tracking-widest group-hover:opacity-0 transition-opacity">
+      <span>Manage Item</span>
+      <MoreHorizontal size={14} />
     </div>
   </div>
 );
@@ -114,33 +131,49 @@ export const ToppingCard = ({
   onEdit,
   onDelete,
 }: ToppingCardProps) => (
-  <div className="group rounded-2xl border border-slate-200 bg-white p-3 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
-    <div className="flex items-center justify-between gap-3">
+  <div className="group relative rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-lg">
+    <div className="flex items-center justify-between gap-3 mb-2">
       <div className="min-w-0 flex items-center gap-2">
         <Tag size={16} className="shrink-0 text-brown-two" />
         <div className="min-w-0">
-          <h3 className="truncate font-bold text-base">{topping.name}</h3>
-          <p className="text-xs text-gray-500">₱{topping.price}</p>
+          <h3 className="truncate font-black text-dark-brown text-base leading-tight">{topping.name}</h3>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">₱{topping.price}</p>
         </div>
       </div>
-      <div className="flex gap-2 opacity-100 transition-opacity duration-200 sm:opacity-0 sm:group-hover:opacity-100">
-        <IconButton
-          label={`Edit ${topping.name}`}
-          onClick={onEdit}
-          variant="ghost"
-          className="h-auto w-auto rounded-full p-2"
-        >
-          <Edit size={16} />
-        </IconButton>
-        <IconButton
-          label={`Delete ${topping.name}`}
-          onClick={onDelete}
-          variant="danger"
-          className="h-auto w-auto rounded-full p-2 bg-transparent"
-        >
-          <Trash2 size={16} />
-        </IconButton>
+      <div
+        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider ${
+          topping.is_available
+            ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+            : "bg-rose-50 text-rose-600 border border-rose-100"
+        }`}
+      >
+        {topping.is_available ? "Available" : "Unavailable"}
       </div>
+    </div>
+
+    {/* Subtle Action Overlay */}
+    <div className="absolute inset-0 z-10 flex items-center justify-center gap-2 rounded-2xl bg-white/95 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <IconButton
+        label={`Edit ${topping.name}`}
+        onClick={onEdit}
+        variant="ghost"
+        className="flex items-center gap-2 rounded-xl bg-slate-50 px-4 py-2 text-[10px] font-black uppercase tracking-wider text-brown hover:bg-slate-100 transition-all border border-slate-200"
+      >
+        <Edit size={14} /> Edit
+      </IconButton>
+      <IconButton
+        label={`Delete ${topping.name}`}
+        onClick={onDelete}
+        variant="danger"
+        className="rounded-xl bg-rose-50 p-2 text-rose-500 hover:bg-rose-100 hover:text-rose-700 transition-all border border-rose-100"
+      >
+        <Trash2 size={16} />
+      </IconButton>
+    </div>
+
+    <div className="mt-2 flex items-center justify-between text-[10px] text-slate-300 font-bold uppercase tracking-widest group-hover:opacity-0 transition-opacity">
+      <span>Manage Topping</span>
+      <MoreHorizontal size={14} />
     </div>
   </div>
 );

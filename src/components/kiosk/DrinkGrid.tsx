@@ -18,12 +18,12 @@ export const DrinkGrid = ({ drinks, isSubmitting, onCustomize }: DrinkGridProps)
           isSubmitting ? "opacity-60 cursor-not-allowed" : "cursor-pointer hover:border-brown hover:bg-[#fcfbf7] hover:shadow-md hover:-translate-y-0.5"
         }`}
       >
-        <h4 className="w-full font-bold text-sm leading-tight text-dark-brown mb-1 line-clamp-2">
+        <h4 className="w-full font-bold text-sm leading-tight text-dark-brown mb-1 line-clamp-2 min-h-[2.5rem]">
           {drink.name}
         </h4>
-        <div className="w-full flex items-center justify-between mt-auto">
-          <span className="text-sm font-semibold text-gray-600">₱{drink.sizes.regular}</span>
-          <span className="rounded bg-brown px-3 py-1 text-[11px] uppercase font-bold text-white tracking-wider shadow-sm">
+        <div className="w-full flex items-center justify-between mt-2 pt-2 border-t border-slate-50">
+          <span className="font-bold text-sm text-dark-brown whitespace-nowrap">₱{drink.sizes.regular}</span>
+          <span className="rounded-xl bg-brown px-4 py-2 text-[10px] uppercase font-black text-white tracking-[0.1em] shadow-sm active:scale-95 transition-transform">
             Add
           </span>
         </div>

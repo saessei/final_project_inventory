@@ -1,6 +1,6 @@
 import { Button } from "./Button";
 
-type OrderStatus = "pending" | "preparing" | "completed" | "cancelled";
+type OrderStatus = "pending" | "preparing" | "ready" | "completed" | "cancelled";
 
 interface OrderButtonProps {
   status: OrderStatus;
@@ -13,18 +13,23 @@ const config: Record<
 > = {
   pending: {
     label: "Start Preparing",
-    color: "bg-brown/20",
+    color: "bg-brown/10",
     text: "text-dark-brown",
   },
   preparing: {
-    label: "Mark Complete",
-    color: "bg-orange-100",
-    text: "text-brown-two",
+    label: "Mark Ready",
+    color: "bg-orange-50",
+    text: "text-orange-600",
+  },
+  ready: {
+    label: "Mark Picked Up",
+    color: "bg-green-50",
+    text: "text-emerald-600",
   },
   completed: {
     label: "Archive Order",
-    color: "bg-green-100",
-    text: "text-green-600",
+    color: "bg-gray-50",
+    text: "text-gray-500",
   },
   cancelled: {
     label: "Archived",
@@ -41,10 +46,11 @@ export const OrderStatusButton = ({ status, onClick }: OrderButtonProps) => {
   const { label, color, text } = cfg;
 
   return (
-    <div>
+    <div className="w-full">
       <Button
         variant="secondary"
-        className={`${color} ${text} rounded-2xl font-quicksand font-bold hover:scale-100`}
+        fullWidth
+        className={`${color} ${text} rounded-2xl font-quicksand font-black text-xs uppercase tracking-wider hover:scale-100 transition-all border border-current/10`}
         onClick={onClick}
       >
         {label}
