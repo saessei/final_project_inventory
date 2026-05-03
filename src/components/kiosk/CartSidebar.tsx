@@ -1,4 +1,4 @@
-import { Trash } from "lucide-react";
+import { Trash, Edit2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
@@ -9,24 +9,30 @@ interface CartSidebarProps {
   cart: CartItem[];
   cartTotal: number;
   customerName: string;
+  paymentMethod: string;
   isCheckingOut?: boolean;
   onCustomerNameChange: (name: string) => void;
+  onPaymentMethodChange: (method: string) => void;
   onCheckout: () => void;
   onDecrementItem: (index: number) => void;
   onIncrementItem: (index: number) => void;
   onRemoveItem: (index: number) => void;
+  onEditItem: (index: number) => void;
 }
 
 export const CartSidebar = ({
   cart,
   cartTotal,
   customerName,
+  paymentMethod,
   isCheckingOut = false,
   onCustomerNameChange,
+  onPaymentMethodChange,
   onCheckout,
   onDecrementItem,
   onIncrementItem,
   onRemoveItem,
+  onEditItem,
 }: CartSidebarProps) => {
   const itemCount = cart.reduce((count, item) => count + item.quantity, 0);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -79,7 +85,7 @@ export const CartSidebar = ({
           </div>
         </div>
 
-        <div className="space-y-3 max-h-[45vh] lg:max-h-[60vh] overflow-y-auto no-scrollbar pb-3">
+        <div className="space-y-3 max-h-[45vh] lg:max-h-[50vh] overflow-y-auto no-scrollbar pb-3">
           {cart.length === 0 ? (
             <p className="text-sm text-gray-500">Cart is empty.</p>
           ) : (
@@ -88,48 +94,67 @@ export const CartSidebar = ({
               return (
                 <div
                   key={item.id}
-                  className="border rounded-xl p-3 bg-[#fcfcfc]"
+                  className="border border-slate-200 rounded-xl p-3 bg-white shadow-sm"
                 >
-                  <div className="flex justify-between text-sm font-semibold">
+                  <div className="flex justify-between text-sm font-bold text-dark-brown">
                     <span>{item.drink_name}</span>
                     <span>₱{total.toFixed(2)}</span>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Sugar: {item.sugar}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Toppings:{" "}
-                    {item.toppings?.length ? item.toppings.join(", ") : "None"}
-                  </p>
+                  <div className="mt-1 space-y-0.5">
+                    <p className="text-xs text-gray-500 capitalize">
+                      Size: {item.size}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Sugar: {item.sugar}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Toppings:{" "}
+                      {item.toppings?.length ? item.toppings.join(", ") : "None"}
+                    </p>
+                    {item.notes && (
+                      <p className="text-xs font-medium text-brown">
+                        Notes: {item.notes}
+                      </p>
+                    )}
+                  </div>
                   <div className="mt-3 flex items-center justify-between gap-3">
-                    <div className="inline-flex items-center rounded-full border border-slate-200 bg-white shadow-sm overflow-hidden">
+                    <div className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 overflow-hidden">
                       <button
                         type="button"
                         onClick={() => onDecrementItem(idx)}
-                        className="h-9 w-10 grid place-items-center text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                        className="h-8 w-8 grid place-items-center text-slate-700 hover:bg-slate-200 disabled:opacity-50"
                         disabled={item.quantity <= 1}
                       >
                         -
                       </button>
-                      <div className="h-9 min-w-10 px-3 grid place-items-center text-sm font-bold text-slate-800">
+                      <div className="h-8 min-w-8 px-2 grid place-items-center text-sm font-bold text-slate-800 bg-white">
                         {item.quantity}
                       </div>
                       <button
                         type="button"
                         onClick={() => onIncrementItem(idx)}
-                        className="h-9 w-10 grid place-items-center text-slate-700 hover:bg-slate-50"
+                        className="h-8 w-8 grid place-items-center text-slate-700 hover:bg-slate-200"
                       >
                         +
                       </button>
                     </div>
-                    <IconButton
-                      label={`Remove ${item.drink_name}`}
-                      onClick={() => onRemoveItem(idx)}
-                      variant="danger"
-                      className="h-auto w-auto rounded-full p-2"
-                    >
-                      <Trash size={16} />
-                    </IconButton>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onEditItem(idx)}
+                        className="flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1.5 text-xs font-semibold text-gray-600 hover:bg-slate-50 hover:text-brown"
+                      >
+                        <Edit2 size={12} /> Edit
+                      </button>
+                      <IconButton
+                        label={`Remove ${item.drink_name}`}
+                        onClick={() => onRemoveItem(idx)}
+                        variant="danger"
+                        className="h-auto w-auto rounded-md p-1.5"
+                      >
+                        <Trash size={16} />
+                      </IconButton>
+                    </div>
                   </div>
                 </div>
               );
@@ -137,33 +162,43 @@ export const CartSidebar = ({
           )}
         </div>
 
-        <div className="mt-6 border-t pt-4">
+        <div className="mt-4 border-t pt-4">
           <TextField
             id="customerName"
-            label="Customer name"
+            label="Customer Name (Optional)"
             type="text"
             value={customerName}
             onChange={(e) => onCustomerNameChange(e.target.value)}
             placeholder="Enter customer name"
-            className="border-slate-300 bg-slate-50 text-slate-800 focus:border-dark-brown focus:ring-dark-brown/20"
+            className="border-slate-200 bg-white text-slate-800 focus:border-brown focus:ring-0 shadow-sm"
           />
+          <div className="mt-3">
+            <label className="block text-sm font-semibold mb-1 text-slate-700">Payment Method</label>
+            <select
+              value={paymentMethod}
+              onChange={(e) => onPaymentMethodChange(e.target.value)}
+              className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-brown focus:outline-none focus:ring-0 shadow-sm"
+            >
+              <option value="cash">Cash</option>
+              <option value="gcash">GCash</option>
+              <option value="card">Card</option>
+            </select>
+          </div>
           <div className="mt-4">
-            <p className="text-sm text-gray-500">Subtotal</p>
-            <p className="text-3xl font-bold">₱{cartTotal.toFixed(2)}</p>
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm font-semibold text-gray-600">Subtotal</p>
+              <p className="text-2xl font-black text-dark-brown">₱{cartTotal.toFixed(2)}</p>
+            </div>
             <Button
               onClick={handleCheckoutClick}
               variant="solid"
               fullWidth
-              className="mt-4"
-              disabled={
-                isCheckingOut ||
-                cart.length === 0 ||
-                customerName.trim() === ""
-              }
+              disabled={isCheckingOut || cart.length === 0}
               isLoading={isCheckingOut}
-              loadingText="Checking out..."
+              loadingText="Sending to queue..."
+              className="py-3 text-lg bg-brown hover:bg-dark-brown"
             >
-              Check Out
+              Place Order
             </Button>
           </div>
         </div>

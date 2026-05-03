@@ -233,7 +233,7 @@ export const Kiosk = () => {
           </p>
         </div>
 
-        <div className="mb-6 flex flex-col sm:flex-row gap-3">
+        <div className="mb-4 flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             <TextField
               type="text"
@@ -247,7 +247,7 @@ export const Kiosk = () => {
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-full sm:w-64 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-dark-brown outline-none transition-all focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20"
+            className="w-full sm:w-48 md:hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-dark-brown outline-none transition-all focus:border-dark-brown focus:ring-2 focus:ring-dark-brown/20"
           >
             <option value="all">All Categories</option>
             {categories.map((cat) => (
@@ -256,6 +256,33 @@ export const Kiosk = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        {/* Quick Tabs */}
+        <div className="mb-6 flex overflow-x-auto no-scrollbar gap-2 pb-1">
+          <button
+            onClick={() => setSelectedCategory("all")}
+            className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-bold transition-colors active:scale-95 ${
+              selectedCategory === "all"
+                ? "bg-brown text-white border border-brown"
+                : "bg-white text-gray-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+            }`}
+          >
+            All
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-bold transition-colors active:scale-95 ${
+                selectedCategory === cat
+                  ? "bg-brown text-white border border-brown"
+                  : "bg-white text-gray-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         <KioskSkeleton loading={menuLoading || cartLoading}>

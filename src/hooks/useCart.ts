@@ -17,6 +17,7 @@ export type CartItem = {
   toppings: string[];
   topping_details: CartTopping[];
   quantity: number;
+  notes?: string;
 };
 
 export function useCart(_staffUserId?: string) {
@@ -32,6 +33,7 @@ export function useCart(_staffUserId?: string) {
           ci.drink_id === item.drink_id &&
           ci.size === item.size &&
           ci.sugar === item.sugar &&
+          ci.notes === item.notes &&
           JSON.stringify(ci.topping_details.map((t) => t.id).sort()) ===
             JSON.stringify(item.topping_details.map((t) => t.id).sort()),
       );
