@@ -1,5 +1,6 @@
 // src/patterns/DynamicStrategies.ts
-import { dynamicMenu } from "@/services/dynamicMenuService";
+import { dynamicMenu } from "@/services/DynamicMenuService";
+import type { SugarLevel, Topping } from "@/services/DynamicMenuService";
 
 export interface CustomizationStrategy {
   name: string;
@@ -17,7 +18,7 @@ export class DynamicSugarStrategy implements CustomizationStrategy {
 
   async loadOptions(): Promise<void> {
     const levels = await dynamicMenu.getSugarLevels();
-    this.optionsCache = levels.map((s) => s.label);
+    this.optionsCache = levels.map((s: SugarLevel) => s.label);
   }
 
   priceAdjustment(): number {
@@ -35,7 +36,7 @@ export class DynamicToppingStrategy implements CustomizationStrategy {
 
   async loadOptions(): Promise<void> {
     const toppings = await dynamicMenu.getToppings();
-    this.optionsCache = toppings.map((t) => t.name);
+    this.optionsCache = toppings.map((t: Topping) => t.name);
   }
 
   async priceAdjustment(option: string): Promise<number> {
