@@ -143,24 +143,29 @@ export const ReportsSkeleton = ({ loading, children }: SkeletonShellProps) => (
 );
 
 const KioskFallback = () => (
-  <div className="space-y-6">
-    <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-      {Array.from({ length: 18 }).map((_, index) => (
-        <div
-          key={index}
-          className="flex h-[110px] flex-col items-start justify-between gap-2 rounded-2xl border border-slate-100 bg-white p-3.5 shadow-sm"
-        >
-          <div className="w-full space-y-2">
-            <div className={`${bone} h-5 w-3/4 rounded-md`} />
-            <div className={`${bone} h-4 w-1/2 rounded-md`} />
+  <div className="grid gap-3 sm:gap-4 md:gap-5 lg:gap-4 xl:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+    {Array.from({ length: 12 }).map((_, index) => (
+      <div
+        key={index}
+        className="group relative flex h-[140px] flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm"
+      >
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-3">
+            <div className={`${bone} h-3 w-16 rounded-full`} />
+            <div className={`${bone} h-3 w-20 rounded-full`} />
           </div>
-          <div className="w-full flex items-center justify-between mt-auto">
-            <div className={`${bone} h-5 w-10 rounded-md`} />
-            <div className={`${bone} h-7 w-14 rounded-md`} />
-          </div>
+          <div className={`${bone} h-10 w-11/12 rounded-2xl`} />
         </div>
-      ))}
-    </div>
+
+        <div className="w-full flex items-center justify-between mt-auto pt-3 border-t border-slate-100/80">
+          <div className="flex flex-col gap-2">
+            <div className={`${bone} h-3 w-20 rounded-full`} />
+            <div className={`${bone} h-6 w-16 rounded-full`} />
+          </div>
+          <div className={`${bone} h-9 w-20 rounded-xl`} />
+        </div>
+      </div>
+    ))}
   </div>
 );
 

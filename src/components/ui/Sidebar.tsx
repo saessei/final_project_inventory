@@ -27,8 +27,6 @@ export const Sidebar = () => {
   const location = useLocation();
 
   const adminSidebarItems = [
-    { name: "Order Taking", icon: <Store size={20} />, path: "/kiosk" },
-    { name: "Order Queue", icon: <List size={20} />, path: "/queued-orders" },
     {
       name: "Menu Manager",
       icon: <ClipboardList size={20} />,
