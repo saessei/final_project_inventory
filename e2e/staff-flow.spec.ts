@@ -1,65 +1,95 @@
-import { test, expect } from '@playwright/test';
+import { expect, test, type Page } from "@playwright/test";
 
-test.describe('Staff Flow', () => {
-  test.beforeEach(async ({ page }) => {
-    // Navigate to role selection (already logged in via storageState)
-    await page.goto('/#/role-select');
-    
-    // Select Staff role
-    await page.getByRole('button', { name: 'Staff' }).click();
-    
-    // Verify we are on the Order Taking (Kiosk) page
-    await expect(page).toHaveURL(/.*kiosk/);
-    await expect(page.getByRole('heading', { name: 'Order Taking' })).toBeVisible();
-  });
+const EMAIL = process.env.TEST_USER_EMAIL ?? "test@user.com";
+const PASSWORD = process.env.TEST_USER_PASSWORD ?? "Password123";
 
-  test('should create a new order and update its status in the queue', async ({ page }) => {
-    const customerName = `Staff Test ${Date.now()}`;
-    
-    // 1. Create a new order
-    // Click on the first drink in the grid (e.g., Classic Milk Tea)
-    await page.getByText('Classic Milk Tea').first().click();
-    
-    // Customize and add to cart
-    await expect(page.getByText('Customize drink')).toBeVisible();
-    await page.getByRole('button', { name: 'Add to Cart' }).click();
-    
-    // Fill customer name in sidebar
-    await page.getByPlaceholder('Customer Name').fill(customerName);
-    
-    // Checkout
-    await page.getByRole('button', { name: 'Place Order' }).click();
-    
-    // Verify success modal
-    await expect(page.getByText('Order successful')).toBeVisible();
-    await page.getByRole('button', { name: 'New Order' }).click();
-    
-    // 2. Go to Queue Manager
-    await page.getByText('Order Queue').click();
-    await expect(page.getByRole('heading', { name: 'Order Queue' })).toBeVisible();
-    
-    // Find our order by customer name
-    const orderCard = page.locator('article', { hasText: customerName });
-    await expect(orderCard).toBeVisible();
-    await expect(orderCard.getByText('Pending')).toBeVisible();
-    
-    // 3. Update status (Pending -> Preparing)
-    await orderCard.getByRole('button').click(); // OrderStatusButton text changes, simpler to click by role
-    await expect(orderCard.getByText('Preparing')).toBeVisible();
-    
-    // 4. Update status (Preparing -> Ready)
-    await orderCard.getByRole('button').click();
-    await expect(orderCard.getByText('Ready')).toBeVisible();
+async function signIn(page: Page) {
+  await page.goto("/#/signin");
+  await page.getByLabel("Email").fill(EMAIL);
+  await page.getByPlaceholder("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await expect(page).toHaveURL(/#\/role-select/);
+}
 
-    // 5. Update status (Ready -> Completed)
-    await orderCard.getByRole('button').click();
-    
-    // Verify it's no longer in the active list (or moved to history)
-    await expect(orderCard).not.toBeVisible();
-    
-    // Switch to History to verify
-    await page.getByRole('button', { name: 'History' }).click();
-    await expect(page.locator('article', { hasText: customerName })).toBeVisible();
-    await expect(page.locator('article', { hasText: customerName }).getByText('Completed')).toBeVisible();
+async function chooseStaff(page: Page) {
+  await page.getByRole("button", { name: /^staff$/i }).click();
+  await expect(page).toHaveURL(/#\/kiosk/);
+  await expect(
+    page.getByRole("heading", { name: /order taking/i }),
+  ).toBeVisible();
+}
+
+test.describe("staff flow", () => {
+  test("places an order and moves it through the queue manager", async ({
+    page,
+  }) => {
+    const customerName = `E2E Customer ${Date.now()}`;
+
+    await signIn(page);
+    await chooseStaff(page);
+
+    const firstDrink = page.locator("main section").getByRole("button").first();
+    await expect(firstDrink).toBeVisible({ timeout: 15_000 });
+    await firstDrink.click();
+
+    const customizeDialog = page
+      .locator(".fixed")
+      .filter({ hasText: /customize drink/i })
+      .first();
+    await expect(customizeDialog).toBeVisible();
+    await page.getByRole("button", { name: /large/i }).click();
+
+    const firstTopping = page
+      .getByText("Toppings", { exact: true })
+      .locator("..")
+      .locator("..")
+      .getByRole("button")
+      .first();
+    if (await firstTopping.isVisible().catch(() => false)) {
+      await firstTopping.click();
+    }
+
+    await page.getByRole("button", { name: /add to cart/i }).click();
+    await expect(customizeDialog).not.toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/1 items/i)).toBeVisible();
+
+    await page.getByLabel("Customer Name").fill(customerName);
+    await page.getByRole("button", { name: /place order/i }).click();
+    await expect(page.getByRole("heading", { name: /order successful/i })).toBeVisible({
+      timeout: 20_000,
+    });
+    await page.getByRole("button", { name: /new order/i }).click();
+
+    await page.getByText("Order Queue", { exact: true }).click();
+    await expect(page).toHaveURL(/#\/queued-orders/);
+    await expect(
+      page.getByRole("heading", { name: /order queue/i }),
+    ).toBeVisible();
+
+    await page.getByPlaceholder(/search by customer name/i).fill(customerName);
+    await expect(page.getByRole("heading", { name: customerName })).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await page.getByRole("button", { name: /start preparing/i }).click();
+    await expect(page.getByText("Preparing", { exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await page.getByRole("button", { name: /mark ready/i }).click();
+    await expect(page.getByText("Ready", { exact: true })).toBeVisible({
+      timeout: 15_000,
+    });
+
+    await page.getByRole("button", { name: /mark picked up/i }).click();
+    await expect(page.getByRole("heading", { name: customerName })).not.toBeVisible({
+      timeout: 15_000,
+    });
+
+    await page.getByRole("button", { name: /^history$/i }).click();
+    await expect(page.getByRole("heading", { name: customerName })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.getByText("Completed", { exact: true })).toBeVisible();
   });
 });

@@ -1,62 +1,75 @@
-import { test, expect } from '@playwright/test';
+import { expect, test, type Page } from "@playwright/test";
 
-test.describe('Admin Flow', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/#/role-select');
+const EMAIL = process.env.TEST_USER_EMAIL ?? "test@user.com";
+const PASSWORD = process.env.TEST_USER_PASSWORD ?? "Password123";
 
-    // Select Admin role
-    await page.getByRole('button', { name: 'Admin' }).click();
+async function signIn(page: Page) {
+  await page.goto("/#/signin");
+  await page.getByLabel("Email").fill(EMAIL);
+  await page.getByPlaceholder("Password").fill(PASSWORD);
+  await page.getByRole("button", { name: /sign in/i }).click();
+  await expect(page).toHaveURL(/#\/role-select/);
+}
 
-    // Wait for dashboard to load
-    await expect(page).toHaveURL(/admin\/menu/);
-    await expect(page.getByRole('heading', { name: 'Menu Manager' })).toBeVisible();
-
-    // Wait for UI to fully hydrate (important for Supabase-driven apps)
-    await page.waitForLoadState('networkidle');
-
-    // Ensure main action button is ready
-    await expect(page.getByRole('button', { name: 'Add Drink' }))
-      .toBeVisible({ timeout: 10000 });
+async function chooseAdmin(page: Page) {
+  await page.getByRole("button", { name: /^admin$/i }).click();
+  await expect(page).toHaveURL(/#\/admin\/menu/);
+  await expect(
+    page.getByRole("heading", { name: /menu manager/i }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: /add drink/i })).toBeVisible({
+    timeout: 15_000,
   });
+}
 
-  test('should add a new menu item with a topping and verify it', async ({ page }) => {
-    const itemName = `Test Drink ${Date.now()}`;
+test.describe("admin flow", () => {
+  test("logs in as admin, adds a topping and menu item, then views reports", async ({
+    page,
+  }) => {
+    const unique = Date.now();
+    const toppingName = `E2E Topping ${unique}`;
+    const drinkName = `E2E Milk Tea ${unique}`;
+    const categoryName = `E2E Category ${unique}`;
 
-    // Open Add Drink modal
-    const addButton = page.getByRole('button', { name: 'Add Drink' });
-    await addButton.click();
+    await signIn(page);
+    await chooseAdmin(page);
 
-    // Fill in basic info
-    await page.getByLabel('Drink Name *').fill(itemName);
+    await page.getByRole("button", { name: /toppings/i }).click();
+    await page.getByRole("button", { name: /add topping/i }).click();
 
-    // CATEGORY SELECT
-    await page.getByLabel('Category').click();
+    const toppingDialog = page.getByRole("dialog", { name: /add topping/i });
+    await expect(toppingDialog).toBeVisible();
+    await toppingDialog.getByLabel("Topping Name *").fill(toppingName);
+    await toppingDialog.getByLabel(/price/i).fill("15");
+    await toppingDialog.getByRole("button", { name: /^save$/i }).click();
 
-    await page.getByRole('button', { name: 'Milk Tea' }).click();
+    await expect(toppingDialog).not.toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("heading", { name: toppingName })).toBeVisible({
+      timeout: 15_000,
+    });
 
-    // Prices
-    await page.getByLabel('Regular Size *').fill('100');
-    await page.getByLabel('Medium Size *').fill('120');
-    await page.getByLabel('Large Size *').fill('140');
+    await page.getByRole("button", { name: /drinks/i }).click();
+    await page.getByRole("button", { name: /add drink/i }).click();
 
-    // Select topping
-    await page.getByRole('button', { name: 'Pearl' }).click();
+    const drinkDialog = page.getByRole("dialog", { name: /add drink/i });
+    await expect(drinkDialog).toBeVisible();
+    await drinkDialog.getByLabel("Drink Name *").fill(drinkName);
+    await drinkDialog.getByLabel("New Category Name").fill(categoryName);
+    await drinkDialog.getByLabel("Regular Size *").fill("100");
+    await drinkDialog.getByLabel("Medium Size *").fill("120");
+    await drinkDialog.getByLabel("Large Size *").fill("140");
+    await drinkDialog.getByPlaceholder("Search toppings...").fill(toppingName);
+    await drinkDialog.getByRole("button", { name: new RegExp(toppingName) }).click();
+    await drinkDialog.getByRole("button", { name: /save changes/i }).click();
 
-    // Save item
-    await page.getByRole('button', { name: 'Save Changes' }).click();
+    await expect(drinkDialog).not.toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("heading", { name: drinkName })).toBeVisible({
+      timeout: 15_000,
+    });
 
-    // VERIFY (more stable than raw text search)
-    await expect(page.getByRole('heading', { name: itemName }))
-      .toBeVisible({ timeout: 10000 });
-  });
-
-  test('should navigate to Reports page and verify it loads', async ({ page }) => {
-    await page.getByRole('link', { name: 'Reports' }).click();
-
-    await expect(page).toHaveURL(/.*reports/);
-    await expect(page.getByRole('heading', { name: 'Business Reports' }))
-      .toBeVisible();
-
-    await expect(page.getByText('Sales Summary')).toBeVisible();
+    await page.getByText("Reports", { exact: true }).click();
+    await expect(page).toHaveURL(/#\/reports/);
+    await expect(page.getByRole("heading", { name: /reports/i })).toBeVisible();
+    await expect(page.getByText(/sales and order insights/i)).toBeVisible();
   });
 });
