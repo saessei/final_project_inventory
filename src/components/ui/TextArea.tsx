@@ -1,5 +1,5 @@
 import type { TextareaHTMLAttributes } from "react";
-import { cx } from "./utils";
+import { cx } from "@/components/ui/utils";
 
 interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { act, renderHook } from "@testing-library/react";
-import { useCart } from "../hooks/useCart";
+import { useCart } from "@/hooks/useCart";
 
 describe("useCart (integration)", () => {
   it("manages cart items and totals", async () => {

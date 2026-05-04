@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check, MoreHorizontal } from "lucide-react";
-import { cx } from "./utils";
+import { cx } from "@/components/ui/utils";
 
 interface SelectOption {
   value: string;

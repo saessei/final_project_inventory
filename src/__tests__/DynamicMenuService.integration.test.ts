@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { dynamicMenu } from "../services/dynamicMenuService";
+import { dynamicMenu } from "@/services/dynamicMenuService";
 import {
   createAnonTestClient,
   createServiceRoleTestClient,
   ensureSeedMenu,
-} from "./integration/supabaseTestUtils";
+} from "@/__tests__/integration/supabaseTestUtils";
 
 const anon = createAnonTestClient();
 const serviceRole = createServiceRoleTestClient();

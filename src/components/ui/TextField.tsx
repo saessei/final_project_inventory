@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes, ReactNode } from "react";
 import { useId } from "react";
-import { cx } from "./utils";
+import { cx } from "@/components/ui/utils";
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;

@@ -5,8 +5,8 @@ import {
   createServiceRoleTestClient,
   ensureSeedMenu,
   safeCleanupOrder,
-} from "./integration/supabaseTestUtils";
-import { createOrder, updateOrderStatus } from "../services/orderService";
+} from "@/__tests__/integration/supabaseTestUtils";
+import { createOrder, updateOrderStatus } from "@/services/orderService";
 
 const anon = createAnonTestClient();
 const serviceRole = createServiceRoleTestClient();

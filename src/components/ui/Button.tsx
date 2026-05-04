@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { cx } from "./utils";
+import { cx } from "@/components/ui/utils";
 
 type ButtonVariant =
   | "primary"

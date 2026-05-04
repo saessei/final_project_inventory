@@ -1,7 +1,7 @@
 import { useId, type ReactNode } from "react";
 import { X } from "lucide-react";
-import { IconButton } from "./IconButton";
-import { cx } from "./utils";
+import { IconButton } from "@/components/ui/IconButton";
+import { cx } from "@/components/ui/utils";
 
 interface ModalProps {
   isOpen?: boolean;
