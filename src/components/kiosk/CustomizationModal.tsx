@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/Button";
 import { X, Check } from "lucide-react";
-import type { Drink, SugarLevel, Topping } from "@/services/DrinkService";
+import type { Drink, SugarLevel, Topping } from "@/services/drinkService";
 
 interface CustomizationModalProps {
   drink: Drink;

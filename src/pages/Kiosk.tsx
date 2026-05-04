@@ -19,7 +19,7 @@ import {
   type Drink,
   type Topping,
   type SugarLevel,
-} from "@/services/DrinkService";
+} from "@/services/drinkService";
 
 export const Kiosk = () => {
   const { session } = UserAuth();

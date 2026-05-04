@@ -1,6 +1,6 @@
-// src/patterns/DynamicStrategies.ts
-import { dynamicMenu } from "@/services/DynamicMenuService";
-import type { SugarLevel, Topping } from "@/services/DynamicMenuService";
+// src/patterns/dynamicStrategies.ts
+import { dynamicMenu } from "@/services/dynamicMenuService";
+import type { SugarLevel, Topping } from "@/services/dynamicMenuService";
 
 export interface CustomizationStrategy {
   name: string;

@@ -15,6 +15,11 @@ export default defineConfig(({ mode }) => {
   if (resolvedServiceRoleKey) process.env.SUPABASE_SERVICE_ROLE_KEY = resolvedServiceRoleKey;
   
   return {
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
     test: {
       exclude: [
         "**/node_modules/**",
@@ -24,7 +29,7 @@ export default defineConfig(({ mode }) => {
       ],
       environment: "jsdom",
       globals: true,
-      setupFiles: [path.resolve(__dirname, "./src/tests/setup.ts")],
+      setupFiles: [path.resolve(__dirname, "./src/__tests__/setup.ts")],
       env: {
         ...env,
         VITE_SUPABASE_URL: resolvedSupabaseUrl,
