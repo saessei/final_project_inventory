@@ -12,13 +12,13 @@ export const RoleSelect = () => {
     if (nextMode === "admin" && mode === "staff") {
       openPinModal(() => {
         setMode("admin");
-        navigate("/kiosk", { replace: true });
+        navigate("/admin/menu", { replace: true });
       });
       return;
     }
 
     setMode(nextMode);
-    navigate("/kiosk", { replace: true });
+    navigate(nextMode === "admin" ? "/admin/menu" : "/kiosk", { replace: true });
   };
 
   return (
