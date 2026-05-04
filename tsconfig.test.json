@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": [
+    "src/__tests__/**/*.ts",
+    "src/__tests__/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "storybook-static",
+    "playwright-report",
+    "test-results"
+  ]
+}
