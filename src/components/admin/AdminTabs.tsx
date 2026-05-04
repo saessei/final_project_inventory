@@ -1,6 +1,6 @@
 import { CirclePlus, CupSoda, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { DrinkCard, ToppingCard } from "./AdminCards";
+import { DrinkCard, ToppingCard } from "@/components/admin/AdminCards";
 import { MenuManagerSkeleton } from "@/components/ui/LoadingSkeletons";
 import type { DrinkType, TabType, ToppingType } from "@/types/menuTypes";
 

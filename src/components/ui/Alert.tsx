@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cx } from "./utils";
+import { cx } from "@/components/ui/utils";
 
 interface AlertProps {
   type?: "error" | "success" | "info" | "warning";

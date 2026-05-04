@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { useReportMetrics } from "../hooks/useReportMetrics";
-import type { ReportOrder } from "../types/reportTypes";
+import { useReportMetrics } from "@/hooks/useReportMetrics";
+import type { ReportOrder } from "@/types/reportTypes";
 
 describe("useReportMetrics (integration)", () => {
   it("computes revenue and top metrics from live-shaped orders", () => {

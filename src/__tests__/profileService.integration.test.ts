@@ -1,12 +1,12 @@
 import { afterAll, afterEach, describe, expect, it } from "vitest";
-import supabase from "../lib/supabaseClient";
-import { profileService } from "../services/profileService";
+import supabase from "@/lib/supabaseClient";
+import { profileService } from "@/services/profileService";
 import {
   createServiceRoleTestClient,
   createTempAuthUser,
   deleteTempAuthUser,
   ensureProfileRow,
-} from "./integration/supabaseTestUtils";
+} from "@/__tests__/integration/supabaseTestUtils";
 
 const serviceRole = createServiceRoleTestClient();
 

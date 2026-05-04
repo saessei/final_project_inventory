@@ -1,14 +1,14 @@
 import { afterAll, describe, expect, it } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { useOrders } from "../hooks/useOrders";
-import { createOrder } from "../services/orderService";
+import { useOrders } from "@/hooks/useOrders";
+import { createOrder } from "@/services/orderService";
 import {
   cleanupSeedMenu,
   createAnonTestClient,
   createServiceRoleTestClient,
   ensureSeedMenu,
   safeCleanupOrder,
-} from "./integration/supabaseTestUtils";
+} from "@/__tests__/integration/supabaseTestUtils";
 
 const anon = createAnonTestClient();
 const serviceRole = createServiceRoleTestClient();
