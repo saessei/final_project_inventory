@@ -270,22 +270,24 @@ export const Kiosk = () => {
 
       <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar relative">
         <div className="sticky top-0 z-20 bg-cream px-4 lg:px-6 pt-16 lg:pt-6 pb-2 mb-4 shadow-sm border-b border-slate-200/60">
-          <div className="mb-4">
-            <h1 className="text-4xl font-black font-fredoka">Order Taking</h1>
-            <p className="text-lg text-gray-500">
+          <div className="mb-6">
+            <h1 className="text-5xl font-black font-fredoka text-dark-brown tracking-tight mb-1">
+              Order Taking
+            </h1>
+            <p className="text-lg text-brown-two/70 font-medium">
               Build customer orders and send them to the queue.
             </p>
           </div>
 
-          <div className="mb-4 flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
+          <div className="mb-6 flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative group">
               <TextField
                 type="text"
                 placeholder="Search drinks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                leftIcon={<Search size={16} />}
-                className="border-slate-200 bg-white text-dark-brown placeholder-gray-400 focus:border-dark-brown focus:ring-dark-brown/20"
+                leftIcon={<Search size={18} className="text-brown/50 group-focus-within:text-brown transition-colors" />}
+                className="h-12 border-slate-200 bg-white text-dark-brown placeholder-gray-400 focus:border-brown focus:ring-4 focus:ring-brown/10 rounded-2xl transition-all shadow-sm group-hover:shadow-md"
               />
             </div>
             <div className="w-full sm:w-64 md:hidden">
@@ -294,30 +296,31 @@ export const Kiosk = () => {
                 onChange={setSelectedCategory}
                 options={categoryOptions}
                 placeholder="All Categories"
+                className="h-12 rounded-2xl shadow-sm"
               />
             </div>
           </div>
 
           {/* Quick Tabs */}
-          <div className="flex overflow-x-auto no-scrollbar gap-2 pb-1">
+          <div className="flex overflow-x-auto no-scrollbar gap-2.5 pb-2">
             <button
               onClick={() => setSelectedCategory("all")}
-              className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-bold transition-colors active:scale-95 ${
+              className={`whitespace-nowrap rounded-2xl px-6 py-2.5 text-sm font-bold transition-all duration-300 active:scale-95 shadow-sm ${
                 selectedCategory === "all"
-                  ? "bg-brown text-white border border-brown"
-                  : "bg-white text-gray-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                  ? "bg-brown text-white border-transparent shadow-brown/30 shadow-lg scale-105 z-10"
+                  : "bg-white text-gray-500 border border-slate-200 hover:border-brown/30 hover:text-brown hover:bg-brown/5"
               }`}
             >
-              All
+              All Drinks
             </button>
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-bold transition-colors active:scale-95 ${
+                className={`whitespace-nowrap rounded-2xl px-6 py-2.5 text-sm font-bold transition-all duration-300 active:scale-95 shadow-sm ${
                   selectedCategory === cat
-                    ? "bg-brown text-white border border-brown"
-                    : "bg-white text-gray-600 border border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+                    ? "bg-brown text-white border-transparent shadow-brown/30 shadow-lg scale-105 z-10"
+                    : "bg-white text-gray-500 border border-slate-200 hover:border-brown/30 hover:text-brown hover:bg-brown/5"
                 }`}
               >
                 {cat}
