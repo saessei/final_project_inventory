@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { drinkService } from "@/services/drinkService";
+import { drinkService } from "..drinkService/services/drinkService";
 import {
   createAnonTestClient,
   createServiceRoleTestClient,
   ensureSeedMenu,
-} from "@/__tests__/integration/supabaseTestUtils";
+} from "./integration/supabaseTestUtils";
 
 const anon = createAnonTestClient();
 const serviceRole = createServiceRoleTestClient();
