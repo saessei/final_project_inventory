@@ -70,7 +70,7 @@ export const Kiosk = () => {
         setSugarLevels(sugarData);
 
         // Set default sugar level (50%)
-        const defaultSugar = sugarData.find((s) => s.percentage === 50);
+        const defaultSugar = sugarData.find((s: SugarLevel) => s.percentage === 50);
         if (defaultSugar) setSelectedSugar(defaultSugar);
       } catch (error) {
         console.error("Error loading data:", error);
