@@ -271,7 +271,7 @@ export const Kiosk = () => {
       <main className="ml-0 lg:ml-64 mr-0 lg:mr-[22rem] h-screen overflow-y-auto no-scrollbar relative">
         <div className="sticky top-0 z-20 bg-cream px-4 lg:px-6 pt-16 lg:pt-6 pb-2 mb-4 shadow-sm border-b border-slate-200/60">
           <div className="mb-6">
-            <h1 className="text-5xl font-black font-fredoka text-dark-brown tracking-tight mb-1">
+            <h1 className="text-4xl font-black font-fredoka text-dark-brown tracking-tight mb-1">
               Order Taking
             </h1>
             <p className="text-lg text-brown-two/70 font-medium">
