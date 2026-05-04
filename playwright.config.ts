@@ -1,35 +1,21 @@
-import { defineConfig, devices } from '@playwright/test';
-import dotenv from 'dotenv';
-import path from 'path';
+import { defineConfig } from "@playwright/test";
+import dotenv from "dotenv";
 
-// Load .env.test
-dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
+dotenv.config({ path: ".env.test" });
 
 export default defineConfig({
-  testDir: './e2e',
-  fullyParallel: true,
-  reporter: 'html',
+  testDir: "./e2e",
+  timeout: 30000,
+  retries: 1,
+  reporter: "html",
   use: {
-    baseURL: 'http://localhost:5173', 
-    trace: 'on-first-retry',
-  },
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    baseURL: "http://localhost:5173",
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
   projects: [
     {
-      name: 'setup',
-      testMatch: /auth\.setup\.ts/,
-    },
-    {
-      name: 'chromium',
-      use: { 
-        ...devices['Desktop Chrome'],
-        storageState: './.playwright/user.json',
-      },
-      dependencies: ['setup'],
+      name: "chromium",
     },
   ],
 });
