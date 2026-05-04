@@ -1,12 +1,12 @@
 // src/components/Admin/MenuManager.tsx
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { drinkService } from "../../services/drinkService";
+import { drinkService } from "@/services/drinkService";
 import { Sidebar } from "@/components/ui/Sidebar";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { AdminTabs } from "@/components/admin/AdminTabs";
 import { MenuManagerSkeleton } from "@/components/ui/LoadingSkeletons";
-import { DrinkModal, ToppingModal } from "./AdminModals";
+import { DrinkModal, ToppingModal } from "@/components/admin/AdminModals";
 import { TextField } from "@/components/ui/TextField";
 import { Select } from "@/components/ui/Select";
 import { Search } from "lucide-react";
