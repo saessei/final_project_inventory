@@ -1,4 +1,4 @@
-import type { Drink } from "@/services/drinkService";
+import type { Drink } from "../../services/drinkService";
 import { Plus } from "lucide-react";
 
 interface DrinkGridProps {

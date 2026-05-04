@@ -2,7 +2,7 @@
 import { useRef, useState, useEffect } from "react";
 import { UserAuth } from "@/components/auth/AuthContext";
 import { Sidebar } from "@/components/ui/Sidebar";
-import { createOrder } from "@/services/orderService";
+import { createOrder } from "../services/orderService";
 import { useCart } from "@/hooks/useCart";
 import { useNavigate } from "react-router-dom";
 import { CartSidebar } from "@/components/kiosk/CartSidebar";
