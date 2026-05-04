@@ -79,8 +79,43 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "orders" },
-        () => {
-          void run();
+        async (payload) => {
+          if (cancelled) return;
+
+          if (payload.eventType === "INSERT") {
+            // Fetch the full order with items for new inserts
+            const { data } = await supabase
+              .from("orders")
+              .select("*, order_items(*, order_item_toppings(topping_name))")
+              .eq("id", payload.new.id)
+              .single();
+            
+            if (!cancelled && data) {
+              setOrders((prev) => {
+                const alreadyExists = prev.some(o => o.id === data.id);
+                if (alreadyExists) return prev;
+                return [...prev, mapOrder(data as OrderRow)];
+              });
+            }
+          } else if (payload.eventType === "UPDATE") {
+            // Update the existing order in state
+            setOrders((prev) =>
+              prev.map((order) =>
+                order.id === payload.new.id
+                  ? { 
+                      ...order, 
+                      ...payload.new,
+                      // Ensure order_details is updated if status changed
+                      // Actually order_details is formatted from order_items, 
+                      // so we don't need to re-format unless items changed.
+                      // The mapOrder function uses order_items from the row.
+                    }
+                  : order
+              )
+            );
+          } else if (payload.eventType === "DELETE") {
+            setOrders((prev) => prev.filter((o) => o.id !== payload.old.id));
+          }
         },
       )
       .subscribe();

@@ -40,6 +40,56 @@ export const createServiceRoleTestClient = (): SupabaseClient | null => {
   });
 };
 
+export type TempAuthUser = {
+  id: string;
+  email: string;
+  password: string;
+};
+
+export const createTempAuthUser = async (
+  client: SupabaseClient,
+  prefix = "vitest-profile",
+): Promise<TempAuthUser> => {
+  const email = `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}@example.com`;
+  const password = `Temp-${Math.random().toString(36).slice(2)}a1!`;
+
+  const { data, error } = await client.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
+
+  if (error || !data.user?.id) {
+    throw new Error(`Failed to create temp auth user: ${error?.message ?? "unknown"}`);
+  }
+
+  return { id: data.user.id, email, password };
+};
+
+export const deleteTempAuthUser = async (
+  client: SupabaseClient,
+  userId: string,
+): Promise<void> => {
+  const { error } = await client.auth.admin.deleteUser(userId);
+  if (error) {
+    throw new Error(`Failed to delete temp auth user: ${error.message}`);
+  }
+};
+
+export const ensureProfileRow = async (
+  client: SupabaseClient,
+  userId: string,
+  fullName: string,
+): Promise<void> => {
+  const { error } = await client
+    .from("profiles")
+    .upsert({ id: userId, full_name: fullName }, { onConflict: "id" });
+
+  if (error) {
+    throw new Error(`Failed to seed profile row: ${error.message}`);
+  }
+};
+
 export const safeCleanupOrder = async (
   orderId: string,
   client: SupabaseClient,
