@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { drinkService } from "../services/drinkService";
+import { drinkService } from "@/services/drinkService";
 import {
   createAnonTestClient,
   createServiceRoleTestClient,
   ensureSeedMenu,
-} from "./integration/supabaseTestUtils";
+} from "@/__tests__/integration/supabaseTestUtils";
 
 const anon = createAnonTestClient();
 const serviceRole = createServiceRoleTestClient();
@@ -55,7 +55,7 @@ describe("DrinkService (integration)", () => {
       .eq("name", name)
       .maybeSingle();
 
-    const id = (row as any)?.id as string | undefined;
+    const id = (row as { id?: string } | null)?.id;
     expect(id).toBeTruthy();
 
     if (id) {
