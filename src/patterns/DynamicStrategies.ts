@@ -18,7 +18,7 @@ export class DynamicSugarStrategy implements CustomizationStrategy {
 
   async loadOptions(): Promise<void> {
     const levels = await dynamicMenu.getSugarLevels();
-    this.optionsCache = levels.map((s: SugarLevel) => s.label);
+    this.optionsCache = levels.map((s: SugarLevel): string => s.label);
   }
 
   priceAdjustment(): number {
@@ -36,7 +36,7 @@ export class DynamicToppingStrategy implements CustomizationStrategy {
 
   async loadOptions(): Promise<void> {
     const toppings = await dynamicMenu.getToppings();
-    this.optionsCache = toppings.map((t: Topping) => t.name);
+    this.optionsCache = toppings.map((t: Topping): string => t.name);
   }
 
   async priceAdjustment(option: string): Promise<number> {

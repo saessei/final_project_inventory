@@ -51,7 +51,7 @@ export const MenuManager = () => {
     setToppings(toppingsData);
     setCategories(
       categoriesData.filter(
-        (category) => category.name.toLowerCase() !== "beverages",
+        (category: MenuCategory) => category.name.toLowerCase() !== "beverages",
       ),
     );
     setLoading(false);

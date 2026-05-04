@@ -12,7 +12,7 @@ export interface DrinkCategory {
 
 export async function getCategoryFactories(): Promise<DrinkCategory[]> {
   const categories = await dynamicMenu.getCategories();
-  return categories.map((cat: DynamicCategory) => ({
+  return categories.map((cat: DynamicCategory): DrinkCategory => ({
     id: cat.id,
     label: cat.label,
     description: cat.description,

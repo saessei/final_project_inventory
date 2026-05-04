@@ -134,8 +134,8 @@ export const CustomizationModal = ({
           {drink.available_toppings.length > 0 && (
             <SectionCard title="Toppings">
               <div className="grid grid-cols-2 gap-2 max-h-44 overflow-y-auto no-scrollbar">
-                {drink.available_toppings.map((topping) => {
-                  const isSelected = selectedToppings.some((t) => t.id === topping.id);
+                {drink.available_toppings.map((topping: Topping) => {
+                  const isSelected = selectedToppings.some((t: Topping) => t.id === topping.id);
                   return (
                     <Button
                       key={topping.id}
