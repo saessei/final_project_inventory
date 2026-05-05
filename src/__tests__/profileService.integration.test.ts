@@ -13,20 +13,6 @@ describe("ProfileService Integration Tests (Real DB)", () => {
   let userId: string;
 
   beforeAll(async () => {
-    console.log("URL:", import.meta.env.VITE_SUPABASE_URL);
-    console.log("Anon key loaded?:", !!import.meta.env.VITE_SUPABASE_ANON_KEY);
-    console.log(
-      "Service key loaded?:",
-      !!import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY,
-    );
-    console.log(
-      "Service key prefix:",
-      import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY?.substring(0, 20),
-    );
-    console.log(
-      "Anon key prefix:",
-      import.meta.env.VITE_SUPABASE_ANON_KEY?.substring(0, 20),
-    );
     const email = import.meta.env.TEST_USER_EMAIL;
     const password = import.meta.env.TEST_USER_PASSWORD;
 
@@ -67,7 +53,7 @@ describe("ProfileService Integration Tests (Real DB)", () => {
     await userClient.auth.signOut();
   });
 
-  // ─── getProfile ───────────────────────────────────────────────
+  //getProfile
 
   describe("getProfile", () => {
     it("should return the profile for a valid user", async () => {
@@ -87,7 +73,7 @@ describe("ProfileService Integration Tests (Real DB)", () => {
     });
   });
 
-  // ─── updateName ───────────────────────────────────────────────
+  // updateName
 
   describe("updateName", () => {
     it("should persist the updated name to the database", async () => {
