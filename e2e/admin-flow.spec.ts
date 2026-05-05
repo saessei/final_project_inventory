@@ -78,4 +78,39 @@ test.describe("admin flow", () => {
     await expect(page.getByRole("heading", { name: /reports/i })).toBeVisible();
     await expect(page.getByText(/sales and order insights/i)).toBeVisible();
   });
+
+  test("edits an existing topping price", async ({ page }) => {
+    const unique = Date.now();
+    const toppingName = `E2E Edit Topping ${unique}`;
+    const initialPrice = "20";
+    const updatedPrice = "35";
+
+    await signIn(page);
+    await chooseAdmin(page);
+
+    await page.getByRole("button", { name: /toppings/i }).click();
+    await page.getByRole("button", { name: /add topping/i }).click();
+
+    const toppingDialog = page.getByRole("dialog", { name: /add topping/i });
+    await expect(toppingDialog).toBeVisible();
+    await toppingDialog.getByLabel("Topping Name *").fill(toppingName);
+    await toppingDialog.getByLabel(/price/i).fill(initialPrice);
+    await toppingDialog.getByRole("button", { name: /^save$/i }).click();
+
+    await expect(toppingDialog).not.toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("heading", { name: toppingName })).toBeVisible({ timeout: 15_000 });
+
+    // Open topping card to reveal actions and edit
+    await page.getByRole("heading", { name: toppingName }).click();
+    await page.getByRole("button", { name: new RegExp(`Edit ${toppingName.replace(/[-\\/\\^$*+?.()|[\]{}]/g, "\\$&")}`) }).click();
+
+    const editDialog = page.getByRole("dialog", { name: /edit topping/i });
+    await expect(editDialog).toBeVisible();
+    await editDialog.getByLabel(/price/i).fill(updatedPrice);
+    await editDialog.getByRole("button", { name: /save/i }).click();
+
+    await expect(editDialog).not.toBeVisible({ timeout: 15_000 });
+    // Verify updated price visible on card (get the first match since we just created this topping)
+    await expect(page.getByRole("heading", { name: toppingName }).locator("..").getByText(new RegExp(`₱${updatedPrice}`))).toBeVisible({ timeout: 15_000 });
+  });
 });
