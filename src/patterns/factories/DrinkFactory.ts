@@ -11,6 +11,7 @@ export type ToppingModel = {
   is_available: boolean;
 };
 
+//product interface 
 export type DrinkModel = {
   id: string;
   name: string;
@@ -62,6 +63,7 @@ type DrinkRow = {
   created_at?: string | null;
 };
 
+// creator
 export class DrinkFactory {
   static emptySizeMap(): DrinkSizeMap {
     return { regular: 0, medium: 0, large: 0 };
@@ -109,6 +111,7 @@ export class DrinkFactory {
     return sizeMap;
   }
 
+  // concrete creator
   static createDrink(row: DrinkRow): DrinkModel {
     const category = Array.isArray(row.category)
       ? row.category[0]?.name
