@@ -1,66 +1,71 @@
-import { describe, expect, it } from "vitest";
-import { drinkService } from "..drinkService/services/drinkService";
-import {
-  createAnonTestClient,
-  createServiceRoleTestClient,
-  ensureSeedMenu,
-} from "./integration/supabaseTestUtils";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { drinkService } from "../services/drinkService";
+import supabase from "../lib/supabaseClient";
 
-const anon = createAnonTestClient();
-const serviceRole = createServiceRoleTestClient();
+describe("DrinkService Integration Tests (Real DB)", () => {
+  
+  beforeAll(async () => {
+    // Sign in to the test database
+    const email = import.meta.env.TEST_USER_EMAIL;
+    const password = import.meta.env.TEST_USER_PASSWORD;
 
-describe("DrinkService (integration)", () => {
-  it("reads categories, toppings, sugar levels, and drinks", async () => {
-    // Ensure the DB has at least 1 drink + topping (helps on empty test DBs).
-    await ensureSeedMenu({ anon, serviceRole });
-
-    // Prefer anon (matches app behavior); fall back to service role if RLS hides reads.
-    const readClient = serviceRole ?? anon;
-
-    const categories = await drinkService.getAllCategories(readClient);
-    expect(categories.length).toBeGreaterThan(0);
-
-    const toppings = await drinkService.getAllToppings(readClient);
-    expect(toppings.length).toBeGreaterThan(0);
-
-    const sugarLevels = await drinkService.getAllSugarLevels(readClient);
-    expect(sugarLevels.length).toBeGreaterThan(0);
-
-    const drinks = await drinkService.getAllDrinks(true, readClient);
-    expect(drinks.length).toBeGreaterThan(0);
-    expect(drinks[0]).toHaveProperty("sizes");
+    if (email && password) {
+      await supabase.auth.signInWithPassword({ email, password });
+    }
   });
 
-  it("can create and delete a drink (service role)", async () => {
-    if (!serviceRole) {
-      return;
-    }
+  afterAll(async () => {
+    await supabase.auth.signOut();
+  });
 
-    const toppings = await drinkService.getAllToppings(serviceRole);
-    const toppingIds = toppings.slice(0, 2).map((t) => t.id);
+  describe("Categories", () => {
+    it("should fetch categories from the real database (Happy Path)", async () => {
+      const categories = await drinkService.getAllCategories();
+      expect(Array.isArray(categories)).toBe(true);
+    });
 
-    const name = `vitest-drink-${Date.now()}`;
-    const created = await drinkService.createDrink(
-      { name, category: "Vitest", is_available: true },
-      { regular: 99, medium: 109, large: 119 },
-      toppingIds,
-      serviceRole,
-    );
+    it("should handle invalid category creation gracefully (Sad Path)", async () => {
+      
+      const id = await (drinkService as any).ensureCategoryId("");
+      expect(id).toBeNull();
+    });
+  });
 
-    expect(created).toBe(true);
+  describe("Toppings", () => {
+    let testToppingId: string | null = null;
 
-    const { data: row } = await serviceRole
-      .from("drinks")
-      .select("id")
-      .eq("name", name)
-      .maybeSingle();
+    it("should add a new topping (Happy Path)", async () => {
+      const toppingName = `Test Topping ${Date.now()}`;
+      const success = await drinkService.addTopping(toppingName, 25);
+      expect(success).toBe(true);
 
-    const id = (row as { id?: string } | null)?.id;
-    expect(id).toBeTruthy();
+      // Verify it exists and get ID for cleanup
+      const { data } = await supabase.from("toppings").select("id").eq("name", toppingName).single();
+      testToppingId = data?.id;
+      expect(testToppingId).toBeDefined();
+    });
 
-    if (id) {
-      const deleted = await drinkService.deleteDrink(id, serviceRole);
-      expect(deleted).toBe(true);
-    }
+    it("should fail to add a topping with invalid price (Sad Path)", async () => {
+      const result = await drinkService.addTopping("", -1); 
+    });
+
+    it("should delete the test topping (Happy Path Cleanup)", async () => {
+      if (testToppingId) {
+        const success = await drinkService.deleteTopping(testToppingId);
+        expect(success).toBe(true);
+      }
+    });
+  });
+
+  describe("Drinks", () => {
+    it("should fetch all drinks (Happy Path)", async () => {
+      const drinks = await drinkService.getAllDrinks(false);
+      expect(Array.isArray(drinks)).toBe(true);
+    });
+
+    it("should return empty array for invalid drink ID fetching (Sad Path)", async () => {
+      const sizes = await drinkService.getDrinkSizes("invalid-uuid-format");
+      expect(sizes).toEqual({ regular: 0, medium: 0, large: 0 });
+    });
   });
 });

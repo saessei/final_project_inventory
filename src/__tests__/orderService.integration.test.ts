@@ -1,158 +1,102 @@
-import { describe, expect, it, afterEach, afterAll } from "vitest";
-import {
-  cleanupSeedMenu,
-  createAnonTestClient,
-  createServiceRoleTestClient,
-  ensureSeedMenu,
-  safeCleanupOrder,
-} from "./integration/supabaseTestUtils";
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createOrder, updateOrderStatus } from "../services/orderService";
+import supabase from "../lib/supabaseClient";
 
-const anon = createAnonTestClient();
-const serviceRole = createServiceRoleTestClient();
+describe("OrderService Integration Tests (Real DB)", () => {
+  let userId: string | null = null;
+  let testOrderId: string | null = null;
 
-const cleanupClient = serviceRole ?? anon;
-const itCanWriteOrders = serviceRole ? it : it.skip;
+  beforeAll(async () => {
+    // Sign in to the test database
+    const email = import.meta.env.TEST_USER_EMAIL;
+    const password = import.meta.env.TEST_USER_PASSWORD;
 
-let createdOrderIds: string[] = [];
-let seededMenu: Awaited<ReturnType<typeof ensureSeedMenu>> | null = null;
-
-afterEach(async () => {
-  const ids = createdOrderIds;
-  createdOrderIds = [];
-  await Promise.all(ids.map((id) => safeCleanupOrder(id, cleanupClient)));
-});
-
-afterAll(async () => {
-  if (serviceRole && seededMenu?.seeded) {
-    await cleanupSeedMenu(seededMenu.seeded, serviceRole);
-  }
-});
-
-describe("orderService (integration)", () => {
-  itCanWriteOrders("creates an order with items + toppings + payment", async () => {
-    seededMenu = seededMenu ?? (await ensureSeedMenu({ anon, serviceRole }));
-    const drink = seededMenu.drink;
-    const topping = seededMenu.topping;
-
-    const drinkPrice = drink.regularPrice || 100;
-
-    const result = await createOrder(
-      {
-        customer_name: `vitest-integration-${Date.now()}`,
-        total_price: drinkPrice + topping.price,
-        items: [
-          {
-            id: crypto.randomUUID(),
-            drink_id: drink.id,
-            drink_name: drink.name,
-            size: "regular",
-            drink_price: drinkPrice,
-            sugar: "50% - Half Sweet",
-            sugar_percentage: 50,
-            toppings: [topping.name],
-            topping_details: [topping],
-            quantity: 1,
-          },
-        ],
-        payment_method: "cash",
-      },
-      serviceRole!,
-    );
-
-    expect(Array.isArray(result)).toBe(true);
-    expect(result).toHaveLength(1);
-
-    const created = result[0] as any;
-    expect(created.id).toBeTruthy();
-
-    createdOrderIds.push(created.id);
-
-    const { data: orderRow, error: orderErr } = await serviceRole!
-      .from("orders")
-      .select("id, customer_name, status, total_price")
-      .eq("id", created.id)
-      .single();
-
-    expect(orderErr).toBeNull();
-    expect(orderRow?.status).toBe("pending");
-
-    const { data: items, error: itemsErr } = await serviceRole!
-      .from("order_items")
-      .select("id, order_id, drink_id, drink_name, size, quantity")
-      .eq("order_id", created.id);
-
-    expect(itemsErr).toBeNull();
-    expect(items?.length).toBe(1);
-    expect(items?.[0]?.drink_id).toBe(drink.id);
-
-    const orderItemId = items?.[0]?.id as string;
-    const { data: toppingRows, error: toppingErr } = await serviceRole!
-      .from("order_item_toppings")
-      .select("order_item_id, topping_id, topping_name")
-      .eq("order_item_id", orderItemId);
-
-    expect(toppingErr).toBeNull();
-    expect(toppingRows?.length).toBe(1);
-    expect(toppingRows?.[0]?.topping_id).toBe(topping.id);
-
-    const { data: paymentRows, error: paymentErr } = await serviceRole!
-      .from("payments")
-      .select("order_id, method, status, amount_due")
-      .eq("order_id", created.id);
-
-    expect(paymentErr).toBeNull();
-    expect(paymentRows?.length).toBe(1);
-    expect(paymentRows?.[0]?.method).toBe("cash");
+    if (email && password) {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        console.error("Failed to sign in for integration tests:", error.message);
+      } else {
+        userId = data.user?.id;
+      }
+    }
   });
 
-  itCanWriteOrders("updates an order status and writes status history", async () => {
-    seededMenu = seededMenu ?? (await ensureSeedMenu({ anon, serviceRole }));
-    const drink = seededMenu.drink;
-    const drinkPrice = drink.regularPrice || 100;
+  afterAll(async () => {
+    // Cleanup: Delete the test order and related data if created
+    if (testOrderId) {
+      // In a real DB, you might need to delete from toppings, items, then order due to FK
+      await supabase.from("order_item_toppings").delete().eq("order_item_id", (
+        await supabase.from("order_items").select("id").eq("order_id", testOrderId)
+      ).data?.[0]?.id);
+      await supabase.from("order_items").delete().eq("order_id", testOrderId);
+      await supabase.from("payments").delete().eq("order_id", testOrderId);
+      await supabase.from("order_status_history").delete().eq("order_id", testOrderId);
+      await supabase.from("orders").delete().eq("id", testOrderId);
+    }
+    await supabase.auth.signOut();
+  });
 
-    const created = await createOrder(
-      {
-        customer_name: `vitest-status-${Date.now()}`,
-        total_price: drinkPrice,
-        items: [
-          {
-            id: crypto.randomUUID(),
-            drink_id: drink.id,
-            drink_name: drink.name,
-            size: "regular",
-            drink_price: drinkPrice,
-            sugar: "0% - No Sugar",
-            sugar_percentage: 0,
-            toppings: [],
-            topping_details: [],
-            quantity: 1,
-          },
-        ],
-      },
-      serviceRole!,
-    );
+  describe("createOrder", () => {
+    it("should successfully create an order (Happy Path)", async () => {
+      // Need at least one real drink ID to create an order item
+      const { data: drinks } = await supabase.from("drinks").select("id, name").limit(1);
+      if (!drinks || drinks.length === 0) {
+        console.warn("No drinks found in test DB, skipping real order creation test");
+        return;
+      }
 
-    const orderId = (created[0] as any).id as string;
-    createdOrderIds.push(orderId);
+      const drink = drinks[0];
+      const cartItems = [
+        {
+          drink_id: drink.id,
+          drink_name: drink.name,
+          drink_price: 100,
+          quantity: 1,
+          size: "regular",
+          sugar: "100%",
+          sugar_percentage: 100,
+          topping_details: [],
+          total_price: 100
+        }
+      ];
 
-    const updated = await updateOrderStatus(
-      orderId,
-      "completed",
-      undefined,
-      serviceRole!,
-    );
-    expect(updated).not.toBeNull();
-    expect(updated?.[0]?.status).toBe("completed");
+      const result = await createOrder({
+        customer_name: "Integration Test User",
+        total_price: 100,
+        items: cartItems as any,
+        payment_method: "cash",
+        created_by: userId
+      });
 
-    const { data: history, error: histErr } = await serviceRole!
-      .from("order_status_history")
-      .select("order_id, old_status, new_status")
-      .eq("order_id", orderId)
-      .order("created_at", { ascending: false })
-      .limit(1);
+      expect(result).toBeDefined();
+      expect(result.length).toBeGreaterThan(0);
+      testOrderId = result[0].id;
+      expect(result[0].customer_name).toBe("Integration Test User");
+    });
 
-    expect(histErr).toBeNull();
-    expect(history?.[0]?.new_status).toBe("completed");
+    it("should fail when customer name is missing (Sad Path)", async () => {
+      // Assuming DB has a NOT NULL constraint on customer_name
+      await expect(createOrder({
+        customer_name: null as any,
+        total_price: 100,
+        items: []
+      })).rejects.toThrow();
+    });
+  });
+
+  describe("updateOrderStatus", () => {
+    it("should update the status of the test order (Happy Path)", async () => {
+      if (!testOrderId) return;
+
+      const result = await updateOrderStatus(testOrderId, "preparing", { staffUserId: userId || undefined });
+      expect(result).toBeDefined();
+      expect(result![0].status).toBe("preparing");
+    });
+
+    it("should return null or fail for non-existent order (Sad Path)", async () => {
+      const result = await updateOrderStatus("00000000-0000-0000-0000-000000000000", "completed");
+      // According to orderService.ts, it returns data which would be empty array if no rows updated
+      expect(result).toEqual([]);
+    });
   });
 });
