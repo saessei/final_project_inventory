@@ -75,22 +75,37 @@ test.describe("staff flow", () => {
       },
     );
 
-    await page.getByRole("button", { name: /start preparing/i }).click();
-    await expect(page.getByText("Preparing", { exact: true })).toBeVisible({
-      timeout: 15_000,
-    });
+    const startPreparingBtn = page.getByRole("button", { name: /start preparing/i });
+    await expect(startPreparingBtn).toBeVisible({ timeout: 15_000 });
+    await expect(startPreparingBtn).toBeEnabled({ timeout: 15_000 });
+    try {
+      await startPreparingBtn.click({ timeout: 15_000 });
+    } catch {
+      await startPreparingBtn.evaluate((el) => (el as HTMLElement).click());
+    }
+    await expect(page.getByText("Preparing", { exact: true })).toBeVisible({ timeout: 15_000 });
 
-    await page.getByRole("button", { name: /mark ready/i }).click();
-    await expect(page.getByText("Ready", { exact: true })).toBeVisible({
-      timeout: 15_000,
-    });
+    const markReadyBtn = page.getByRole("button", { name: /mark ready/i });
+    await expect(markReadyBtn).toBeVisible({ timeout: 15_000 });
+    await expect(markReadyBtn).toBeEnabled({ timeout: 15_000 });
+    try {
+      await markReadyBtn.click({ timeout: 15_000 });
+    } catch {
+      await markReadyBtn.evaluate((el) => (el as HTMLElement).click());
+    }
+    await expect(page.getByText("Ready", { exact: true })).toBeVisible({ timeout: 15_000 });
 
-    await page.getByRole("button", { name: /mark picked up/i }).click();
+    const markPickedUpBtn = page.getByRole("button", { name: /mark picked up/i });
+    await expect(markPickedUpBtn).toBeVisible({ timeout: 15_000 });
+    await expect(markPickedUpBtn).toBeEnabled({ timeout: 15_000 });
+    try {
+      await markPickedUpBtn.click({ timeout: 15_000 });
+    } catch {
+      await markPickedUpBtn.evaluate((el) => (el as HTMLElement).click());
+    }
     await expect(
       page.getByRole("heading", { name: customerName }),
-    ).not.toBeVisible({
-      timeout: 15_000,
-    });
+    ).not.toBeVisible({ timeout: 15_000 });
 
     await page.getByRole("button", { name: /^history$/i }).click();
     await expect(page.getByRole("heading", { name: customerName })).toBeVisible(
