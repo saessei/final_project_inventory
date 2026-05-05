@@ -59,6 +59,15 @@ type SugarLevelRow = {
   percentage?: number | null;
 };
 
+type CategoryRow = {
+  id: string;
+  name: string;
+  description?: string | null;
+  display_order?: number | null;
+  is_active?: boolean | null;
+  drinks?: Array<{ id: string }> | null;
+};
+
 class DynamicMenuService {
   private static instance: DynamicMenuService;
   private listeners: Set<() => void> = new Set();
@@ -135,7 +144,7 @@ class DynamicMenuService {
 
     if (error) return [];
 
-    return (data || []).map((row: any) => ({
+    return ((data || []) as CategoryRow[]).map((row) => ({
       id: row.id,
       label: row.name,
       description: row.description ?? "",

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { DrinkCard, ToppingCard, CategoryCard, SugarLevelCard } from "@/components/admin/AdminCards";
 
 const meta: Meta = {

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { DrinkGrid } from "@/components/kiosk/DrinkGrid";
 
 const meta: Meta<typeof DrinkGrid> = {

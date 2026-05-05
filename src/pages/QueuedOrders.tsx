@@ -23,7 +23,7 @@ export const QueuedOrders = () => {
   const staffUserId = session?.user?.id;
 
   const filteredOrders = useMemo(() => {
-    let result = orders.filter((order) => {
+    const result = orders.filter((order) => {
       const matchesSearch = 
         order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         order.id.toLowerCase().includes(searchQuery.toLowerCase());

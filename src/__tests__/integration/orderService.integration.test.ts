@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { createOrder, updateOrderStatus } from "../../services/orderService";
 import supabase from "../../lib/supabaseClient";
+import type { CartItem } from "../../hooks/useCart";
 
 describe("OrderService Integration Tests (Real DB)", () => {
   let userId: string | null = null;
@@ -45,8 +46,9 @@ describe("OrderService Integration Tests (Real DB)", () => {
       }
 
       const drink = drinks[0];
-      const cartItems = [
+      const cartItems: CartItem[] = [
         {
+          id: crypto.randomUUID(),
           drink_id: drink.id,
           drink_name: drink.name,
           drink_price: 100,
@@ -54,15 +56,15 @@ describe("OrderService Integration Tests (Real DB)", () => {
           size: "regular",
           sugar: "100%",
           sugar_percentage: 100,
+          toppings: [],
           topping_details: [],
-          total_price: 100
         }
       ];
 
       const result = await createOrder({
         customer_name: "Integration Test User",
         total_price: 100,
-        items: cartItems as any,
+        items: cartItems,
         payment_method: "cash",
         created_by: userId
       });
@@ -75,7 +77,7 @@ describe("OrderService Integration Tests (Real DB)", () => {
 
     it("should fail when customer name is missing (Sad Path)", async () => {
       await expect(createOrder({
-        customer_name: null as any,
+        customer_name: null as unknown as string,
         total_price: 100,
         items: []
       })).rejects.toThrow();

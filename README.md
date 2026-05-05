@@ -24,6 +24,7 @@ This project is designed for a small milk tea shop workflow:
 - Admin PIN modal for returning from Staff mode to Admin mode
 - Reports dashboard with date presets, CSV export, revenue metrics, item rankings, busy-hour analysis, and recent orders
 - Reusable UI components documented in Storybook
+- App logic organized with factory, strategy, and observer design patterns
 - Integration tests with Vitest and end-to-end tests with Playwright
 
 ## Tech Stack
@@ -185,6 +186,16 @@ npm run storybook
 
 Storybook contains examples for reusable UI and feature components such as buttons, alerts, modals, text fields, select inputs, kiosk cards, admin cards, sidebar, and sign-in screens.
 
+## Design Patterns
+
+The app uses concrete design patterns in `src/patterns/` instead of keeping pattern examples separate from the running code:
+
+- Factory pattern: `DrinkFactory` and `OrderFactory` convert Supabase rows into app models and formatted queue data.
+- Strategy pattern: pricing, order status updates, and report metrics are handled by swappable strategy classes.
+- Observer pattern: `OrderRealtimeObserver` owns the Supabase realtime subscription used by the queue hook.
+
+These patterns are imported by services and hooks, so they are part of the actual application flow.
+
 ## Project Structure
 
 ```text
@@ -199,7 +210,7 @@ src/
   hooks/         Cart, orders, and report metric hooks
   lib/           Supabase client
   pages/         Sign-in, role select, kiosk, queue, reports, and settings pages
-  patterns/      Drink factory and strategy pattern examples
+  patterns/      Factories, strategies, and observers used by app logic
   routes/        Hash router configuration
   services/      Supabase data operations for drinks, orders, and profiles
   stories/       Storybook stories
