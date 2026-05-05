@@ -43,8 +43,12 @@ test.describe("admin flow", () => {
 
     const toppingDialog = page.getByRole("dialog", { name: /add topping/i });
     await expect(toppingDialog).toBeVisible();
-    await toppingDialog.getByLabel("Topping Name *").fill(toppingName);
-    await toppingDialog.getByLabel(/price/i).fill("15");
+    const toppingNameInput = toppingDialog.getByLabel("Topping Name *");
+    await expect(toppingNameInput).toBeEditable({ timeout: 15_000 });
+    await toppingNameInput.fill(toppingName);
+    const toppingPriceInput = toppingDialog.getByLabel(/price/i);
+    await expect(toppingPriceInput).toBeEditable({ timeout: 15_000 });
+    await toppingPriceInput.fill("15");
     await toppingDialog.getByRole("button", { name: /^save$/i }).click();
 
     await expect(toppingDialog).not.toBeVisible({ timeout: 15_000 });
@@ -57,12 +61,24 @@ test.describe("admin flow", () => {
 
     const drinkDialog = page.getByRole("dialog", { name: /add drink/i });
     await expect(drinkDialog).toBeVisible();
-    await drinkDialog.getByLabel("Drink Name *").fill(drinkName);
-    await drinkDialog.getByLabel("New Category Name").fill(categoryName);
-    await drinkDialog.getByLabel("Regular Size *").fill("100");
-    await drinkDialog.getByLabel("Medium Size *").fill("120");
-    await drinkDialog.getByLabel("Large Size *").fill("140");
-    await drinkDialog.getByPlaceholder("Search toppings...").fill(toppingName);
+    const drinkNameInput = drinkDialog.getByLabel("Drink Name *");
+    await expect(drinkNameInput).toBeEditable({ timeout: 15_000 });
+    await drinkNameInput.fill(drinkName);
+    const newCategoryInput = drinkDialog.getByLabel("New Category Name");
+    await expect(newCategoryInput).toBeEditable({ timeout: 15_000 });
+    await newCategoryInput.fill(categoryName);
+    const regularSize = drinkDialog.getByLabel("Regular Size *");
+    await expect(regularSize).toBeEditable({ timeout: 15_000 });
+    await regularSize.fill("100");
+    const mediumSize = drinkDialog.getByLabel("Medium Size *");
+    await expect(mediumSize).toBeEditable({ timeout: 15_000 });
+    await mediumSize.fill("120");
+    const largeSize = drinkDialog.getByLabel("Large Size *");
+    await expect(largeSize).toBeEditable({ timeout: 15_000 });
+    await largeSize.fill("140");
+    const searchToppings = drinkDialog.getByPlaceholder("Search toppings...");
+    await expect(searchToppings).toBeEditable({ timeout: 15_000 });
+    await searchToppings.fill(toppingName);
     await drinkDialog
       .getByRole("button", { name: new RegExp(toppingName) })
       .click();
@@ -106,7 +122,9 @@ test.describe("admin flow", () => {
 
     const editDialog = page.getByRole("dialog", { name: /edit topping/i });
     await expect(editDialog).toBeVisible();
-    await editDialog.getByLabel(/price/i).fill(updatedPrice);
+    const editPrice = editDialog.getByLabel(/price/i);
+    await expect(editPrice).toBeEditable({ timeout: 15_000 });
+    await editPrice.fill(updatedPrice);
     await editDialog.getByRole("button", { name: /save/i }).click();
 
     await expect(editDialog).not.toBeVisible({ timeout: 15_000 });
