@@ -1,41 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import supabase from "@/lib/supabaseClient";
-import { SupabaseClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  DrinkFactory,
+  type DrinkModel,
+  type DrinkSizeMap,
+  type MenuCategoryModel,
+  type SugarLevelModel,
+  type ToppingModel,
+} from "@/patterns";
 
-export interface Drink {
-  id: string;
-  name: string;
-  category_id?: string | null;
-  category?: string | null;
-  is_available: boolean;
-  sizes: {
-    regular: number;
-    medium: number;
-    large: number;
-  };
-  available_toppings: Topping[];
-  created_at: string;
-}
-
-export interface Topping {
-  id: string;
-  name: string;
-  price: number;
-  is_available: boolean;
-}
-
-export interface SugarLevel {
-  id: string;
-  percentage: number;
-  label: string;
-  price_addition: number;
-}
-
-export interface MenuCategory {
-  id: string;
-  name: string;
-  is_active: boolean;
-}
+export type Drink = DrinkModel;
+export type Topping = ToppingModel;
+export type SugarLevel = SugarLevelModel;
+export type MenuCategory = MenuCategoryModel;
 
 class DrinkService {
   private static instance: DrinkService;
@@ -114,11 +92,7 @@ class DrinkService {
       return [];
     }
 
-    return (data || []).map((item) => ({
-      id: item.id,
-      name: item.name,
-      is_active: item.is_active ?? true,
-    }));
+    return (data || []).map(DrinkFactory.createCategory);
   }
 
   async deleteCategory(id: string, client?: SupabaseClient): Promise<boolean> {
@@ -157,12 +131,7 @@ class DrinkService {
       console.error("Error fetching toppings:", error);
       return [];
     }
-    return (data || []).map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: item.price ?? 0,
-      is_available: item.is_available,
-    }));
+    return (data || []).map(DrinkFactory.createTopping);
   }
 
   async addTopping(
@@ -226,7 +195,7 @@ class DrinkService {
       console.error("Error fetching sugar levels:", error);
       return [];
     }
-    return data || [];
+    return (data || []).map(DrinkFactory.createSugarLevel);
   }
 
   async updateSugarLevel(
@@ -273,51 +242,13 @@ class DrinkService {
       return [];
     }
 
-    return (drinks || []).map((drink: any) => {
-      // Format category
-      const categoryName = Array.isArray(drink.category)
-        ? drink.category[0]?.name
-        : drink.category?.name;
-
-      // Format sizes into the expected object structure
-      const sizeMap = { regular: 0, medium: 0, large: 0 };
-      if (Array.isArray(drink.sizes)) {
-        drink.sizes.forEach((s: any) => {
-          if (s.size in sizeMap) {
-            sizeMap[s.size as keyof typeof sizeMap] = s.price;
-          }
-        });
-      }
-
-      // Format toppings
-      const toppings = Array.isArray(drink.drink_toppings)
-        ? drink.drink_toppings
-            .map((dt: any) => {
-              const t = Array.isArray(dt.topping) ? dt.topping[0] : dt.topping;
-              if (!t) return null;
-              return {
-                id: t.id,
-                name: t.name,
-                price: t.price ?? 0,
-                is_available: t.is_available,
-              };
-            })
-            .filter(Boolean)
-        : [];
-
-      return {
-        ...drink,
-        category: categoryName,
-        sizes: sizeMap,
-        available_toppings: toppings,
-      };
-    });
+    return (drinks || []).map((drink: any) => DrinkFactory.createDrink(drink));
   }
 
   async getDrinkSizes(
     drinkId: string,
     client?: SupabaseClient,
-  ): Promise<{ regular: number; medium: number; large: number }> {
+  ): Promise<DrinkSizeMap> {
     const { data, error } = await this.getClient(client)
       .from("drink_sizes")
       .select("size, price")
@@ -325,14 +256,10 @@ class DrinkService {
 
     if (error) {
       console.error("Error fetching sizes:", error);
-      return { regular: 0, medium: 0, large: 0 };
+      return DrinkFactory.emptySizeMap();
     }
 
-    const result = { regular: 0, medium: 0, large: 0 };
-    (data || []).forEach((item: { size: string; price: number }) => {
-      result[item.size as keyof typeof result] = item.price;
-    });
-    return result;
+    return DrinkFactory.createSizeMap(data || []);
   }
 
   async getDrinkToppings(
@@ -362,12 +289,7 @@ class DrinkService {
           : item.topping;
         if (!toppingData) return null;
 
-        return {
-          id: toppingData.id,
-          name: toppingData.name,
-          price: toppingData.price ?? 0,
-          is_available: toppingData.is_available,
-        };
+        return DrinkFactory.createTopping(toppingData);
       })
       .filter(Boolean) as Topping[];
   }

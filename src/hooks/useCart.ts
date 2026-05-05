@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { defaultPricingStrategy } from "@/patterns";
 
 export type CartTopping = {
   id: string;
@@ -20,7 +21,8 @@ export type CartItem = {
   notes?: string;
 };
 
-export function useCart(_staffUserId?: string) {
+export function useCart(staffUserId?: string) {
+  void staffUserId;
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loading] = useState(false);
 
@@ -92,13 +94,7 @@ export function useCart(_staffUserId?: string) {
   }, []);
 
   const cartTotal = useMemo(
-    () =>
-      cart.reduce((sum, item) => {
-        const toppingSum =
-          item.topping_details?.reduce((tsum, t) => tsum + Number(t.price), 0) ||
-          0;
-        return sum + item.quantity * (Number(item.drink_price) + toppingSum);
-      }, 0),
+    () => defaultPricingStrategy.calculateCartTotal(cart),
     [cart],
   );
 

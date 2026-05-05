@@ -2,6 +2,10 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { drinkService } from "../../services/drinkService";
 import supabase from "../../lib/supabaseClient";
 
+type DrinkServiceWithCategoryHelper = typeof drinkService & {
+  ensureCategoryId: (categoryName?: string | null) => Promise<string | null>;
+};
+
 describe("DrinkService Integration Tests (Real DB)", () => {
   
   beforeAll(async () => {
@@ -26,7 +30,8 @@ describe("DrinkService Integration Tests (Real DB)", () => {
 
     it("should handle invalid category creation gracefully (Sad Path)", async () => {
       
-      const id = await (drinkService as any).ensureCategoryId("");
+      const id = await (drinkService as unknown as DrinkServiceWithCategoryHelper)
+        .ensureCategoryId("");
       expect(id).toBeNull();
     });
   });

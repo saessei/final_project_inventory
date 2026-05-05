@@ -2,7 +2,7 @@ import { defineConfig } from "vitest/config";
 import path from "path";
 import dotenv from "dotenv";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   const envPath = path.resolve(process.cwd(), ".env.test");
   const dotEnvTest = dotenv.config({ path: envPath, override: true });
 

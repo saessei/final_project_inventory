@@ -1,36 +1,17 @@
 import supabase from "@/lib/supabaseClient";
 import type { CartItem } from "@/hooks/useCart";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  OrderFactory,
+  defaultOrderStatusStrategy,
+  type OrderItemDetails,
+  type OrderStatus,
+} from "@/patterns";
 
-export type OrderStatus = "pending" | "preparing" | "ready" | "completed" | "cancelled";
+export type { OrderStatus };
 
-export const formatOrderDetails = (
-  items: Array<{
-    quantity: number;
-    drink_name: string;
-    size?: string;
-    sugar_label?: string;
-    sugar?: string;
-    toppings?: string[];
-    order_item_toppings?: Array<{ topping_name: string }>;
-  }>,
-) =>
-  items
-    .map((item) => {
-      const size = item.size
-        ? ` (${item.size.charAt(0).toUpperCase()}${item.size.slice(1)})`
-        : "";
-      const sugar = item.sugar_label ?? item.sugar ?? "";
-      const toppings =
-        item.toppings ??
-        item.order_item_toppings?.map((topping) => topping.topping_name) ??
-        [];
-      const additions = [sugar, ...toppings].filter(Boolean).join(", ");
-      return `${item.quantity}x ${item.drink_name}${size}${
-        additions ? ` (${additions})` : ""
-      }`;
-    })
-    .join(" • ");
+export const formatOrderDetails = (items: OrderItemDetails[]) =>
+  OrderFactory.formatOrderDetails(items);
 
 export const createOrder = async (
   order: {
@@ -133,18 +114,7 @@ export const updateOrderStatus = async (
     .eq("id", orderId)
     .maybeSingle();
 
-  const patch: Record<string, unknown> = { status: newStatus };
-
-  if (newStatus === "completed") patch.completed_at = new Date().toISOString();
-  if (newStatus === "cancelled") patch.cancelled_at = new Date().toISOString();
-
-  if (options?.claim) {
-    if (!options.staffUserId) {
-      throw new Error("staffUserId is required when claim=true");
-    }
-    patch.claimed_by = options.staffUserId;
-    patch.claimed_at = new Date().toISOString();
-  }
+  const patch = defaultOrderStatusStrategy.buildPatch(newStatus, options);
 
   let query = client.from("orders").update(patch).eq("id", orderId);
 

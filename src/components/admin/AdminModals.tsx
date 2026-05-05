@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
@@ -6,6 +7,7 @@ import { TextArea } from "@/components/ui/TextArea";
 import { TextField } from "@/components/ui/TextField";
 import { Select } from "@/components/ui/Select";
 import { Coffee, Search, Check, Tag, DollarSign, Layers, Plus, Trash2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cx } from "@/components/ui/utils";
 import type {
   DrinkModalData,
@@ -14,7 +16,7 @@ import type {
   ToppingType,
 } from "@/types/menuTypes";
 
-const SectionLabel = ({ icon: Icon, children }: { icon: any; children: React.ReactNode }) => (
+const SectionLabel = ({ icon: Icon, children }: { icon: LucideIcon; children: ReactNode }) => (
   <div className="flex items-center gap-2 mb-3">
     <Icon size={16} className="text-brown" />
     <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
@@ -188,7 +190,7 @@ export const DrinkModal = ({
 
     const success = await onDeleteCategory(categoryToDelete.id);
     if (!success) {
-      setDeleteError(`Unable to delete \"${categoryToDelete.name}\" right now.`);
+      setDeleteError(`Unable to delete "${categoryToDelete.name}" right now.`);
       setDeletingCategory(false);
       return;
     }

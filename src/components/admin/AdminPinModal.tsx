@@ -46,7 +46,7 @@ export const AdminPinModal = ({
       console.error("Error checking PIN status:", err);
       setHasExistingPin(false);
     }
-  }, [session?.user?.id]);
+  }, []);
 
   useEffect(() => {
     checkUserPinStatus();

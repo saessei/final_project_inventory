@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { TextField } from "@/components/ui/TextField";
 import { Search, User, Mail, Lock } from "lucide-react";
 

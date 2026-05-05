@@ -1,35 +1,16 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import defaultSupabase from "@/lib/supabaseClient";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { formatOrderDetails, type OrderStatus } from "@/services/orderService";
+import {
+  OrderFactory,
+  OrderRealtimeObserver,
+  type QueueOrder,
+  type QueueOrderRow,
+} from "@/patterns";
 
-export interface Order {
-  id: string;
-  customer_name: string;
-  order_details: string;
-  status: OrderStatus;
-  created_at: string;
-  claimed_by: string | null;
-  claimed_at: string | null;
-  total_price: number;
-}
+export type Order = QueueOrder;
 
-type OrderItemRow = {
-  quantity: number;
-  drink_name: string;
-  size: string;
-  sugar_label: string;
-  order_item_toppings?: Array<{ topping_name: string }>;
-};
-
-type OrderRow = Omit<Order, "order_details"> & {
-  order_items?: OrderItemRow[];
-};
-
-const mapOrder = (order: OrderRow): Order => ({
-  ...order,
-  order_details: formatOrderDetails(order.order_items ?? []),
-});
+const orderWithItemsSelect = "*, order_items(*, order_item_toppings(topping_name))";
 
 export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -39,11 +20,12 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
     setLoading(true);
     const { data } = await supabase
       .from("orders")
-      .select(
-        "*, order_items(*, order_item_toppings(topping_name))",
-      )
+      .select(orderWithItemsSelect)
       .order("created_at");
-    if (data) setOrders((data as OrderRow[]).map(mapOrder));
+
+    if (data) {
+      setOrders((data as QueueOrderRow[]).map(OrderFactory.createQueueOrder));
+    }
     setLoading(false);
   }, [supabase]);
 
@@ -64,65 +46,61 @@ export const useOrders = (supabase: SupabaseClient = defaultSupabase) => {
     const run = async () => {
       const { data } = await supabase
         .from("orders")
-        .select(
-          "*, order_items(*, order_item_toppings(topping_name))",
-        )
+        .select(orderWithItemsSelect)
         .order("created_at");
-      if (!cancelled && data) setOrders((data as OrderRow[]).map(mapOrder));
+
+      if (!cancelled && data) {
+        setOrders((data as QueueOrderRow[]).map(OrderFactory.createQueueOrder));
+      }
       if (!cancelled) setLoading(false);
     };
 
     void run();
 
-    const channel = supabase
-      .channel("queue-tea-live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "orders" },
-        async (payload) => {
-          if (cancelled) return;
+    const observer = new OrderRealtimeObserver(supabase);
+    observer.subscribe({
+      onInsert: async (orderId) => {
+        if (cancelled) return;
 
-          if (payload.eventType === "INSERT") {
-            // Fetch the full order with items for new inserts
-            const { data } = await supabase
-              .from("orders")
-              .select("*, order_items(*, order_item_toppings(topping_name))")
-              .eq("id", payload.new.id)
-              .single();
-            
-            if (!cancelled && data) {
-              setOrders((prev) => {
-                const alreadyExists = prev.some(o => o.id === data.id);
-                if (alreadyExists) return prev;
-                return [...prev, mapOrder(data as OrderRow)];
-              });
-            }
-          } else if (payload.eventType === "UPDATE") {
-            // Update the existing order in state
-            setOrders((prev) =>
-              prev.map((order) =>
-                order.id === payload.new.id
-                  ? { 
-                      ...order, 
-                      ...payload.new,
-                      // Ensure order_details is updated if status changed
-                      // Actually order_details is formatted from order_items, 
-                      // so we don't need to re-format unless items changed.
-                      // The mapOrder function uses order_items from the row.
-                    }
-                  : order
-              )
+        const { data } = await supabase
+          .from("orders")
+          .select(orderWithItemsSelect)
+          .eq("id", orderId)
+          .single();
+
+        if (!cancelled && data) {
+          setOrders((previousOrders) => {
+            const alreadyExists = previousOrders.some(
+              (order) => order.id === data.id,
             );
-          } else if (payload.eventType === "DELETE") {
-            setOrders((prev) => prev.filter((o) => o.id !== payload.old.id));
-          }
-        },
-      )
-      .subscribe();
+            if (alreadyExists) return previousOrders;
+            return [
+              ...previousOrders,
+              OrderFactory.createQueueOrder(data as QueueOrderRow),
+            ];
+          });
+        }
+      },
+      onUpdate: (updatedOrder) => {
+        if (cancelled) return;
+
+        setOrders((previousOrders) =>
+          previousOrders.map((order) =>
+            order.id === updatedOrder.id ? { ...order, ...updatedOrder } : order,
+          ),
+        );
+      },
+      onDelete: (orderId) => {
+        if (cancelled) return;
+        setOrders((previousOrders) =>
+          previousOrders.filter((order) => order.id !== orderId),
+        );
+      },
+    });
 
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      observer.unsubscribe();
     };
   }, [supabase]);
 
