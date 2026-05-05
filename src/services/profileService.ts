@@ -1,10 +1,9 @@
-import defaultSupabase from "@/lib/supabaseClient";
 import supabase from "@/lib/supabaseClient";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 export const profileService = {
-  // Fetch current staff profile data
-  async getProfile(userId: string, supabase = defaultSupabase) {
-    const { data, error } = await supabase
+  async getProfile(userId: string, client: SupabaseClient = supabase) {
+    const { data, error } = await client  // ← was hardcoded to supabase
       .from("profiles")
       .select("full_name")
       .eq("id", userId)
@@ -17,22 +16,18 @@ export const profileService = {
     return data || { full_name: "" };
   },
 
-  // Update name
-  async updateName(userId: string, name: string, supabase = defaultSupabase) {
-    const db = supabase;
-    const { error } = await db
+  async updateName(userId: string, name: string, client: SupabaseClient = supabase): Promise<boolean> {
+    const { data, error } = await client
       .from("profiles")
       .update({ full_name: name })
-      .eq("id", userId);
+      .eq("id", userId)
+      .select();
 
-    if (error) {
-      console.error("Error updating profile:", error);
-      return false;
-    }
+    if (error) return false;
+    if (!data || data.length === 0) return false;
     return true;
   },
 
-  // Change password
   async updatePassword(newPassword: string) {
     const { data, error } = await supabase.auth.updateUser({
       password: newPassword,
