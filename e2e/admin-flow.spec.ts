@@ -37,9 +37,9 @@ test.describe("admin flow", () => {
     page,
   }) => {
     const unique = Date.now();
-    const toppingName = `E2E Topping ${unique}`;
-    const drinkName = `E2E Milk Tea ${unique}`;
-    const categoryName = `E2E Category ${unique}`;
+    const toppingName = `Boba Pearl ${unique}`;
+    const drinkName = `QueueTea Signature ${unique}`;
+    const categoryName = `Special ${unique}`;
 
     await signIn(page);
     await chooseAdmin(page);

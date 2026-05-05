@@ -23,7 +23,7 @@ test.describe("staff flow", () => {
   test("places an order and moves it through the queue manager", async ({
     page,
   }) => {
-    const customerName = `E2E Customer ${Date.now()}`;
+    const customerName = `Customer ${Date.now()}`;
 
     await signIn(page);
     await chooseStaff(page);
