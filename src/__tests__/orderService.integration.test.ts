@@ -24,7 +24,6 @@ describe("OrderService Integration Tests (Real DB)", () => {
   afterAll(async () => {
     // Cleanup: Delete the test order and related data if created
     if (testOrderId) {
-      // In a real DB, you might need to delete from toppings, items, then order due to FK
       await supabase.from("order_item_toppings").delete().eq("order_item_id", (
         await supabase.from("order_items").select("id").eq("order_id", testOrderId)
       ).data?.[0]?.id);
@@ -75,7 +74,6 @@ describe("OrderService Integration Tests (Real DB)", () => {
     });
 
     it("should fail when customer name is missing (Sad Path)", async () => {
-      // Assuming DB has a NOT NULL constraint on customer_name
       await expect(createOrder({
         customer_name: null as any,
         total_price: 100,
@@ -95,7 +93,6 @@ describe("OrderService Integration Tests (Real DB)", () => {
 
     it("should return null or fail for non-existent order (Sad Path)", async () => {
       const result = await updateOrderStatus("00000000-0000-0000-0000-000000000000", "completed");
-      // According to orderService.ts, it returns data which would be empty array if no rows updated
       expect(result).toEqual([]);
     });
   });
