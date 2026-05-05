@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { drinkService } from "../services/drinkService";
-import supabase from "../lib/supabaseClient";
+import { drinkService } from "../../services/drinkService";
+import supabase from "../../lib/supabaseClient";
 
 describe("DrinkService Integration Tests (Real DB)", () => {
   
@@ -46,7 +46,7 @@ describe("DrinkService Integration Tests (Real DB)", () => {
     });
 
     it("should fail to add a topping with invalid price (Sad Path)", async () => {
-      const result = await drinkService.addTopping("", -1); 
+      await drinkService.addTopping("", -1);
     });
 
     it("should delete the test topping (Happy Path Cleanup)", async () => {

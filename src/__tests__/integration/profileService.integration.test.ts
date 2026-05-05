@@ -1,6 +1,6 @@
-// src/__tests__/profileService.integration.test.ts
+// src/__tests__/integration/profileService.integration.test.ts
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { profileService } from "../services/profileService";
+import { profileService } from "../../services/profileService";
 import {
   createAnonClient,
   createServiceRoleClient,
