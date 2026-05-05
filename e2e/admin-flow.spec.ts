@@ -8,6 +8,16 @@ async function signIn(page: Page) {
   await page.getByLabel("Email").fill(EMAIL);
   await page.getByPlaceholder("Password").fill(PASSWORD);
   await page.getByRole("button", { name: /sign in/i }).click();
+
+  page.on("console", (msg) => console.log("BROWSER LOG:", msg.text()));
+  page.on("pageerror", (err) => console.log("PAGE ERROR:", err.message));
+
+  // wait a bit
+  await page.waitForTimeout(3000);
+
+  // log URL
+  console.log("URL AFTER LOGIN:", page.url());
+
   await expect(page).toHaveURL(/#\/role-select/);
 }
 
@@ -59,7 +69,9 @@ test.describe("admin flow", () => {
     await drinkDialog.getByLabel("Medium Size *").fill("120");
     await drinkDialog.getByLabel("Large Size *").fill("140");
     await drinkDialog.getByPlaceholder("Search toppings...").fill(toppingName);
-    await drinkDialog.getByRole("button", { name: new RegExp(toppingName) }).click();
+    await drinkDialog
+      .getByRole("button", { name: new RegExp(toppingName) })
+      .click();
     await drinkDialog.getByRole("button", { name: /save changes/i }).click();
 
     await expect(drinkDialog).not.toBeVisible({ timeout: 15_000 });

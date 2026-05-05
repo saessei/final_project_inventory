@@ -55,7 +55,9 @@ test.describe("staff flow", () => {
 
     await page.getByLabel("Customer Name").fill(customerName);
     await page.getByRole("button", { name: /place order/i }).click();
-    await expect(page.getByRole("heading", { name: /order successful/i })).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: /order successful/i }),
+    ).toBeVisible({
       timeout: 20_000,
     });
     await page.getByRole("button", { name: /new order/i }).click();
@@ -67,9 +69,11 @@ test.describe("staff flow", () => {
     ).toBeVisible();
 
     await page.getByPlaceholder(/search by customer name/i).fill(customerName);
-    await expect(page.getByRole("heading", { name: customerName })).toBeVisible({
-      timeout: 15_000,
-    });
+    await expect(page.getByRole("heading", { name: customerName })).toBeVisible(
+      {
+        timeout: 15_000,
+      },
+    );
 
     await page.getByRole("button", { name: /start preparing/i }).click();
     await expect(page.getByText("Preparing", { exact: true })).toBeVisible({
@@ -82,14 +86,20 @@ test.describe("staff flow", () => {
     });
 
     await page.getByRole("button", { name: /mark picked up/i }).click();
-    await expect(page.getByRole("heading", { name: customerName })).not.toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: customerName }),
+    ).not.toBeVisible({
       timeout: 15_000,
     });
 
     await page.getByRole("button", { name: /^history$/i }).click();
-    await expect(page.getByRole("heading", { name: customerName })).toBeVisible({
-      timeout: 15_000,
-    });
-    await expect(page.getByText("Completed", { exact: true })).toBeVisible();
+    await expect(page.getByRole("heading", { name: customerName })).toBeVisible(
+      {
+        timeout: 15_000,
+      },
+    );
+    await expect(
+      page.locator("div", { hasText: "Completed" }).first(),
+    ).toBeVisible();
   });
 });

@@ -1,9 +1,22 @@
 import { defineConfig } from "vitest/config";
 import { loadEnv } from "vite";
 import path from "path";
+import dotenv from "dotenv";
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
+  // Vitest uses Vite's env system, but integration tests need to reliably
+  // pick up values from `.env.test` (even if the mode isn't `test`).
+  const dotEnvTest = dotenv.config({
+    path: path.resolve(process.cwd(), ".env.test"),
+    override: true,
+  }).parsed;
+
+  // Load Vite env for the active mode, then overlay `.env.test` on top.
+  // This keeps parity with the app while ensuring test env always wins.
+  const env = {
+    ...loadEnv(mode, process.cwd(), ""),
+    ...(dotEnvTest ?? {}),
+  };
 
   const resolvedSupabaseUrl = env.VITE_SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const resolvedAnonKey = env.VITE_SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
