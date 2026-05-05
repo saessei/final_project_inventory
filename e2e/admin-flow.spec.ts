@@ -8,15 +8,9 @@ async function signIn(page: Page) {
   await page.getByLabel("Email").fill(EMAIL);
   await page.getByPlaceholder("Password").fill(PASSWORD);
   await page.getByRole("button", { name: /sign in/i }).click();
+  await page.waitForLoadState("networkidle");
 
-  page.on("console", (msg) => console.log("BROWSER LOG:", msg.text()));
-  page.on("pageerror", (err) => console.log("PAGE ERROR:", err.message));
-
-  // wait a bit
   await page.waitForTimeout(3000);
-
-  // log URL
-  console.log("URL AFTER LOGIN:", page.url());
 
   await expect(page).toHaveURL(/#\/role-select/);
 }
