@@ -32,5 +32,5 @@
     "noUncheckedSideEffectImports": true
   },
   "exclude": ["node_modules", "**/*.test.ts", "**/*.test.tsx", "src/__tests__"],
-  "include": ["src", "src/__tests__", "tests/kiosk.spec.ts", "tests/auth.spec.ts", "vite-env.d.ts"]
+  "include": ["src", "src/**/*", "src/__tests__", "tests/kiosk.spec.ts", "tests/auth.spec.ts", "vite-env.d.ts"]
 }
