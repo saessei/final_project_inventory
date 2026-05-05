@@ -1,5 +1,5 @@
-import defaultSupabase from "@/lib/supabaseClient.ts";
-import supabase from "@/lib/supabaseClient.ts";
+import defaultSupabase from "@/lib/supabaseClient";
+import supabase from "@/lib/supabaseClient";
 
 export const profileService = {
   // Fetch current staff profile data
