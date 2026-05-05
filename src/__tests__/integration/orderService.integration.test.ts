@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
-import { createOrder, updateOrderStatus } from "../services/orderService";
-import supabase from "../lib/supabaseClient";
+import { createOrder, updateOrderStatus } from "../../services/orderService";
+import supabase from "../../lib/supabaseClient";
 
 describe("OrderService Integration Tests (Real DB)", () => {
   let userId: string | null = null;

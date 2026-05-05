@@ -1,4 +1,4 @@
-// src/tests/createTestClient.ts
+// src/__tests__/integration/supabaseTestClient.ts
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 export function createServiceRoleClient(): SupabaseClient {
