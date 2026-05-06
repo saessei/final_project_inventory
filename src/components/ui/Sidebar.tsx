@@ -47,12 +47,6 @@ export const Sidebar = () => {
     sidebarItems.find((item) => item.path === location.pathname)?.name ||
     sidebarItems[0]?.name ||
     "";
-  const displayName =
-    session?.user?.user_metadata?.display_name ||
-    session?.user?.user_metadata?.full_name ||
-    session?.user?.email ||
-    "Guest";
-  const avatarLabel = displayName.charAt(0).toUpperCase();
 
   const handleSignOutClick = () => {
     void handleSignOutConfirm();
@@ -154,21 +148,15 @@ export const Sidebar = () => {
         <div className="mt-6">
           <div className="flex items-center gap-3 px-2 py-3 rounded-xl bg-white shadow-sm">
             <div className="w-10 h-10 rounded-full bg-brown-two/20 flex items-center justify-center text-brown-two text-sm font-bold">
-              {avatarLabel}
+              {session?.user?.email?.charAt(0).toUpperCase() || "U"}
             </div>
             <div>
               <p className="text-xs text-gray-500">Signed in as</p>
               <p
                 className="text-sm font-semibold text-dark-brown truncate"
-                title={displayName}
-              >
-                {displayName}
-              </p>
-              <p
-                className="text-xs text-gray-500 truncate"
                 title={session?.user?.email ?? "Unknown"}
               >
-                {session?.user?.email ?? ""}
+                {session?.user?.email ?? "Guest"}
               </p>
             </div>
           </div>
