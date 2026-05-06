@@ -2,7 +2,7 @@
 import supabase from "@/lib/supabaseClient";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
-  DrinkFactory,
+  DrinkFactory,                    // ← FACTORY: Creates objects from database rows
   type DrinkModel,
   type DrinkSizeMap,
   type MenuCategoryModel,
@@ -15,12 +15,20 @@ export type Topping = ToppingModel;
 export type SugarLevel = SugarLevelModel;
 export type MenuCategory = MenuCategoryModel;
 
+// ============================================================
+// SINGLETON + OBSERVER PATTERNS
+// ============================================================
 class DrinkService {
+  // SINGLETON: Single instance storage
   private static instance: DrinkService;
+  
+  // OBSERVER: List of subscribers to notify
   private listeners: Set<() => void> = new Set();
 
+  // SINGLETON: Private constructor prevents 'new DrinkService()'
   private constructor() {}
 
+  // SINGLETON: Returns the one and only instance
   static getInstance(): DrinkService {
     if (!DrinkService.instance) {
       DrinkService.instance = new DrinkService();
@@ -28,23 +36,23 @@ class DrinkService {
     return DrinkService.instance;
   }
 
+  // OBSERVER: Subscribe to receive notifications
   subscribe(callback: () => void): () => void {
     this.listeners.add(callback);
     return () => this.listeners.delete(callback);
   }
 
+  // OBSERVER: Notify all subscribers of changes
   private notify(): void {
     this.listeners.forEach((callback) => callback());
   }
 
-  /**
-   * Helper to determine which client to use.
-   * Defaults to the standard client if no override is provided.
-   */
+  // Helper: Gets database client
   private getClient(client?: SupabaseClient) {
     return client || supabase;
   }
 
+  // Helper: Finds or creates category by name
   private async ensureCategoryId(
     categoryName?: string | null,
     client?: SupabaseClient,
@@ -80,6 +88,9 @@ class DrinkService {
     return created.id as string;
   }
 
+  // ============================================================
+  // CATEGORY METHODS
+  // ============================================================
   async getAllCategories(client?: SupabaseClient): Promise<MenuCategory[]> {
     const { data, error } = await this.getClient(client)
       .from("categories")
@@ -92,6 +103,7 @@ class DrinkService {
       return [];
     }
 
+    // FACTORY: Converts raw rows to Category objects
     return (data || []).map(DrinkFactory.createCategory);
   }
 
@@ -115,11 +127,14 @@ class DrinkService {
       return false;
     }
 
+    // OBSERVER: Notify subscribers that data changed
     this.notify();
     return true;
   }
 
-  // ============ TOPPINGS ============
+  // ============================================================
+  // TOPPING METHODS
+  // ============================================================
   async getAllToppings(client?: SupabaseClient): Promise<Topping[]> {
     const { data, error } = await this.getClient(client)
       .from("toppings")
@@ -131,6 +146,8 @@ class DrinkService {
       console.error("Error fetching toppings:", error);
       return [];
     }
+    
+    // FACTORY: Converts raw rows to Topping objects
     return (data || []).map(DrinkFactory.createTopping);
   }
 
@@ -147,6 +164,8 @@ class DrinkService {
       console.error("Error adding topping:", error);
       return false;
     }
+    
+    // OBSERVER: Notify subscribers that data changed
     this.notify();
     return true;
   }
@@ -166,6 +185,8 @@ class DrinkService {
       console.error("Error updating topping:", error);
       return false;
     }
+    
+    // OBSERVER: Notify subscribers that data changed
     this.notify();
     return true;
   }
@@ -180,11 +201,15 @@ class DrinkService {
       console.error("Error deleting topping:", error);
       return false;
     }
+    
+    // OBSERVER: Notify subscribers that data changed
     this.notify();
     return true;
   }
 
-  // ============ SUGAR LEVELS ============
+  // ============================================================
+  // SUGAR LEVEL METHODS
+  // ============================================================
   async getAllSugarLevels(client?: SupabaseClient): Promise<SugarLevel[]> {
     const { data, error } = await this.getClient(client)
       .from("sugar_levels")
@@ -195,6 +220,8 @@ class DrinkService {
       console.error("Error fetching sugar levels:", error);
       return [];
     }
+    
+    // FACTORY: Converts raw rows to SugarLevel objects
     return (data || []).map(DrinkFactory.createSugarLevel);
   }
 
@@ -212,11 +239,15 @@ class DrinkService {
       console.error("Error updating sugar level:", error);
       return false;
     }
+    
+    // OBSERVER: Notify subscribers that data changed
     this.notify();
     return true;
   }
 
-  // ============ DRINKS ============
+  // ============================================================
+  // DRINK METHODS
+  // ============================================================
   async getAllDrinks(onlyAvailable: boolean = true, client?: SupabaseClient): Promise<Drink[]> {
     let query = this.getClient(client)
       .from("drinks")
@@ -242,12 +273,13 @@ class DrinkService {
       return [];
     }
 
+    // FACTORY: Converts raw rows to Drink objects
     return (drinks || []).map((drink: any) => DrinkFactory.createDrink(drink));
   }
 
   async getDrinkSizes(
     drinkId: string,
-    client?: SupabaseClient,
+    client?: SupabaseClient,  
   ): Promise<DrinkSizeMap> {
     const { data, error } = await this.getClient(client)
       .from("drink_sizes")
@@ -259,6 +291,7 @@ class DrinkService {
       return DrinkFactory.emptySizeMap();
     }
 
+    // FACTORY: Converts size array to size object
     return DrinkFactory.createSizeMap(data || []);
   }
 
@@ -268,11 +301,7 @@ class DrinkService {
   ): Promise<Topping[]> {
     const { data, error } = await this.getClient(client)
       .from("drink_toppings")
-      .select(
-        `
-        topping:toppings(*)
-      `,
-      )
+      .select(`topping:toppings(*)`)
       .eq("drink_id", drinkId);
 
     if (error) {
@@ -289,6 +318,7 @@ class DrinkService {
           : item.topping;
         if (!toppingData) return null;
 
+        // FACTORY: Converts raw topping row to Topping object
         return DrinkFactory.createTopping(toppingData);
       })
       .filter(Boolean) as Topping[];
@@ -348,6 +378,7 @@ class DrinkService {
       }
     }
 
+    // OBSERVER: Notify subscribers that data changed
     this.notify();
     return true;
   }
@@ -404,6 +435,7 @@ class DrinkService {
       }
     }
 
+    // OBSERVER: Notify subscribers that data changed
     this.notify();
     return true;
   }
@@ -421,9 +453,12 @@ class DrinkService {
       console.error("Error deleting drink:", error);
       return false;
     }
+    
+    // OBSERVER: Notify subscribers that data changed
     this.notify();
     return true;
   }
 }
 
+// SINGLETON: Export the single instance for the whole app to use
 export const drinkService = DrinkService.getInstance();

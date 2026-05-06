@@ -2,17 +2,23 @@ import supabase from "@/lib/supabaseClient";
 import type { CartItem } from "@/hooks/useCart";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import {
-  OrderFactory,
-  defaultOrderStatusStrategy,
+  OrderFactory,                    // ← FACTORY: Creates formatted order text
+  defaultOrderStatusStrategy,      // ← STRATEGY: Handles status update rules
   type OrderItemDetails,
   type OrderStatus,
 } from "@/patterns";
 
 export type { OrderStatus };
 
+// ============================================================
+// FACTORY PATTERN - Exports formatted order details
+// ============================================================
 export const formatOrderDetails = (items: OrderItemDetails[]) =>
   OrderFactory.formatOrderDetails(items);
 
+// ============================================================
+// CREATE ORDER - Creates new order in database
+// ============================================================
 export const createOrder = async (
   order: {
     customer_name: string;
@@ -26,6 +32,7 @@ export const createOrder = async (
 ) => {
   const subtotal = Number(order.total_price) || 0;
 
+  // Insert into orders table
   const { data: createdOrder, error: orderError } = await client
     .from("orders")
     .insert({
@@ -40,6 +47,7 @@ export const createOrder = async (
 
   if (orderError) throw new Error(orderError.message);
 
+  // Insert each drink as an order item
   const orderItems = order.items.map((item) => ({
     order_id: createdOrder.id,
     drink_id: item.drink_id,
@@ -62,6 +70,7 @@ export const createOrder = async (
     throw new Error(itemError.message);
   }
 
+  // Insert toppings for each order item
   const toppingRows = order.items.flatMap((item, index) => {
     const orderItemId = createdItems?.[index]?.id;
     if (!orderItemId) return [];
@@ -84,6 +93,7 @@ export const createOrder = async (
     }
   }
 
+  // Create payment record
   await client.from("payments").insert({
     order_id: createdOrder.id,
     method: order.payment_method ?? "cash",
@@ -91,6 +101,7 @@ export const createOrder = async (
     amount_due: subtotal,
   });
 
+  // Log status history
   await client.from("order_status_history").insert({
     order_id: createdOrder.id,
     old_status: null,
@@ -102,22 +113,35 @@ export const createOrder = async (
   return [{ ...createdOrder, order_items: createdItems }];
 };
 
+// ============================================================
+// UPDATE ORDER STATUS - Uses STRATEGY pattern
+// ============================================================
 export const updateOrderStatus = async (
   orderId: string,
   newStatus: OrderStatus,
   options?: { claim?: boolean; staffUserId?: string },
   client: SupabaseClient = supabase,
 ) => {
+  // Get current status from database
   const { data: existing } = await client
     .from("orders")
     .select("status")
     .eq("id", orderId)
     .maybeSingle();
 
+  // ============================================================
+  // STRATEGY PATTERN IN ACTION
+  // ============================================================
+  // The strategy decides what fields to update based on status
+  // - "completed" → adds completed_at timestamp
+  // - "cancelled" → adds cancelled_at timestamp
+  // - claim: true → adds claimed_by and claimed_at
   const patch = defaultOrderStatusStrategy.buildPatch(newStatus, options);
 
+  // Apply the patch to database
   let query = client.from("orders").update(patch).eq("id", orderId);
 
+  // Prevent double-claiming (only if order hasn't been claimed yet)
   if (options?.claim) {
     query = query.is("claimed_by", null);
   }
@@ -129,6 +153,7 @@ export const updateOrderStatus = async (
     return null;
   }
 
+  // Log the status change in history table
   if (data?.length) {
     await client.from("order_status_history").insert({
       order_id: orderId,
