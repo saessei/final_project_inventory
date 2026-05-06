@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { type CartItem, useCart } from "@/hooks/useCart";
 
 const cartItem = (
@@ -18,6 +18,10 @@ const cartItem = (
 });
 
 describe("useCart", () => {
+  beforeEach(() => {
+    localStorage.clear();
+  });
+
   it("adds a new item to the cart", async () => {
     const { result } = renderHook(() => useCart());
 
@@ -73,7 +77,7 @@ describe("useCart", () => {
     });
 
     expect(result.current.cart).toHaveLength(2);
-    expect(result.current.cart.map((item) => item.sugar)).toEqual([
+    expect(result.current.cart.map((item: CartItem) => item.sugar)).toEqual([
       "50%",
       "100%",
     ]);
@@ -173,5 +177,27 @@ describe("useCart", () => {
     });
 
     expect(result.current.cartTotal).toBe(390);
+  });
+
+  it("restores the cart after remounting with the same staff user", async () => {
+    const { result, unmount } = renderHook(() => useCart("staff-1"));
+
+    await act(async () => {
+      await result.current.upsertItem(cartItem({ quantity: 2 }));
+    });
+
+    expect(localStorage.getItem("queuetea.cart.staff-1")).toContain(
+      '"quantity":2',
+    );
+
+    unmount();
+
+    const { result: remountedResult } = renderHook(() => useCart("staff-1"));
+
+    expect(remountedResult.current.cart).toHaveLength(1);
+    expect(remountedResult.current.cart[0]).toMatchObject({
+      drink_id: "drink-1",
+      quantity: 2,
+    });
   });
 });

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { defaultPricingStrategy } from "@/patterns";  // ← STRATEGY: Imported for cart total calculation
 
 // ============================================================
@@ -24,13 +24,53 @@ export type CartItem = {
   notes?: string;                // ← Special instructions
 };
 
+const CART_STORAGE_PREFIX = "queuetea.cart";
+
+function getCartStorageKey(staffUserId?: string) {
+  return staffUserId ? `${CART_STORAGE_PREFIX}.${staffUserId}` : CART_STORAGE_PREFIX;
+}
+
+function readStoredCart(storageKey: string): CartItem[] {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed as CartItem[];
+  } catch {
+    return [];
+  }
+}
+
 // ============================================================
 // CUSTOM HOOK (Context) - Manages cart state
 // ============================================================
 export function useCart(staffUserId?: string) {
-  void staffUserId;  // Reserved for future use
-  const [cart, setCart] = useState<CartItem[]>([]);  // ← STATE: Array of cart items
+  const storageKey = getCartStorageKey(staffUserId);
+  const [cart, setCart] = useState<CartItem[]>(() => readStoredCart(storageKey));  // ← STATE: Array of cart items
   const [loading] = useState(false);
+  const hydratedStorageKeyRef = useRef(storageKey);
+
+  useEffect(() => {
+    hydratedStorageKeyRef.current = storageKey;
+    setCart(readStoredCart(storageKey));
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (hydratedStorageKeyRef.current !== storageKey) return;
+
+    try {
+      if (cart.length === 0) {
+        localStorage.removeItem(storageKey);
+      } else {
+        localStorage.setItem(storageKey, JSON.stringify(cart));
+      }
+    } catch {
+      // ignore storage failures (private mode, etc.)
+    }
+  }, [cart, storageKey]);
 
   const refresh = useCallback(async () => undefined, []);
 
