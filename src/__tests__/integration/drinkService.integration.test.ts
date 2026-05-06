@@ -2,12 +2,11 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { drinkService } from "../../services/drinkService";
 import supabase from "../../lib/supabaseClient";
 
-type DrinkServiceCategoryHelper = {
+type DrinkServiceWithCategoryHelper = typeof drinkService & {
   ensureCategoryId: (categoryName?: string | null) => Promise<string | null>;
 };
 
 describe("DrinkService Integration Tests (Real DB)", () => {
-  
   beforeAll(async () => {
     // Sign in to the test database
     const email = import.meta.env.TEST_USER_EMAIL;
@@ -29,8 +28,7 @@ describe("DrinkService Integration Tests (Real DB)", () => {
     });
 
     it("should handle invalid category creation gracefully (Sad Path)", async () => {
-      
-      const id = await (drinkService as unknown as DrinkServiceCategoryHelper).ensureCategoryId("");
+      const id = await (drinkService as any).ensureCategoryId("");
       expect(id).toBeNull();
     });
   });
@@ -44,7 +42,11 @@ describe("DrinkService Integration Tests (Real DB)", () => {
       expect(success).toBe(true);
 
       // Verify it exists and get ID for cleanup
-      const { data } = await supabase.from("toppings").select("id").eq("name", toppingName).single();
+      const { data } = await supabase
+        .from("toppings")
+        .select("id")
+        .eq("name", toppingName)
+        .single();
       testToppingId = data?.id;
       expect(testToppingId).toBeDefined();
     });

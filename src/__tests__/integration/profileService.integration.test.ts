@@ -13,8 +13,8 @@ describe("ProfileService Integration Tests (Real DB)", () => {
   let userId: string;
 
   beforeAll(async () => {
-    const email  = (import.meta as any).env.TEST_USER_EMAIL;
-    const password = (import.meta as any).env.TEST_USER_PASSWORD
+    const email  = import.meta.env.TEST_USER_EMAIL;
+    const password = import.meta.env.TEST_USER_PASSWORD;
 
     if (!email || !password) {
       throw new Error(
