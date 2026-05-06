@@ -1,3 +1,7 @@
+// ============================================================
+// PRODUCT (What the factory creates)
+// ============================================================
+
 export type OrderStatus =
   | "pending"
   | "preparing"
@@ -15,10 +19,14 @@ export type OrderItemDetails = {
   order_item_toppings?: Array<{ topping_name: string }>;
 };
 
+// ┌─────────────────────────────────────────────────────────────┐
+// │  PRODUCT: The final object the factory creates              │
+// │  This is what components actually use                       │
+// └─────────────────────────────────────────────────────────────┘
 export type QueueOrder = {
   id: string;
   customer_name: string;
-  order_details: string;
+  order_details: string;      // ← This field gets FORMATTED by the factory
   status: OrderStatus;
   created_at: string;
   claimed_by: string | null;
@@ -26,11 +34,25 @@ export type QueueOrder = {
   total_price: number;
 };
 
+// ┌─────────────────────────────────────────────────────────────┐
+// │  RAW INPUT: The messy database data                         │
+// │  Missing the formatted order_details field                  │
+// └─────────────────────────────────────────────────────────────┘
 export type QueueOrderRow = Omit<QueueOrder, "order_details"> & {
   order_items?: OrderItemDetails[];
 };
 
+
+// ┌─────────────────────────────────────────────────────────────┐
+// │  FACTORY CLASS: Contains methods to create products         │
+// └─────────────────────────────────────────────────────────────┘
 export class OrderFactory {
+
+  // ┌─────────────────────────────────────────────────────────────┐
+  // │  HELPER METHOD: Formats raw data into readable string       │
+  // │  Takes: Array of order items                                │
+  // │  Returns: "2x Milk Tea (Large, 50%) • 1x Boba (Regular)"    │
+  // └─────────────────────────────────────────────────────────────┘
   static formatOrderDetails(items: OrderItemDetails[]): string {
     return items
       .map((item) => {
@@ -51,10 +73,15 @@ export class OrderFactory {
       .join(" • ");
   }
 
+  // ┌─────────────────────────────────────────────────────────────┐
+  // │  FACTORY METHOD: Creates the final product                  │
+  // │  Input: Raw database row (QueueOrderRow)                    │
+  // │  Output: Clean product (QueueOrder)                         │
+  // └─────────────────────────────────────────────────────────────┘
   static createQueueOrder(row: QueueOrderRow): QueueOrder {
     return {
-      ...row,
-      order_details: OrderFactory.formatOrderDetails(row.order_items ?? []),
+      ...row,                                                    // Copy all raw data
+      order_details: OrderFactory.formatOrderDetails(row.order_items ?? []), // Add formatted field
     };
   }
 }
